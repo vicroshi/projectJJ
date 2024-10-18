@@ -4,5 +4,6 @@ project('projectJJ', 'cpp',
 
 # These arguments are only used to build the shared library
 # not the executables that use the library.
-
-executable('projectJJ', 'main.cpp')
+includes = include_directories('include')
+subdir('src')
+executable('projectJJ', ['main.cpp'], include_directories : includes, link_with : vamana_lib)
