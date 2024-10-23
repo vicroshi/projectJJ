@@ -4,8 +4,9 @@
 
 #include "graph.h"
 #include <iomanip>
-VamanaIndex::VamanaIndex(int vecnum, int deg) {
-    this->vecnum = vecnum;
+template <typename T>
+VamanaIndex<T>::VamanaIndex(int vecnum, int dim, int deg, T* db)
+    :vecnum(vecnum), dim(dim), db(db, vecnum*dim) {
     init_graph(deg);
 }
 void VamanaIndex::init_graph(int r) {

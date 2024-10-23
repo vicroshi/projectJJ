@@ -2,8 +2,8 @@
 // Created by vic on 21/10/2024.
 //
 #include "database.h"
-float* read_fvecs(std::string name, size_t* dim, size_t* vecnum) {
-    int fd = open(name.c_str(), O_RDONLY);
+float* read_fvecs(std::string* name, size_t* dim, size_t* vecnum) {
+    int fd = open(name->c_str(), O_RDONLY);
     if (fd == -1) {
         perror("Error opening file for reading");
         return nullptr;
@@ -31,6 +31,6 @@ float* read_fvecs(std::string name, size_t* dim, size_t* vecnum) {
     return p;
 }
 
-int* read_ivecs(std::string name, size_t* dim, size_t* vecnum) {
+int* read_ivecs(std::string* name, size_t* dim, size_t* vecnum) {
     return (int*) read_fvecs(name, dim, vecnum);
 }
