@@ -13,14 +13,15 @@
 #include <unordered_set>
 #include <ranges>
 #include <random>
-using namespace std;
-class VamanaIndex {
-    private:
-        vector<unordered_set<int>> graph;
-        int vecnum;
-        void init_graph(int r);
-    public:
-        VamanaIndex(int vecnum, int deg);
-        void print_graph();
+#include <span>
+//template <typename T>
+struct VamanaIndex {
+    std::vector<std::unordered_set<int>> graph;
+//    std::span<T> db;
+    int vecnum;
+    //methods
+    VamanaIndex(int vecnum, int deg);
+    void init_graph(int r);
+    void print_graph();
 };
 #endif //PROJECTJJ_GRAPH_H

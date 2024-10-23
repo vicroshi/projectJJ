@@ -4,39 +4,50 @@
 #include <unistd.h>
 #include <cstring>
 #include <filesystem>
-#include <graph.h>
+#include "graph.h"
+#include "database.h"
 #include <random>
 #include <sys/stat.h>
-using namespace std;
-float* fvecs_read(const char* fname, size_t* d_out, size_t* n_out) {
-    FILE* f = fopen(fname, "r");
-    if (!f) {
-        fprintf(stderr, "could not open %s\n", fname);
-        perror("");
-        abort();
-    }
-    int d;
-    fread(&d, 1, sizeof(int), f);
-    fseek(f, 0, SEEK_SET);
-    struct stat st;
-    fstat(fileno(f), &st);
-    size_t sz = st.st_size;
-    size_t n = sz / ((d + 1) * 4);
+#include <iomanip> // Include iomanip for setprecision
 
-    *d_out = d;
-    *n_out = n;
-    float* x = new float[n * (d + 1)];
-    size_t nr = fread(x, sizeof(float), n * (d + 1), f);
 
-    // shift array to remove row headers
-    for (size_t i = 0; i < n; i++)
-        memmove(x + i * d, x + 1 + i * (d + 1), d * sizeof(*x));
-
-    fclose(f);
-    return x;
-}
 int main() {
-    VamanaIndex vamanaIndex(100,10);
-    vamanaIndex.print_graph();
+    std::vector<float> vec;
+//    std::string name = "../datasets/siftsmall/siftsmall_base.fvecs";
+    std::string dbname = "../datasets/siftsmall/siftsmall_base.fvecs";
+    std::string qname = "../datasets/siftsmall/siftsmall_query.fvecs";
+
+    size_t d1,d2,n1,n2;
+    float* base = read_fvecs(dbname, &d1, &n1);
+    std::span<float> db(base, d1*n1);
+    float* query = read_fvecs(qname, &d2, &n2);
+    std::span<float> qr(query, d2*n2);
+    int i = 0;
+    int j = 0;
+    bool flag;
+    for (int q_idx = 0; q_idx < n2; q_idx++) {
+        for (int v_idx = 0; v_idx < n1; v_idx++) {
+            flag = true;
+//            std::cout << "Vector " << v_idx << std::endl;
+            i++;
+            for (int d_idx = 0; d_idx < d1; d_idx++) {
+                if (qr[q_idx*d1+d_idx] != db[v_idx*d1+d_idx]) {
+                    flag = false;
+                }
+//                    std::cout << std::fixed << std::setprecision(1) << std::setw(6) << qr[j] << " ";
+//                }
+//                std::cout << std::fixed << std::setprecision(1) <<std::setw(6) << db[i] << " ";
+//                i++;
+            }
+            if (flag) {
+                std::cout << "Match found at Vector#" << v_idx << "and Query#" <<q_idx << std::endl;
+            }
+//            j++;
+//            std::cout << std::endl;
+        }
+    }
+//    std::cout << "Total iterations: " << i << std::endl;
+
     return 0;
 }
+
