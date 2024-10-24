@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <variant>   // For std::variant
+#include <iomanip> 
 
 using namespace std;
 using TypeVariant = std::variant<int, float>;
@@ -12,7 +13,7 @@ using TypeVariant = std::variant<int, float>;
 // Function to print the contents of a 2D vector of variants
 void print_vector(const vector<vector<TypeVariant>>& vec) {
     for (size_t i = 0; i < vec.size(); ++i) {
-        cout << "Vector " << i + 1 << ": ";
+        // cout << "Vector " << i + 1 << ": ";
         for (int j=0;j<vec[i].size();j++) {
             // Check the type of each value and print accordingly
             if (holds_alternative<int>(vec[i][j])) {
@@ -90,9 +91,12 @@ int main(int argc, char **argv){
         cerr<<"Usage: "<<argv[0]<<" <filename>"<< endl;
         return 0;
     }
+    //to have 2 decimal points for floats
+    cout << fixed << setprecision(3);
     string file_type = get_type_from_extension(argv[1]);
     // Read from the file based on the detected type
     vector<vector<TypeVariant>> database = read_from_file(argv[1],file_type);
+    
     // Print the contents of the database
     print_vector(database);
     return 0; // Return success
