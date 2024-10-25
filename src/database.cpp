@@ -2,35 +2,94 @@
 // Created by vic on 21/10/2024.
 //
 #include "database.h"
-float* read_fvecs(std::string* name, size_t* dim, size_t* vecnum) {
-    int fd = open(name->c_str(), O_RDONLY);
-    if (fd == -1) {
-        perror("Error opening file for reading");
-        return nullptr;
+#include <iostream>
+#include <string>
+#include <limits>
+
+std::string getFileExtension(const std::string& filePath) {
+    // Find the last dot in the file path
+    size_t dotPosition = filePath.find_last_of(".");
+    
+    // If there's no dot or the dot is the first character (e.g., ".hiddenfile"), return an empty string
+    if (dotPosition == std::string::npos || dotPosition == 0 || dotPosition == filePath.length() - 1) {
+        return "";
     }
-    struct stat sb;
-    if (fstat(fd, &sb) == -1) {
-        perror("Error getting the file size");
-        return nullptr;
-    }
-    read(fd, dim, sizeof(int));
-    float* p = (float*)mmap(nullptr, sb.st_size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
-    if (p == MAP_FAILED) {
-        perror("Error mapping the file");
-        return nullptr;
-    }
-    close(fd);
-    int d = *reinterpret_cast<int *>(p);
-    *dim = d;
-    *vecnum = sb.st_size / ((d + 1) * 4);
-//    float* x = new float[*vecnum * d];
-    for (size_t i = 0; i < *vecnum; i++) {
-        std::memmove(p + i * d, p + 1 + i * (d + 1), d * sizeof(*p));
-    }
-//    munmap(p, sb.st_size);
-    return p;
+    
+    // Extract the substring after the last dot
+    return filePath.substr(dotPosition + 1);
 }
 
-int* read_ivecs(std::string* name, size_t* dim, size_t* vecnum) {
-    return (int*) read_fvecs(name, dim, vecnum);
+
+void ann(){
+    std::string base_file_path, query_file_path;
+    int k, a, L, R;
+    while (true) {
+        std::cout << "base file path: ";
+        std::cin >> base_file_path;
+        std::cout << "query file path: ";
+        std::cin >> query_file_path;
+        // Get valid integer input for `k`
+        while (true) {
+            std::cout << "k: ";
+            std::cin >> k;
+            if (std::cin.fail() || k <= 0) {
+                std::cin.clear();  // clear error state
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');  // discard invalid input
+                std::cout << "Invalid input. Please submit a positive integer.\n";
+            }else{
+                break;  // valid input received
+            }
+        }
+        // Get valid integer input for `alpha`
+        while (true) {
+            std::cout << "alpha: ";
+            std::cin >> a;
+            if (std::cin.fail() || a <= 0) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Invalid input. Please submit a positive integer.\n";
+            } else {
+                break;
+            }
+        }
+        // Get valid integer input for `L`
+        while (true) {
+            std::cout << "List size (L): ";
+            std::cin >> L;
+            if (std::cin.fail() || L <= 0) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Invalid input. Please submit a positive integer.\n";
+            } else {
+                break;
+            }
+        }
+        // Get valid integer input for `R`
+        while (true) {
+            std::cout << "Out-degree R: ";
+            std::cin >> R;
+            if (std::cin.fail() || R <= 0) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Invalid input. Please submit a positive integer.\n";
+            } else {
+                break;
+            }
+        }
+        //check for file type to call the execute with proper <type>
+        //if user gives a .fvecs base file and a .ivecs as query, should exit
+        std::string type=getFileExtension(base_file_path);
+        if(type==getFileExtension(query_file_path) && type=="fvecs"){
+            execute<float>(base_file_path,query_file_path);
+        }
+        else if(type==getFileExtension(query_file_path) && type=="ivecs"){
+            execute<int>(base_file_path,query_file_path);
+        }
+        //any other case: they're incompatible
+        else {
+            std::cout<<"Incompatible input files!"<<std::endl;
+            continue;
+        }
+    }
+    return ;
 }
