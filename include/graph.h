@@ -16,12 +16,14 @@
 #include <span>
 #include <iomanip>
 #include <database.h>
+
 template <typename T>
 struct VamanaIndex {
     std::vector<std::unordered_set<int>> graph;
     Matrix<T>* db;
     int vecnum;
-    VamanaIndex(int deg, T* db):db(db) {
+    //                   \/ should not be just T, maybe Matrix<T>?
+    VamanaIndex(int deg, Matrix<T>* db):db(db) {
         this->vecnum = db->vecnum;
         init_graph(deg);
 
