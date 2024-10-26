@@ -16,10 +16,12 @@ std::string getFileExtension( const std::string& );
 
 
 template <typename T>
-void execute(std::string base_file_path,std::string query_file_path){
+void execute(std::string base_file_path,std::string query_file_path,int k,int a,int L,int R){
     size_t base_dim,base_vecs_num;
     T* base=read_from_file<T>(&base_file_path,&base_dim,&base_vecs_num);
-    std::span<T> db(base, base_dim*base_vecs_num);
+    //std::span<T> db(base, base_dim*base_vecs_num);
+    Matrix<T> base_m(base_dim,base_vecs_num,base);
+    VamanaIndex<T> v_m(R,&base_m);
     // std::cout<<"[";
     // for (size_t i=0;i<100;i++){
     //     std::cout<<db[i]<<" ";
@@ -27,15 +29,15 @@ void execute(std::string base_file_path,std::string query_file_path){
     // std::cout<<"]"<<std::endl;
     size_t query_dim,query_vecs_num;
     T* query=read_from_file<T>(&query_file_path,&query_dim,&query_vecs_num);
-    std::span<T> qr(query, query_dim*query_vecs_num);
+    //std::span<T> qr(query, query_dim*query_vecs_num);
+    Matrix<T> query_m(query_dim,query_vecs_num,query);
     // std::cout<<"[";
     // for (size_t i=0;i<100;i++){
     //     std::cout<<qr[i]<<" ";
     // }
     // std::cout<<"]"<<std::endl;
-    Matrix<T> base_m(base_dim,base_vecs_num,base);
-    VamanaIndex<T> v_m(5,&base_m);
-    v_m.print_graph();
+    
+    // v_m.print_graph();
 
     std::cout<<"about to exit execute..."<<std::endl;
 }

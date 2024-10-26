@@ -79,10 +79,10 @@ void ann(){
         //if user gives a .fvecs base file and a .ivecs as query, should exit
         std::string type=getFileExtension(base_file_path);
         if(type==getFileExtension(query_file_path) && type=="fvecs"){
-            execute<float>(base_file_path,query_file_path);
+            execute<float>(base_file_path,query_file_path,k, a, L, R);
         }
         else if(type==getFileExtension(query_file_path) && type=="ivecs"){
-            execute<int>(base_file_path,query_file_path);
+            execute<int>(base_file_path,query_file_path,k, a, L, R);
         }
         //any other case: they're incompatible
         else {
