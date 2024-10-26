@@ -21,7 +21,8 @@ std::string getFileExtension(const std::string& filePath) {
 
 void ann(){
     std::string base_file_path, query_file_path;
-    int k, a, L, R;
+    int k, L, R;
+    float a;
     while (true) {
         std::cout << "base file path: ";
         std::cin >> base_file_path;
@@ -43,10 +44,10 @@ void ann(){
         while (true) {
             std::cout << "alpha: ";
             std::cin >> a;
-            if (std::cin.fail() || a <= 0) {
+            if (std::cin.fail() || a < 1.0f) {
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                std::cout << "Invalid input. Please submit a positive integer.\n";
+                std::cout << "Invalid input. Please submit a float greater or equal to 1.\n";
             } else {
                 break;
             }

@@ -10,7 +10,8 @@ executable('projectJJ', ['main.cpp'], include_directories : includes, link_with 
 
 test_src = ['tests/tests_all.cpp',
             'tests/test_matrix.cpp',
-            'tests/test_utils.cpp']
+            'tests/test_utils.cpp',
+            'tests/test_vamana.cpp']
 
 e = executable('unit_tests',sources: test_src,
                include_directories: includes,

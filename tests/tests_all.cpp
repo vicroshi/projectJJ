@@ -14,6 +14,8 @@
 
 
 //vamana tests
+extern void test_greedy();
+extern void test_k_closest();
 /*
  *
  *
@@ -21,6 +23,8 @@
  */
 
 //utils tests
+extern void test_fileType();
+extern void test_read();
 /*
  *
  *
@@ -34,5 +38,9 @@ TEST_LIST = {
     {"matrix_constructor", test_constructor},
     {"euclid", test_euclid},
     {"medoid_naive", test_medoid},
+    {"greedy_search",test_greedy},
+    {"file_Type",test_fileType},
+    {"file_read",test_read},
+    {"k_closest",test_k_closest},
     {nullptr, nullptr}
 };

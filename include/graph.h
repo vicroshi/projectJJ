@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <database.h>
 #include "database.h"
+#include <set>
 
 
 
@@ -30,8 +31,8 @@ struct VamanaIndex {
     VamanaIndex(size_t deg, Matrix<T>* db):db(db) {
         this->vecnum = db->vecnum;
         init_graph(deg);
-
     }
+    VamanaIndex(Matrix<T>*db):db(db){}; //default constructor for testing??
     //den prepei na einai gia kathe ena simeio db?
     void init_graph(size_t r){
         graph.resize(vecnum);
@@ -66,66 +67,106 @@ struct VamanaIndex {
         }
     }
 
-    void greedy_search(int start_idx,const std::span<T>& query,int k,int list_size,std::vector<int>& L,std::vector<int>& V) {
-        L.push_back(start_idx);
+    void greedy_search(int start_idx,const std::span<T>& query,int k,size_t list_size,std::set<int>& L,std::set<int>& V) {
+        L.insert(start_idx);
         V.clear(); //empty set
-        std::vector<int>difference;
+
         //L-V
-        //check if index is in L but not in V
-        for (int i=0;i<L.size();i++) {
-            if (std::find(V.begin(), V.end(), (L[i])) == V.end()) {
-                difference.push_back((L[i]));
-            }
-        }
-        double dist,min_dist=std::numeric_limits<double>::max();  
+        std::set<int>difference;
+        std::set_difference(L.begin(), L.end(), V.begin(), V.end(),
+                        std::inserter(difference, difference.begin()));
+    
+
+        std::cout<<"size(L-V): "<<difference.size()<<std::endl; 
+        std::cout<<"L-V:"<<std::endl;
+            for(auto &item:difference) std::cout<<item<<" ";
+            std::cout<<std::endl;
+        // std::cout<<"good"<<std::endl;
+        int stop=0;
         while( !(difference.empty()) ){
+            stop++;
             int p_star_idx=-1;
-            for(size_t i=0;i<difference.size();i++){
+            double dist,min_dist=std::numeric_limits<double>::max();  
+            for(auto item:difference){
                                                 //db->vecs.subspan[i*db->dim],db->dim
-                dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(i*(db->dim),db->dim));
+                std::cout<<"."<<std::endl;
+                // std::cout<<"diff["<<i<<"]: ";
+                for(auto &item:db->vecs.subspan(item*(db->dim),db->dim)){
+                    std::cout<<item<<" ";
+                }
+                std::cout<<std::endl;
+                dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(item*(db->dim),db->dim));
                 if(dist<min_dist){
                     min_dist=dist;
-                    p_star_idx=i;
+                    p_star_idx=item;
                 }
             }
+            std::cout<<"p_star_idx: "<<p_star_idx<<std::endl;
+
             //update L <- L U Nout(p_star)
-            for(auto neighbor:graph[p_star_idx])
-                L.push_back(neighbor);
-            
+            for(auto neighbor:graph[p_star_idx]){
+                std::cout<<"neighbor: "<<neighbor+1<< " ->";
+                for(auto& item:db->vecs.subspan(neighbor*(db->dim),db->dim)) std::cout<<item<<" ";
+                std::cout<<std::endl;
+                L.insert(neighbor);
+            }
+            std::cout<<"added all neighbors in L,new nize: "<<L.size()<<std::endl;
             if(p_star_idx!=-1)
-                V.push_back(p_star_idx);
-            if(L.size()>list_size)//keep list_size closest to Xq
+                V.insert(p_star_idx);
+            std::cout<<"added p* in V,V:"<<std::endl;
+            for(auto &item:V) std::cout<<item<<" ";
+            std::cout<<std::endl;
+            if(L.size()>list_size){//keep list_size closest to Xq
+                std::cout<<"|L| > list_size, have to cut some.."<<std::endl;
+                std::cout<<"L before:"<<std::endl;
+                for(auto item:L) std::cout<<item<<" ";
                 keep_k_closest(L,list_size,query);
-            
-            //check again L-V
+                std::cout<<"\nL after:"<<std::endl;
+                for(auto item:L) std::cout<<item<<" ";
+            }
+            std::cout<<"checking L-V after loop"<<std::endl;
+            //L-V
             difference.clear();
-            for (const auto& item : L) {
-                if (std::find(V.begin(), V.end(), item) == V.end()) {
-                    difference.push_back(item);
-                }
-            }  
+            std::set_difference(L.begin(), L.end(), V.begin(), V.end(),
+                        std::inserter(difference, difference.begin()));
+            std::cout<<"size(L-V): "<<difference.size()<<std::endl; 
+            std::cout<<"L-V:"<<std::endl;
+            for(auto &item:difference) std::cout<<item<<" ";
+            std::cout<<std::endl;
         }
+
         //return k closest points from L
         keep_k_closest(L,k,query);
         return ;
     }
-
-    void keep_k_closest(std::vector<int>& source,int k,const std::span<T>& query){
+    
+    void keep_k_closest(std::set<int>& source,int k,const std::span<T>& query){
         if( k<=0 || (size_t) k > source.size()) return;
-        std::vector<int> temp;
+        std::set<int> temp;
+        // std::cout<<"\nfor query: ";
+        // for(auto & item: query) std::cout<<item<<" ";
+        // std::cout<<std::endl;
         for (int i=0;i<k;i++){
-            double dist,min_dist=std::numeric_limits<double>::max(); 
+            // std::cout<<"---"<<std::endl;
+            double dist=0,min_dist=std::numeric_limits<double>::max(); 
             int closest_idx=-1;
-            for(size_t j=0;j<source.size();j++){
-                dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(source[j]*(db->dim),db->dim));
+            for(auto item:source){
+                // std::cout<<"point["<<j<<"]: ";
+                // for(auto& item:db->vecs.subspan(source[j]*(db->dim),db->dim)){
+                //     std::cout<<item<<" ";
+                // }
+                dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(item*(db->dim),db->dim));
+                // std::cout<<"dist:"<<dist<<std::endl;
                 if(dist<min_dist){
                     min_dist=dist;
-                    closest_idx=j;
+                    closest_idx=item;
                 }
             }
+            // std::cout<<"closest point: "<<closest_idx<<std::endl;
             //kratame to mikrotero index, to bgazoume apo to original
-            temp.push_back(source[closest_idx]);
-            source.erase(source.begin() + closest_idx);
+            temp.insert(closest_idx);
+            source.erase( closest_idx);
+            // std::cout<<"---"<<std::endl;
         }
         //kratame auta pou einai sto temp
         source = std::move(temp); 
