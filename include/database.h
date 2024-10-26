@@ -13,8 +13,10 @@
 #include <fcntl.h>
 #include <memory>
 #include <span>
-float* read_fvecs(std::string* fname, size_t* dim, size_t* vecnum);
-int* read_ivecs(std::string* fname, size_t* dim, size_t* vecnum);
+#include <limits>
+
+
+
 template <typename T>
 struct Matrix{
     size_t dim;
@@ -40,7 +42,7 @@ struct Matrix{
         return dist;
     }
 
-     int medoid_naive() {
+    int medoid_naive() {
         double dist;
         double min_dist = std::numeric_limits<double>::max();
         double medoid_idx = 0;
@@ -56,7 +58,10 @@ struct Matrix{
                 medoid_idx = i;
             }
         }
+        return medoid_idx;
     }
 
 };
+
+
 #endif //DATABASE_H
