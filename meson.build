@@ -7,3 +7,12 @@ project('projectJJ', 'cpp',
 includes = include_directories('include')
 subdir('src')
 executable('projectJJ', ['main.cpp'], include_directories : includes, link_with : vamana_lib)
+
+test_src = ['tests/tests_all.cpp',
+            'tests/test_matrix.cpp',
+            'tests/test_utils.cpp']
+
+e = executable('unit_tests',sources: test_src,
+               include_directories: includes,
+               link_with : vamana_lib)
+test('unit_tests',e)
