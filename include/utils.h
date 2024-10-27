@@ -14,6 +14,8 @@
 void ann();
 std::string getFileExtension( const std::string& );
 
+template <typename T>
+T* read_from_file(std::string*, size_t*, size_t*);
 
 template <typename T>
 void execute(std::string base_file_path,std::string query_file_path,int k,float a,int L,int R){
@@ -27,8 +29,8 @@ void execute(std::string base_file_path,std::string query_file_path,int k,float 
         23,4,0,0,4,38,83,30,14,9,4,9,17,23,41,0,0,2,8,19,25,23,1};
     std::span<T> spanEg(eg.data(), eg.size());
     std::set<int> l,V;
-    v_m.greedy_search(4,spanEg,k,(size_t) L,l,V);
-
+    // v_m.greedy_search(4,spanEg,k,(size_t) L,l,V);
+    v_m.robust_prune(2,V,a,(size_t) R);
 
 
     // std::cout<<"[";
