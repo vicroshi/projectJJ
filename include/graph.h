@@ -24,7 +24,7 @@
 
 template <typename T>
 struct VamanaIndex {
-    std::vector<std::unordered_set<int>> graph;
+    std::vector<std::set<int>> graph;
     Matrix<T>* db;
     int vecnum;
     //                   \/ should not be just T, maybe Matrix<T>?
