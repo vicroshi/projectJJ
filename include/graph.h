@@ -19,7 +19,7 @@
 #include "database.h"
 #include <set>
 
-
+#define MEDOID 3732
 
 
 template <typename T>

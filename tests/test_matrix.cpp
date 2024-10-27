@@ -60,6 +60,7 @@ void test_euclid() {
     TEST_ASSERT(n.sq_euclid(n.get_row(2), n.get_row(3)) == 51);
 }
 
+
 void test_medoid() {
     int p[8][4] = {
         {1, 2, 3, 4},
@@ -75,4 +76,26 @@ void test_medoid() {
     TEST_ASSERT(m.medoid_naive() == 5);
     std::span<int> vec = m.get_row(5);
     TEST_ASSERT(std::equal(vec.begin(),vec.end(),std::array{3, 3, 3, 3}.begin()));
+    TEST_CASE("distance matrix");
+    double cdist[8][8];
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            cdist[i][j] = Matrix<int>::sq_euclid(m.get_row(i), m.get_row(j));
+        }
+    }
+    double true_dist[8][8] = {
+        {0.00, 5.10, 4.24, 4.47, 8.31, 3.46, 7.35, 6.48},
+        {5.10, 0.00, 8.19, 3.32, 3.61, 7.35, 5.48, 4.36},
+        {4.24, 8.19, 0.00, 7.35, 10.95, 2.83, 7.35, 8.31},
+        {4.47, 3.32, 7.35, 0.00, 6.48, 5.83, 7.35, 5.39},
+        {8.31, 3.61, 10.95, 6.48, 0.00, 9.85, 6.16, 3.61},
+        {3.46, 7.35, 2.83, 5.83, 9.85, 0.00, 5.20, 7.35},
+        {7.35, 5.48, 7.35, 7.35, 6.16, 5.20, 0.00, 6.93},
+        {6.48, 4.36, 8.31, 5.39, 3.61, 7.35, 6.93, 0.00}
+    };
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            TEST_CHECK(cdist[i][j] == true_dist[i][j]);
+        }
+    }
 }
