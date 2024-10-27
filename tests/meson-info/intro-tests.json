@@ -1,0 +1,21 @@
+[
+  {
+    "cmd": [
+      "/home/zenki/Documents/DIT/jj/projectJJ/tests/unit_tests"
+    ],
+    "env": {},
+    "name": "unit_tests",
+    "workdir": null,
+    "timeout": 30,
+    "suite": [
+      "projectJJ"
+    ],
+    "is_parallel": true,
+    "priority": 0,
+    "protocol": "exitcode",
+    "depends": [
+      "unit_tests@exe"
+    ],
+    "extra_paths": []
+  }
+]

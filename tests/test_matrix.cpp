@@ -6,6 +6,7 @@
 #include <acutest.h>
 #include <database.h>
 void test_constructor(){
+    //dokimazw oles tis periptwseis tou T, eite int eite float
     float* p = new float[100];
     for (int i = 0; i < 100; i++) {
         p[i] = static_cast<float>(i) + 0.2;
@@ -16,6 +17,7 @@ void test_constructor(){
     TEST_ASSERT(m.dim == 10);
     TEST_ASSERT(m.vecnum == 10);
     delete[] p;
+    //case its int
     int *x = new int[100];
     for (int i = 0; i < 100; i++) {
         x[i] = i;
@@ -42,7 +44,15 @@ void test_euclid() {
     TEST_ASSERT(m.sq_euclid(m.get_row(0), m.get_row(2)) == 114);
     TEST_ASSERT(m.sq_euclid(m.get_row(0), m.get_row(3)) == 87);
     TEST_ASSERT(m.sq_euclid(m.get_row(2), m.get_row(3)) == 51);
-    Matrix<int> n(4,4,reinterpret_cast<int*>(&p[0][0]));
+    int i[4][4] = {
+        {0, 0, 0, 0},
+        {1, 1, 1, 1},
+        {1, 3, 10, 2},
+        {2, 3, 5, 7}
+    };
+    Matrix<int> n(4,4,&i[0][0]);
+    // Matrix<int> n(4,4,reinterpret_cast<int*>(&p[0][0]));
+    
 //    std::cout << n.sq_euclid(m.get_row(0), m.get_row(1)) << std::endl;
     TEST_ASSERT(n.sq_euclid(n.get_row(0), n.get_row(1)) == 4);
     TEST_ASSERT(n.sq_euclid(n.get_row(0), n.get_row(2)) == 114);
