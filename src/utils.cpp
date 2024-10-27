@@ -87,9 +87,14 @@ void ann(){
         }
         //any other case: they're incompatible
         else {
-            std::cout<<"Incompatible input files!"<<std::endl;
-            continue;
+            std::cout<<"Incompatible input files!\nExiting..."<<std::endl;
+            break;
+        }
+        std::string exit;
+        std::cout << "Stop execution? (yes/no): ";
+        std::cin >> exit;
+        if (exit.starts_with("y") || exit.starts_with("Y")) {
+            break;
         }
     }
-    return ;
 }

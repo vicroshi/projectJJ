@@ -28,17 +28,19 @@ struct VamanaIndex {
     Matrix<T>* db;
     int vecnum;
     //                   \/ should not be just T, maybe Matrix<T>?
-    VamanaIndex(size_t deg, Matrix<T>* db):db(db) {
+    VamanaIndex(int deg, Matrix<T>* db):db(db) {
         this->vecnum = db->vecnum;
-        init_graph(deg);
+        const std::ranges::iota_view<int,int> range = std::ranges::iota_view(0, vecnum);
+        init_graph(deg, range);
+        int medoid = db->medoid_naive();
+        std::cout << "Medoid: " << medoid << std::endl;
     }
     VamanaIndex(Matrix<T>*db):db(db){}; //default constructor for testing??
     //den prepei na einai gia kathe ena simeio db?
-    void init_graph(size_t r){
+    void init_graph(size_t r, std::ranges::iota_view<int, int> range ){
         graph.resize(vecnum);
         int idx = 0;
         //new feature, ranges (iterator class)
-        const auto range = std::ranges::iota_view(0, vecnum);
         std::vector<int> idcs(range.begin(), range.end());
         std::vector<int> samp;
         
@@ -79,14 +81,14 @@ struct VamanaIndex {
                         std::inserter(difference, difference.begin()));
     
 
-        // std::cout<<"size(L-V): "<<difference.size()<<std::endl; 
+        // std::cout<<"size(L-V): "<<difference.size()<<std::endl;
         // std::cout<<"L-V:"<<std::endl;
         //     for(auto &item:difference) std::cout<<item<<" ";
         //     std::cout<<std::endl;
         // std::cout<<"good"<<std::endl;
         while( !(difference.empty()) ){
             int p_star_idx=-1;
-            double dist,min_dist=std::numeric_limits<double>::max();  
+            double dist,min_dist=std::numeric_limits<double>::max();
             for(auto item:difference){
                                                 //db->vecs.subspan[i*db->dim],db->dim
                 // std::cout<<"."<<std::endl;
@@ -129,7 +131,7 @@ struct VamanaIndex {
             difference.clear();
             std::set_difference(L.begin(), L.end(), V.begin(), V.end(),
                         std::inserter(difference, difference.begin()));
-            // std::cout<<"size(L-V): "<<difference.size()<<std::endl; 
+            // std::cout<<"size(L-V): "<<difference.size()<<std::endl;
             // std::cout<<"L-V:"<<std::endl;
             // for(auto &item:difference) std::cout<<item<<" ";
             // std::cout<<std::endl;
@@ -148,7 +150,7 @@ struct VamanaIndex {
         // std::cout<<std::endl;
         for (int i=0;i<k;i++){
             // std::cout<<"---"<<std::endl;
-            double dist=0,min_dist=std::numeric_limits<double>::max(); 
+            double dist=0,min_dist=std::numeric_limits<double>::max();
             int closest_idx=-1;
             for(auto item:source){
                 // std::cout<<"point["<<j<<"]: ";
@@ -169,7 +171,7 @@ struct VamanaIndex {
             // std::cout<<"---"<<std::endl;
         }
         //kratame auta pou einai sto temp
-        source = std::move(temp); 
+        source = std::move(temp);
         return ;
     }
 
@@ -186,7 +188,7 @@ struct VamanaIndex {
         int p_star_idx;
         while(!V.empty()){
             //std::cout<<"."<<std::endl;
-            double dist=0,min_dist=std::numeric_limits<double>::max(); 
+            double dist=0,min_dist=std::numeric_limits<double>::max();
             for(auto item:V){
                 //distance tou p me kathe stoixeio tou V (p')
                 dist=Matrix<T>::sq_euclid(db->vecs.subspan(p*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
@@ -222,16 +224,14 @@ struct VamanaIndex {
                 }
                 else
                     it++; // Only increment if not erased
-                
+
             }
         }
     }
 
-    
+
 
 };
-
-
 
 
 #endif //PROJECTJJ_GRAPH_H
