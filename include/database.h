@@ -59,7 +59,6 @@ struct Matrix{
         }
         return medoid_idx;
     }
-
 };
 
 

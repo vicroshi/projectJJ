@@ -27,17 +27,29 @@ struct VamanaIndex {
     std::vector<std::set<int>> graph;
     Matrix<T>* db;
     int vecnum;
+    size_t L_size;
+    int k;
+    int a;
+    size_t R;
     //                   \/ should not be just T, maybe Matrix<T>?
-    VamanaIndex(int deg, Matrix<T>* db):db(db) {
+    VamanaIndex(size_t R, size_t L_size, int k, int a, Matrix<T>* db)
+    :R(R), L_size(L_size), k(k), a(a), db(db) {
         this->vecnum = db->vecnum;
-        const std::ranges::iota_view<int,int> range = std::ranges::iota_view(0, vecnum);
-        init_graph(deg, range);
-        int medoid = db->medoid_naive();
-        std::cout << "Medoid: " << medoid << std::endl;
+        std::ranges::iota_view<int,int> range = std::ranges::iota_view(0, vecnum);
+        init_graph(R, range);
+        int medoid = MEDOID;
+        std::vector<int> perm(range.begin(), range.end());
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::ranges::shuffle(perm, g);
+        std::set<int> L,V;
+        for(auto &i:perm){
+            greedy_search(medoid,db->get_row(i),1,L_size, L,V);
+        }
+
     }
     VamanaIndex(Matrix<T>*db):db(db){}; //default constructor for testing??
-    //den prepei na einai gia kathe ena simeio db?
-    void init_graph(size_t r, std::ranges::iota_view<int, int> range ){
+    void init_graph(int r, std::ranges::iota_view<int, int> range ) {
         graph.resize(vecnum);
         int idx = 0;
         //new feature, ranges (iterator class)
@@ -79,7 +91,7 @@ struct VamanaIndex {
         std::set<int>difference;
         std::set_difference(L.begin(), L.end(), V.begin(), V.end(),
                         std::inserter(difference, difference.begin()));
-    
+
 
         // std::cout<<"size(L-V): "<<difference.size()<<std::endl;
         // std::cout<<"L-V:"<<std::endl;
@@ -141,7 +153,7 @@ struct VamanaIndex {
         keep_k_closest(L,k,query);
         return ;
     }
-    
+
     void keep_k_closest(std::set<int>& source,int k,const std::span<T>& query){
         if( k<=0 || (size_t) k > source.size()) return;
         std::set<int> temp;
