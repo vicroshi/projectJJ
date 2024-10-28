@@ -59,7 +59,9 @@ struct VamanaIndex {
     }
 
     void print_graph(){
+        int i=0;
         for (auto &set : graph) {
+            std::cout<<"for node "<<std::setw(3)<< i++<<": ";
             for (auto &i : set) {
                 std::cout <<std::setw(3) << i << " ";
             }
@@ -77,62 +79,60 @@ struct VamanaIndex {
                         std::inserter(difference, difference.begin()));
     
 
-        std::cout<<"size(L-V): "<<difference.size()<<std::endl; 
-        std::cout<<"L-V:"<<std::endl;
-            for(auto &item:difference) std::cout<<item<<" ";
-            std::cout<<std::endl;
+        // std::cout<<"size(L-V): "<<difference.size()<<std::endl; 
+        // std::cout<<"L-V:"<<std::endl;
+        //     for(auto &item:difference) std::cout<<item<<" ";
+        //     std::cout<<std::endl;
         // std::cout<<"good"<<std::endl;
-        int stop=0;
         while( !(difference.empty()) ){
-            stop++;
             int p_star_idx=-1;
             double dist,min_dist=std::numeric_limits<double>::max();  
             for(auto item:difference){
                                                 //db->vecs.subspan[i*db->dim],db->dim
-                std::cout<<"."<<std::endl;
-                // std::cout<<"diff["<<i<<"]: ";
-                for(auto &item:db->vecs.subspan(item*(db->dim),db->dim)){
-                    std::cout<<item<<" ";
-                }
-                std::cout<<std::endl;
+                // std::cout<<"."<<std::endl;
+                // std::cout<<"calculating distance from query to point: ";
+                // for(auto &item:db->vecs.subspan(item*(db->dim),db->dim)){
+                //     std::cout<<item<<" ";
+                // }
+                // std::cout<<std::endl;
                 dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(item*(db->dim),db->dim));
                 if(dist<min_dist){
                     min_dist=dist;
                     p_star_idx=item;
                 }
             }
-            std::cout<<"p_star_idx: "<<p_star_idx<<std::endl;
+            // std::cout<<"p_star_idx: "<<p_star_idx<<std::endl;
 
             //update L <- L U Nout(p_star)
             for(auto neighbor:graph[p_star_idx]){
-                std::cout<<"neighbor: "<<neighbor+1<< " ->";
-                for(auto& item:db->vecs.subspan(neighbor*(db->dim),db->dim)) std::cout<<item<<" ";
-                std::cout<<std::endl;
+                // std::cout<<"neighbor: "<<neighbor<< " ->";
+                // for(auto& item:db->vecs.subspan(neighbor*(db->dim),db->dim)) std::cout<<item<<" ";
+                // std::cout<<std::endl;
                 L.insert(neighbor);
             }
-            std::cout<<"added all neighbors in L,new nize: "<<L.size()<<std::endl;
+            // std::cout<<"added all neighbors in L,new nize: "<<L.size()<<std::endl;
             if(p_star_idx!=-1)
                 V.insert(p_star_idx);
-            std::cout<<"added p* in V,V:"<<std::endl;
-            for(auto &item:V) std::cout<<item<<" ";
-            std::cout<<std::endl;
+            // std::cout<<"added p* in V,V:"<<std::endl;
+            // for(auto &item:V) std::cout<<item<<" ";
+            // std::cout<<std::endl;
             if(L.size()>list_size){//keep list_size closest to Xq
-                std::cout<<"|L| > list_size, have to cut some.."<<std::endl;
-                std::cout<<"L before:"<<std::endl;
-                for(auto item:L) std::cout<<item<<" ";
+                // std::cout<<"|L| > list_size, have to cut some.."<<std::endl;
+                // std::cout<<"L before:"<<std::endl;
+                // for(auto item:L) std::cout<<item<<" ";
                 keep_k_closest(L,list_size,query);
-                std::cout<<"\nL after:"<<std::endl;
-                for(auto item:L) std::cout<<item<<" ";
+                // std::cout<<"\nL after:"<<std::endl;
+                // for(auto item:L) std::cout<<item<<" ";
             }
-            std::cout<<"checking L-V after loop"<<std::endl;
+            // std::cout<<"checking L-V after loop"<<std::endl;
             //L-V
             difference.clear();
             std::set_difference(L.begin(), L.end(), V.begin(), V.end(),
                         std::inserter(difference, difference.begin()));
-            std::cout<<"size(L-V): "<<difference.size()<<std::endl; 
-            std::cout<<"L-V:"<<std::endl;
-            for(auto &item:difference) std::cout<<item<<" ";
-            std::cout<<std::endl;
+            // std::cout<<"size(L-V): "<<difference.size()<<std::endl; 
+            // std::cout<<"L-V:"<<std::endl;
+            // for(auto &item:difference) std::cout<<item<<" ";
+            // std::cout<<std::endl;
         }
 
         //return k closest points from L
@@ -171,6 +171,60 @@ struct VamanaIndex {
         //kratame auta pou einai sto temp
         source = std::move(temp); 
         return ;
+    }
+
+    void robust_prune(int p,std::set<int>& V,float a,size_t R){
+        for(auto item:graph[p]){ //bazoume tous geitones tou p
+            V.insert(item);
+        }
+        V.erase(p); //bgazoume to p
+        //std::cout<<"p="<<p<<",(start)in V: ";
+        //for(auto item:V) std::cout<<item<<" ";
+        //std::cout<<std::endl;
+        graph[p].clear();
+        //std::cout<<"cleared neighbors of p"<<std::endl;
+        int p_star_idx;
+        while(!V.empty()){
+            //std::cout<<"."<<std::endl;
+            double dist=0,min_dist=std::numeric_limits<double>::max(); 
+            for(auto item:V){
+                //distance tou p me kathe stoixeio tou V (p')
+                dist=Matrix<T>::sq_euclid(db->vecs.subspan(p*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
+                //std::cout<<"dist:"<<dist<<std::endl;
+                if(dist<min_dist){
+                    min_dist=dist;
+                    p_star_idx=item;
+                    //std::cout<<"(in if)p*: "<<p_star_idx<<std::endl;
+
+                }
+            }
+            //std::cout<<"p*: "<<p_star_idx<<std::endl;
+            //update neighbors of p
+            graph[p].insert(p_star_idx);
+            //std::cout<<"added p* in neighbor,size:"<<graph[p].size()<<std::endl;
+            if(graph[p].size()==R){
+                //std::cout<<"about to exit."<<std::endl;
+                break;
+            }
+            //std::cout<<"about to remove p' "<<std::endl;
+            for (auto it = V.begin(); it != V.end(); ) {
+                int item = *it;
+                //std::cout<<"p': "<<item<<",p*: "<<p_star_idx<<std::endl;
+                                                                    //p*                                             //p'
+                double d1=Matrix<T>::sq_euclid(db->vecs.subspan(p_star_idx*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
+                //std::cout<<"d(p*,p'): "<<d1<<std::endl;
+                                                    //p                                                //p'
+                double d2=Matrix<T>::sq_euclid(db->vecs.subspan(p*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
+                //std::cout<<"d(p,p'): "<<d2<<std::endl;
+                if(a*d1<=d2){
+                    //std::cout<<"gotta remove p'"<<std::endl;
+                    it=V.erase(it);// Erase and get new iterator position
+                }
+                else
+                    it++; // Only increment if not erased
+                
+            }
+        }
     }
 
     

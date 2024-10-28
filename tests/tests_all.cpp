@@ -16,6 +16,7 @@
 //vamana tests
 extern void test_greedy();
 extern void test_k_closest();
+extern void test_prune();
 /*
  *
  *
@@ -42,5 +43,6 @@ TEST_LIST = {
     {"file_Type",test_fileType},
     {"file_read",test_read},
     {"k_closest",test_k_closest},
+    {"prune",test_prune},
     {nullptr, nullptr}
 };
