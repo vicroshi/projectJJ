@@ -45,9 +45,9 @@ struct Matrix{
         double dist;
         double min_dist = std::numeric_limits<double>::max();
         int medoid_idx = 0;
-        for (int i = 0; i < vecnum; i++) {
+        for (size_t i = 0; i < vecnum; i++) {
             dist = 0;
-            for (int j = 0; j < vecnum; j++) {
+            for (size_t j = 0; j < vecnum; j++) {
                 if (i != j) {
                     dist += sq_euclid(get_row(i), get_row(j));
                 }
