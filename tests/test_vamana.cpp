@@ -221,16 +221,58 @@ void test_prune(){
     };
 
     Matrix<int> i_m(4,15,&points[0][0]);
-    VamanaIndex<int> V(15,&i_m);
+    VamanaIndex<int> V(7,&i_m);
     std::cout<<"before pruning: "<<std::endl;
     V.print_graph();
-    float a=2.5f;
+    float a=2.4f;
     std::set<int>L={},v={};
-    int medoid=i_m.medoid_naive();
-    V.robust_prune(0,v,a,10);
-    // V.robust_prune(0,v,a,10);
-    V.robust_prune(3,v,a,10);
+    // int medoid=i_m.medoid_naive();
+    size_t R=5;
+    V.robust_prune(0,v,a,R);
+    // V.robust_prune(0,v,a,R);
+    TEST_ASSERT(V.graph[0].size()<=R); //node should now have at most R neighbors
+    // V.robust_prune(3,v,a,R);
+    // TEST_ASSERT(V.graph[3].size()<=R); //node should now have at most R neighbors
+
     std::cout<<"\nafter pruning: "<<std::endl;
 
     V.print_graph();
+    //should be done for floats too
+}
+
+
+void test_vamana_index(){
+    std::cout<<std::endl;
+    int points[15][4] = {
+    {3, 7, 12, 8},
+    {5, 15, 1, 9},
+    {0, 13, 4, 11},
+    //{7, 3, 10, 2},
+    {10, 2, 6, 14},
+    {12, 5, 8, 6},
+    {9, 0, 7, 13},
+    {14, 2, 11, 3},
+    {4, 8, 15, 5},
+    {6, 10, 3, 12},
+    {1, 9, 14, 0},
+    {11, 4, 13, 7},
+    {2, 6, 9, 15},
+    {15, 1, 5, 10},
+    {8, 12, 2, 4}
+    };
+    
+    // std::set<int>closest={5, 12, 4, 11, 8};
+    std::set<int>closest={4, 10, 6, 7, 0};
+    int q[4]={7,3,10,2};
+    std::span<int> q_span(q,4);
+    Matrix<int> i_m(4,15,&points[0][0]);
+    VamanaIndex<int> V(7,&i_m);
+    V.print_graph();
+    V.vamana_indexing(1.0f,3,7);
+    V.print_graph();
+    std::set<int>L,v;
+    V.greedy_search(5,q_span,3,6,L,v);
+    for(auto item:L) std::cout<<item<<" ";
+    for(auto item:closest)std::cout<<item<<" ";
+    TEST_ASSERT(L==closest);
 }
