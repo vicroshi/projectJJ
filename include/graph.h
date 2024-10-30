@@ -84,7 +84,8 @@ struct VamanaIndex {
         // std::cout<<"good"<<std::endl;
         while( !(difference.empty()) ){
             int p_star_idx=-1;
-            double dist,min_dist=std::numeric_limits<double>::max();  
+            
+            double min_dist=std::numeric_limits<double>::max();  
             for(auto item:difference){
                                                 //db->vecs.subspan[i*db->dim],db->dim
                 // std::cout<<"."<<std::endl;
@@ -93,7 +94,12 @@ struct VamanaIndex {
                 //     std::cout<<item<<" ";
                 // }
                 // std::cout<<std::endl;
-                dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(item*(db->dim),db->dim));
+
+
+                auto vec1 = db->get_row(item);
+                auto vec2 = query;
+                auto dist = db->sq_euclid(reinterpret_cast<float*>(vec1.data()), reinterpret_cast<float*>(vec2.data()), vec1.size());
+                // dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(item*(db->dim),db->dim));
                 if(dist<min_dist){
                     min_dist=dist;
                     p_star_idx=item;
@@ -152,7 +158,12 @@ struct VamanaIndex {
                 // for(auto& item:db->vecs.subspan(source[j]*(db->dim),db->dim)){
                 //     std::cout<<item<<" ";
                 // }
-                dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(item*(db->dim),db->dim));
+
+                auto vec1 = db->get_row(item);
+                auto vec2 = query;
+                auto dist = db->sq_euclid(reinterpret_cast<float*>(vec1.data()), reinterpret_cast<float*>(vec2.data()), vec1.size());
+
+                // dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(item*(db->dim),db->dim));
                 // std::cout<<"dist:"<<dist<<std::endl;
                 if(dist<min_dist){
                     min_dist=dist;
@@ -185,8 +196,14 @@ struct VamanaIndex {
             // std::cout<<"."<<std::endl;
             double dist=0,min_dist=std::numeric_limits<double>::max(); 
             for(auto item:V){
-                //distance tou p me kathe stoixeio tou V (p')                                     //p' \/
-                dist=Matrix<T>::sq_euclid(db->vecs.subspan(p*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
+                //distance tou p me kathe stoixeio tou V (p')      
+                auto vec1 = db->get_row(p);
+                auto vec2 = db->get_row(item);
+                auto dist = db->sq_euclid(reinterpret_cast<float*>(vec1.data()), reinterpret_cast<float*>(vec2.data()), vec1.size());
+                
+                
+                                               //p' \/
+                // dist=Matrix<T>::sq_euclid(db->vecs.subspan(p*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
                 // std::cout<<"dist:"<<dist<<std::endl;
                 if(dist<min_dist){
                     min_dist=dist;
@@ -207,11 +224,20 @@ struct VamanaIndex {
             for (auto it=V.begin();it!=V.end();){
                 int item=*it;
                 // std::cout<<"p': "<<item<<",p*: "<<p_star_idx<<std::endl;
+                auto vec1 = db->get_row(p_star_idx);
+                auto vec2 = db->get_row(item);
+                auto d1 = db->sq_euclid(reinterpret_cast<float*>(vec1.data()), reinterpret_cast<float*>(vec2.data()), vec1.size());                
                                                                     //p*                                             //p'
-                double d1=Matrix<T>::sq_euclid(db->vecs.subspan(p_star_idx*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
+                // double d1=Matrix<T>::sq_euclid(db->vecs.subspan(p_star_idx*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
                 // std::cout<<"d(p*,p'): "<<d1<<std::endl;
+
+                vec1 = db->get_row(p);
+                // auto vec2 = db->get_row(item);
+                auto d2 = db->sq_euclid(reinterpret_cast<float*>(vec1.data()), reinterpret_cast<float*>(vec2.data()), vec1.size());               
+
+
                                                     //p                                                //p'
-                double d2=Matrix<T>::sq_euclid(db->vecs.subspan(p*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
+                // double d2=Matrix<T>::sq_euclid(db->vecs.subspan(p*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
                 // std::cout<<"d(p,p'): "<<d2<<std::endl;
                 if(a*d1<=d2){
                     //std::cout<<"gotta remove p'"<<std::endl;
