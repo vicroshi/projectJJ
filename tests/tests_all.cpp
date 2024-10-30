@@ -17,6 +17,7 @@
 extern void test_greedy();
 extern void test_k_closest();
 extern void test_prune();
+extern void test_vamana_index();
 /*
  *
  *
@@ -44,5 +45,6 @@ TEST_LIST = {
     {"file_read",test_read},
 //    {"k_closest",test_k_closest},
 //    {"prune",test_prune},
+    {"vamana_index",test_vamana_index},
     {nullptr, nullptr}
 };

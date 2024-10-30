@@ -10,6 +10,7 @@
 #include <limits>
 #include "graph.h"
 #include <set>
+#include <chrono> //for timing
 
 void ann();
 std::string getFileExtension( const std::string& );
@@ -17,25 +18,10 @@ std::string getFileExtension( const std::string& );
 template <typename T>
 T* read_from_file(const std::string&, size_t*, size_t*);
 
-inline float recall(int k, std::set<int>& X, std::set<int>& T) {
-    std::set<int> intrsct;
-    for (auto &i : X) {
-        std::cout << i << " ";
-    }
-    std::cout << std::endl;
-    for (auto &i : T) {
-        std::cout << i << " ";
-    }
-//    std::ranges::set_intersection(X, T, std::inserter(intrsct, intrsct.begin()));
-    std::set_intersection(X.begin(), X.end(), T.begin(), T.end(), std::inserter(intrsct, intrsct.begin()));
-    return static_cast<float>(intrsct.size()) / static_cast<float>(k);
-}
-// 81 99 6110 6159 6183 6645 6719 6819 6997 7633
-// 11 69 235 279 384 414 528 647 711 763 855 965 1076 1088 1118 1252 1262 1269 1274 1365 1398 1477 1661 1746 1889 1891 1909 1912 1914 1950 2016 2142 2247 2377 2428 2473 2482 2692 2891 2894 2919 3254 3270 3434 3631 3689 3730 3748 3899 4086 4151 4334 4344 4402 4440 4677 4692 4734 4761 4767 4910 5072 5096 5134 5167 5252 5310 5327 5421 5776 6142 6234 6661 7344 7428 7857 8028 8082 8102 8414 8475 8504 8575 8782 8852 8896 8976 9045 9108 9163 9240 9308 9338 9494 9846 9892 9942 9951 9987 9993
+void recall_k(int ,std::set<int> , std::set<int> );
 
-//../datasets/siftsmall/siftsmall_base.fvecs
-//../datasets/siftsmall/siftsmall_query.fvecs
-//../datasets/siftsmall/siftsmall_groundtruth.ivecs
+
+
 template <typename T>
 void execute(std::string base_file_path,std::string query_file_path,int k,float a,int L,int R){
     size_t base_dim,base_vecnum = 0;
@@ -83,10 +69,40 @@ void execute(std::string base_file_path,std::string query_file_path,int k,float 
     //     std::cout<<qr[i]<<" ";
     // }
     // std::cout<<"]"<<std::endl;
-    
-    // v_m.print_graph();
+    Matrix<T> base_m(base_dim,base_vecs_num,base);
+    VamanaIndex<T> v_m(R,&base_m);
 
-    std::cout<<"about to exit execute..."<<std::endl;
+    size_t query_dim,query_vecs_num;
+    T* query=read_from_file<T>(&query_file_path,&query_dim,&query_vecs_num);
+    Matrix<T> query_m(query_dim,query_vecs_num,query);
+
+    std::span<T> q_span(query_m.get_row(1));
+    // for(auto item:q_span) std::cout<<item<<" ";
+
+    auto clock_start = std::chrono::high_resolution_clock::now();
+    v_m.vamana_indexing(a,list_size,R);
+    std::set<int>L,V;
+    v_m.greedy_search(MEDOID,q_span,k,list_size,L,V);
+    auto clock_end = std::chrono::high_resolution_clock::now();
+
+    std::cout<<"[ ";
+    for(auto item:L){
+        std::cout<<item<<" ";
+    }
+    std::cout<<" ]\n";
+
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(clock_end - clock_start).count();
+    std::cout << "Time taken: " << duration / 1e6 << " sec(s)." << std::endl;
+    size_t ground_dim,ground_vecs_num;
+    std::string ground_path("../datasets/siftsmall/siftsmall_groundtruth.ivecs");
+    int* ground=read_from_file<int>(&ground_path,&ground_dim,&ground_vecs_num);
+    Matrix<int> ground_m(ground_dim,ground_vecs_num,ground);
+    auto row=ground_m.get_row(1);
+    std::set<int> G(row.begin(),row.begin()+k);
+
+    recall_k(k,L,G);
+
+
 }
 
 template <typename T>

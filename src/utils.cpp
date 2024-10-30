@@ -24,10 +24,10 @@ void ann(){
     int k, L, R;
     float a;
     while (true) {
-        std::cout << "base file path: ";
-        std::cin >> base_file_path;
-        std::cout << "query file path: ";
-        std::cin >> query_file_path;
+        // std::cout << "base file path: ";
+        // std::cin >> base_file_path;
+        // std::cout << "query file path: ";
+        // std::cin >> query_file_path;
         // Get valid integer input for `k`
         while (true) {
             std::cout << "k: ";
@@ -79,11 +79,12 @@ void ann(){
         //check for file type to call the execute with proper <type>
         //if user gives a .fvecs base file and a .ivecs as query, should exit
         std::string type=getFileExtension(base_file_path);
-        if(type==getFileExtension(query_file_path) && type=="fvecs"){
-            execute<float>(base_file_path,query_file_path,k, a, L, R);
+        // if(type==getFileExtension(query_file_path) && type=="fvecs"){
+        if(true){
+            execute<float>("../datasets/siftsmall/siftsmall_base.fvecs","../datasets/siftsmall/siftsmall_query.fvecs",k, a, L, R);
         }
         else if(type==getFileExtension(query_file_path) && type=="ivecs"){
-            execute<int>(base_file_path,query_file_path,k, a, L, R);
+            execute<int>("../datasets/siftsmall/siftsmall_base.fvecs","../datasets/siftsmall/siftsmall_query.fvecs",k, a, L, R);
         }
         //any other case: they're incompatible
         else {
@@ -99,4 +100,12 @@ void ann(){
 //            break;
 //        }
     }
+}
+
+void recall_k(int k,std::set<int> X, std::set<int> G){
+    std::set<int>intersection;
+    std::set_intersection(X.begin(), X.end(), G.begin(), G.end(),
+                        std::inserter(intersection, intersection.begin()));
+    std::cout<<"recall: "<< (double) intersection.size()/(double) k <<std::endl;
+    
 }

@@ -105,13 +105,10 @@ struct VamanaIndex {
     void greedy_search(int start_idx,const std::span<T>& query,int k,size_t list_size,std::set<int>& L, std::set<int>& V) {
         L.insert(start_idx);
         V.clear(); //empty set
-
         //L-V
         std::set<int>difference;
         std::set_difference(L.begin(), L.end(), V.begin(), V.end(),
                         std::inserter(difference, difference.begin()));
-
-
         // std::cout<<"size(L-V): "<<difference.size()<<std::endl;
         // std::cout<<"L-V:"<<std::endl;
         //     for(auto &item:difference) std::cout<<item<<" ";
@@ -168,7 +165,6 @@ struct VamanaIndex {
             // for(auto &item:difference) std::cout<<item<<" ";
             // std::cout<<std::endl;
         }
-
         //return k closest points from L
         keep_k_closest(L,k,query);
     }
@@ -212,11 +208,11 @@ struct VamanaIndex {
             V.insert(item);
         }
         V.erase(p); //bgazoume to p
-        //std::cout<<"p="<<p<<",(start)in V: ";
-        //for(auto item:V) std::cout<<item<<" ";
-        //std::cout<<std::endl;
+        // std::cout<<"p="<<p<<",(start)in V: ";
+        // for(auto item:V) std::cout<<item<<" ";
+        // std::cout<<std::endl;
         graph[p].clear();
-        //std::cout<<"cleared neighbors of p"<<std::endl;
+        // std::cout<<"cleared neighbors of p"<<std::endl;
         int p_star_idx;
         while(!V.empty()){
             //std::cout<<"."<<std::endl;
@@ -232,30 +228,76 @@ struct VamanaIndex {
                     //std::cout<<"(in if)p*: "<<p_star_idx<<std::endl;
                 }
             }
-            //std::cout<<"p*: "<<p_star_idx<<std::endl;
+            // std::cout<<"p*: "<<p_star_idx<<std::endl;
             //update neighbors of p
             graph[p].insert(p_star_idx);
-            //std::cout<<"added p* in neighbor,size:"<<graph[p].size()<<std::endl;
+            // std::cout<<"added p* in neighbor,size:"<<graph[p].size()<<std::endl;
             if(graph[p].size()==R){
-                //std::cout<<"about to exit."<<std::endl;
+                // std::cout<<"about to exit."<<std::endl;
                 break;
             }
-            //std::cout<<"about to remove p' "<<std::endl;
-            std::set<int> deletes={};
-//            for (auto it = V.begin(); it != V.end(); ) {
-            for (auto &p_ : V) {
-                double d1=Matrix<T>::sq_euclid(db->get_row(p_star_idx),db->get_row(p_));
-//                double d1=sq_euclid(reinterpret_cast<float *>(db->get_row(p_star_idx).data()),reinterpret_cast<float *>(db->get_row(p_).data()),db->dim);
-                double d2=Matrix<T>::sq_euclid(db->get_row(p),db->get_row(p_));
-//                double d2=sq_euclid(reinterpret_cast<float *>(db->get_row(p).data()),reinterpret_cast<float *>(db->get_row(p_).data()),db->dim);
+            // std::cout<<"about to remove p' "<<std::endl;
+            for (auto it=V.begin();it!=V.end();){
+                int item=*it;
+                // std::cout<<"p': "<<item<<",p*: "<<p_star_idx<<std::endl;
+                auto vec1 = db->get_row(p_star_idx);
+                auto vec2 = db->get_row(item);
+                auto d1 = db->sq_euclid(reinterpret_cast<float*>(vec1.data()), reinterpret_cast<float*>(vec2.data()), vec1.size());
+                                                                    //p*                                             //p'
+                // double d1=Matrix<T>::sq_euclid(db->vecs.subspan(p_star_idx*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
+                // std::cout<<"d(p*,p'): "<<d1<<std::endl;
+
+                vec1 = db->get_row(p);
+                // auto vec2 = db->get_row(item);
+                auto d2 = db->sq_euclid(reinterpret_cast<float*>(vec1.data()), reinterpret_cast<float*>(vec2.data()), vec1.size());
+
+
+                                                    //p                                                //p'
+                // double d2=Matrix<T>::sq_euclid(db->vecs.subspan(p*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
+                // std::cout<<"d(p,p'): "<<d2<<std::endl;
                 if(a*d1<=d2){
-                    deletes.insert(p_);
+                    //std::cout<<"gotta remove p'"<<std::endl;
+                    it=V.erase(it);// Erase and get new iterator position
+                }
+                else{
+                    it++; // Only increment if not erased
                 }
             }
-            for(auto item:deletes){
-                V.erase(item);
+        }
+    }
+
+    void vamana_indexing(float a,int list_size,size_t R){
+        // int medoid=db->medoid_naive();
+        int medoid=MEDOID;
+        // std::cout<<"medoid: "<<medoid<<std::endl;
+        //create the permuation
+        std::vector<int>sigma;
+        for(size_t i=0;i<db->vecnum;i++) sigma.push_back(i);
+        std::random_device rd;
+        std::mt19937 g(rd());
+        // Shuffle the vector to get a random permutation
+        std::shuffle(sigma.begin(), sigma.end(), g);
+        // std::cout<<"permutation:\n";
+        // for(auto item:sigma) std::cout<<item<<" ";
+        // std::cout<<"\n";
+        for(size_t i=0;i<sigma.size();i++){
+            std::cout<<i<<"\n";
+            std::set<int>L,V;
+            //i must construct query
+            greedy_search(medoid,db->vecs.subspan(sigma[i]*(db->dim),db->dim),1,list_size,L,V);
+            robust_prune(sigma[i],V,a,R);
+            //for all points j in Nout(sigma[i])
+            for(auto j:graph[sigma[i]]){
+                //temp set to call search
+                std::set<int> temp_neighbors = graph[j];
+                temp_neighbors.insert(sigma[i]);
+                if(temp_neighbors.size() > R){
+                    robust_prune(j,temp_neighbors,a,R);
+                }
+                else{
+                    graph[j].insert(sigma[i]);
+                }
             }
-            //std::cout<<"removed p' from V"<<std::endl;
         }
     }
 
