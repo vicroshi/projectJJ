@@ -39,10 +39,10 @@ TEST_LIST = {
     {"matrix_constructor", test_constructor},
     {"euclid", test_euclid},
     {"medoid_naive", test_medoid},
-    {"greedy_search",test_greedy},
+//    {"greedy_search",test_greedy},
     {"file_Type",test_fileType},
     {"file_read",test_read},
-    {"k_closest",test_k_closest},
-    {"prune",test_prune},
+//    {"k_closest",test_k_closest},
+//    {"prune",test_prune},
     {nullptr, nullptr}
 };

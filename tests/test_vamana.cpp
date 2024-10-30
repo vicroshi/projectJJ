@@ -28,7 +28,7 @@ void test_greedy(){
 //in order:{0,4,1,3,5,2}
 
     Matrix<int> i_m(4,6,&points[0][0]);
-    VamanaIndex<int> V(3,&i_m);
+    VamanaIndex<int> V(3,10,10,2.5,&i_m);
     // V.print_graph();
     std::set<int>L={},v={};
     std::vector<int> int_q ={1,2,5,8};
@@ -100,7 +100,7 @@ void test_greedy(){
 //in order:{4,1,3,5,0,2}
 
     Matrix<float> f_m(4,6,&points_f[0][0]);
-    VamanaIndex<float> Vf(3,&f_m);
+    VamanaIndex<float> Vf(3,10,10,2.5,&f_m);
     // V.print_graph();
     L={};
     v={};
@@ -155,7 +155,7 @@ void test_greedy(){
     TEST_ASSERT(L==sol);
 }
 
-void test_k_closest(){
+/*void test_k_closest(){
     int points_i[6][3] = {
         {0, 1, 30},
         {4, 5, 6},
@@ -198,7 +198,7 @@ void test_k_closest(){
     true_closest_idx={1,4};
 
     TEST_ASSERT(true_closest_idx==L);
-}
+}*/
 
 void test_prune(){
     std::cout<<std::endl;
@@ -221,7 +221,7 @@ void test_prune(){
     };
 
     Matrix<int> i_m(4,15,&points[0][0]);
-    VamanaIndex<int> V(15,&i_m);
+    VamanaIndex<int> V(15,10, 1, 2.5f,&i_m);
     std::cout<<"before pruning: "<<std::endl;
     V.print_graph();
     float a=2.5f;

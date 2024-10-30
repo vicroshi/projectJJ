@@ -16,7 +16,7 @@
 #include <span>
 #include <iomanip>
 #include <database.h>
-#include "database.h"
+#include "distance.h"
 #include <set>
 
 #define MEDOID 3732
@@ -28,27 +28,46 @@ struct VamanaIndex {
     Matrix<T>* db;
     int vecnum;
     size_t L_size;
+
     int k;
-    int a;
+
+    float a;
+
     size_t R;
-    //                   \/ should not be just T, maybe Matrix<T>?
-    VamanaIndex(size_t R, size_t L_size, int k, int a, Matrix<T>* db)
-    :R(R), L_size(L_size), k(k), a(a), db(db) {
+
+    VamanaIndex(size_t R, size_t L_size, int k, float a, Matrix<T>* db)
+        :R(R), L_size(L_size), k(k), a(a), db(db) {
         this->vecnum = db->vecnum;
         std::ranges::iota_view<int,int> range = std::ranges::iota_view(0, vecnum);
+        std::cout << "Indexing..." << std::endl;
         init_graph(R, range);
         int medoid = MEDOID;
         std::vector<int> perm(range.begin(), range.end());
         std::random_device rd;
         std::mt19937 g(rd());
         std::ranges::shuffle(perm, g);
-        std::set<int> L,V;
+//        print_graph();
         for(auto &i:perm){
+//            std::cout<< i<< " ";
+            std::set<int> L,V;
             greedy_search(medoid,db->get_row(i),1,L_size, L,V);
+            robust_prune(i,V,a,R);
+            for (auto &j:graph[i]){
+                std::set<int> tmp = graph[j];
+                tmp.insert(i);
+                if(tmp.size() > R){
+                    robust_prune(j,tmp,a,R);
+                }
+                else {
+                    graph[j].insert(i);
+                }
+            }
         }
-
     }
-    VamanaIndex(Matrix<T>*db):db(db){}; //default constructor for testing??
+
+    VamanaIndex(size_t R, Matrix<T>*db):db(db){}
+
+    ; //default constructor for testing??
     void init_graph(int r, std::ranges::iota_view<int, int> range ) {
         graph.resize(vecnum);
         int idx = 0;
@@ -83,7 +102,7 @@ struct VamanaIndex {
         }
     }
 
-    void greedy_search(int start_idx,const std::span<T>& query,int k,size_t list_size,std::set<int>& L,std::set<int>& V) {
+    void greedy_search(int start_idx,const std::span<T>& query,int k,size_t list_size,std::set<int>& L, std::set<int>& V) {
         L.insert(start_idx);
         V.clear(); //empty set
 
@@ -101,7 +120,7 @@ struct VamanaIndex {
         while( !(difference.empty()) ){
             int p_star_idx=-1;
             double dist,min_dist=std::numeric_limits<double>::max();
-            for(auto item:difference){
+            for(auto i:difference){
                                                 //db->vecs.subspan[i*db->dim],db->dim
                 // std::cout<<"."<<std::endl;
                 // std::cout<<"calculating distance from query to point: ";
@@ -109,10 +128,11 @@ struct VamanaIndex {
                 //     std::cout<<item<<" ";
                 // }
                 // std::cout<<std::endl;
-                dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(item*(db->dim),db->dim));
+                dist=Matrix<T>::sq_euclid(query,db->get_row(i));
+//                dist=sq_euclid(reinterpret_cast<float *>(query.data()),reinterpret_cast<float *>(db->get_row(i).data()),db->dim);
                 if(dist<min_dist){
                     min_dist=dist;
-                    p_star_idx=item;
+                    p_star_idx=i;
                 }
             }
             // std::cout<<"p_star_idx: "<<p_star_idx<<std::endl;
@@ -151,7 +171,6 @@ struct VamanaIndex {
 
         //return k closest points from L
         keep_k_closest(L,k,query);
-        return ;
     }
 
     void keep_k_closest(std::set<int>& source,int k,const std::span<T>& query){
@@ -170,6 +189,7 @@ struct VamanaIndex {
                 //     std::cout<<item<<" ";
                 // }
                 dist=Matrix<T>::sq_euclid(query,db->vecs.subspan(item*(db->dim),db->dim));
+//                dist=sq_euclid(reinterpret_cast<float *>(query.data()),reinterpret_cast<float *>(db->get_row(item).data()),db->dim);
                 // std::cout<<"dist:"<<dist<<std::endl;
                 if(dist<min_dist){
                     min_dist=dist;
@@ -201,15 +221,15 @@ struct VamanaIndex {
         while(!V.empty()){
             //std::cout<<"."<<std::endl;
             double dist=0,min_dist=std::numeric_limits<double>::max();
-            for(auto item:V){
+            for(auto i:V){
                 //distance tou p me kathe stoixeio tou V (p')
-                dist=Matrix<T>::sq_euclid(db->vecs.subspan(p*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
+                dist=Matrix<T>::sq_euclid(db->get_row(p),db->get_row(i));
+//                dist=sq_euclid(reinterpret_cast<float *>(db->get_row(p).data()),reinterpret_cast<float *>(db->get_row(i).data()),db->dim);
                 //std::cout<<"dist:"<<dist<<std::endl;
                 if(dist<min_dist){
                     min_dist=dist;
-                    p_star_idx=item;
+                    p_star_idx=i;
                     //std::cout<<"(in if)p*: "<<p_star_idx<<std::endl;
-
                 }
             }
             //std::cout<<"p*: "<<p_star_idx<<std::endl;
@@ -221,23 +241,21 @@ struct VamanaIndex {
                 break;
             }
             //std::cout<<"about to remove p' "<<std::endl;
-            for (auto it = V.begin(); it != V.end(); ) {
-                int item = *it;
-                //std::cout<<"p': "<<item<<",p*: "<<p_star_idx<<std::endl;
-                                                                    //p*                                             //p'
-                double d1=Matrix<T>::sq_euclid(db->vecs.subspan(p_star_idx*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
-                //std::cout<<"d(p*,p'): "<<d1<<std::endl;
-                                                    //p                                                //p'
-                double d2=Matrix<T>::sq_euclid(db->vecs.subspan(p*(db->dim),db->dim),db->vecs.subspan(item*(db->dim),db->dim));
-                //std::cout<<"d(p,p'): "<<d2<<std::endl;
+            std::set<int> deletes={};
+//            for (auto it = V.begin(); it != V.end(); ) {
+            for (auto &p_ : V) {
+                double d1=Matrix<T>::sq_euclid(db->get_row(p_star_idx),db->get_row(p_));
+//                double d1=sq_euclid(reinterpret_cast<float *>(db->get_row(p_star_idx).data()),reinterpret_cast<float *>(db->get_row(p_).data()),db->dim);
+                double d2=Matrix<T>::sq_euclid(db->get_row(p),db->get_row(p_));
+//                double d2=sq_euclid(reinterpret_cast<float *>(db->get_row(p).data()),reinterpret_cast<float *>(db->get_row(p_).data()),db->dim);
                 if(a*d1<=d2){
-                    //std::cout<<"gotta remove p'"<<std::endl;
-                    it=V.erase(it);// Erase and get new iterator position
+                    deletes.insert(p_);
                 }
-                else
-                    it++; // Only increment if not erased
-
             }
+            for(auto item:deletes){
+                V.erase(item);
+            }
+            //std::cout<<"removed p' from V"<<std::endl;
         }
     }
 
