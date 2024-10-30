@@ -102,10 +102,17 @@ void ann(){
     }
 }
 
-void recall_k(int k,std::set<int> X, std::set<int> G){
+double recall_k(int k,const std::set<int>& X, const std::set<int>& G){
     std::set<int>intersection;
     std::set_intersection(X.begin(), X.end(), G.begin(), G.end(),
                         std::inserter(intersection, intersection.begin()));
-    std::cout<<"recall: "<< (double) intersection.size()/(double) k <<std::endl;
-    
+//    std::cout<<"recall: "<< (double) intersection.size()/(double) k <<std::endl;
+//    for(auto x:X){
+//        std::cout<<x<<" ";
+//    }
+//    std::cout<<std::endl;
+//    for(auto g:G){
+//        std::cout<<g<<" ";
+//    }
+    return ((double) intersection.size()/(double) k);
 }

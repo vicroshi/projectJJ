@@ -18,7 +18,7 @@ std::string getFileExtension( const std::string& );
 template <typename T>
 T* read_from_file(const std::string&, size_t*, size_t*);
 
-void recall_k(int ,std::set<int> , std::set<int> );
+double recall_k(int ,const std::set<int>& , const std::set<int>& );
 
 
 
@@ -32,77 +32,45 @@ void execute(std::string base_file_path,std::string query_file_path,int k,float 
     std::string gt_file_path = "../datasets/siftsmall/siftsmall_groundtruth.ivecs";
     int* ground_truth = read_from_file<int>(gt_file_path, &gt_dim, &gt_vecnum);
     Matrix<int> gt_m(gt_dim, gt_vecnum, ground_truth);
+    auto clock_start = std::chrono::high_resolution_clock::now();
     VamanaIndex<T> v_m(R,L,k,a,&base_m);
+    auto clock_end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(clock_end - clock_start).count();
+    std::cout << "Time taken: " << duration / 1e6 << " sec(s)." << std::endl;
     std::set<int> l,v={};
     size_t query_dim,query_vecnum = 0;
     T* query=read_from_file<T>(query_file_path,&query_dim,&query_vecnum);
-    Matrix<T> query_m(base_dim,query_vecnum,query);
+    Matrix<T> query_m(query_dim,query_vecnum,query);
 //    std::cout << "Choose a query (type a number from 1 to " << query_vecnum << ")\n";
 //    int query_num;
 //    std::cin >> query_num ;
 //    int query_idx = query_num - 1;
+    double recallsum = 0;
     for (int query_idx = 0; query_idx < query_vecnum; query_idx++) {
-        v_m.greedy_search(MEDOID,base_m.get_row(query_idx),k,L, l ,v);
+        v_m.greedy_search(MEDOID,query_m.get_row(query_idx),k,L, l ,v);
         auto gt = gt_m.get_row(query_idx);
-        std::set<int> t(gt.begin(), gt.end());
-        printf("query #%d %d-recall@%d: %f\n",query_idx,k,L,recall(k,l,t));
+        std::set<int> t(gt.begin(), gt.begin() + k);
+        double recall = recall_k(k,l,t);
+        recallsum += recall;
+        printf("query #%02d %d-recall@%d: %f\n",query_idx,k,L,recall);
     }
+    std::cout << "Average recall: " << recallsum /static_cast<double>(query_vecnum) << std::endl;
     munmap(base, base_dim * base_vecnum * sizeof(T));
     munmap(ground_truth, gt_dim * gt_vecnum * sizeof(int));
     munmap(query, query_dim * query_vecnum * sizeof(T));
-//    v_m.greedy_search(0,base_m.get_row(query_idx),k,L, l ,v);
-//    auto gt = gt_m.get_row(query_idx);
-//    std::set<int> t(gt.begin(), gt.end());
-//    printf("query #%d %d-recall@%d: %f\n",query_num,k,L,recall(k,l,t));
-    //    v_m.greedy_search(0,base_m.get_row(0),k,L, l ,v);
-    // std::cout<<"[";
-    // for (size_t i=0;i<100;i++){
-    //     std::cout<<db[i]<<" ";
-    // }
-    // std::cout<<"]"<<std::endl;
-//    size_t query_dim,query_vecs_num;
-//    T* query=read_from_file<T>(&query_file_path,&query_dim,&query_vecs_num);
-    //std::span<T> qr(query, query_dim*query_vecs_num);
-//    Matrix<T> query_m(query_dim,query_vecs_num,query);
-    // std::cout<<"[";
-    // for (size_t i=0;i<100;i++){
-    //     std::cout<<qr[i]<<" ";
-    // }
-    // std::cout<<"]"<<std::endl;
-    Matrix<T> base_m(base_dim,base_vecs_num,base);
-    VamanaIndex<T> v_m(R,&base_m);
-
-    size_t query_dim,query_vecs_num;
-    T* query=read_from_file<T>(&query_file_path,&query_dim,&query_vecs_num);
-    Matrix<T> query_m(query_dim,query_vecs_num,query);
-
-    std::span<T> q_span(query_m.get_row(1));
-    // for(auto item:q_span) std::cout<<item<<" ";
-
-    auto clock_start = std::chrono::high_resolution_clock::now();
-    v_m.vamana_indexing(a,list_size,R);
-    std::set<int>L,V;
-    v_m.greedy_search(MEDOID,q_span,k,list_size,L,V);
-    auto clock_end = std::chrono::high_resolution_clock::now();
-
-    std::cout<<"[ ";
-    for(auto item:L){
-        std::cout<<item<<" ";
-    }
-    std::cout<<" ]\n";
-
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(clock_end - clock_start).count();
-    std::cout << "Time taken: " << duration / 1e6 << " sec(s)." << std::endl;
-    size_t ground_dim,ground_vecs_num;
-    std::string ground_path("../datasets/siftsmall/siftsmall_groundtruth.ivecs");
-    int* ground=read_from_file<int>(&ground_path,&ground_dim,&ground_vecs_num);
-    Matrix<int> ground_m(ground_dim,ground_vecs_num,ground);
-    auto row=ground_m.get_row(1);
-    std::set<int> G(row.begin(),row.begin()+k);
-
-    recall_k(k,L,G);
+//    std::cout<<"[ ";
+//    for(auto item:L){
+//        std::cout<<item<<" ";
+//    }
+//    std::cout<<" ]\n";
 
 
+//    size_t ground_dim,ground_vecs_num;
+//    std::string ground_path("../datasets/siftsmall/siftsmall_groundtruth.ivecs");
+//    int* ground=read_from_file<int>(&ground_path,&ground_dim,&ground_vecs_num);
+//    Matrix<int> ground_m(ground_dim,ground_vecs_num,ground);
+//    auto row=ground_m.get_row(1);
+//    std::set<int> G(row.begin(),row.begin()+k);
 }
 
 template <typename T>

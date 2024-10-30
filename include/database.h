@@ -35,7 +35,7 @@ struct Matrix{
 //        return dist;
 //    }
 
-    static double sq_euclid(std::span<T> row1, std::span<T> row2) {
+    static constexpr  double sq_euclid(const std::span<T>& row1,const std::span<T>& row2) {
         __m256 sum = _mm256_setzero_ps(); // Initialize sum to 0
         unsigned i;
         size_t dim = 128;
