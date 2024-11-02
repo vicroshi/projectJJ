@@ -20,7 +20,7 @@ struct Matrix{
     T get(int row, int col){
         return vecs[row*dim+col];
     }
-        std::span<T> get_row(int row){
+        std::span<T> row(int row){
         return vecs.subspan(row*dim, dim);
     }
 //    static double sq_euclid(std::span<T> row1, std::span<T> row2){
@@ -71,7 +71,7 @@ struct Matrix{
             dist = 0;
             for (size_t j = 0; j < vecnum; j++) {
                 if (i != j) {
-                    dist += sq_euclid(get_row(i), get_row(j));
+                    dist += sq_euclid(row(i), row(j));
                 }
             }
             if (dist < min_dist) {

@@ -52,7 +52,7 @@ struct VamanaIndex {
 //        for(auto &i:perm){
 ////            std::cout<< i<< " ";
 //            std::set<int> L,V;
-//            greedy_search(medoid,db->get_row(i),1,L_size, L,V);
+//            greedy_search(medoid,db->row(i),1,L_size, L,V);
 //            robust_prune(i,V,a,R);
 //            for (auto &j:graph[i]){
 //                std::set<int> tmp = graph[j];
@@ -107,32 +107,23 @@ struct VamanaIndex {
     void greedy_search(int start_idx,const std::span<T>& query,int k,size_t list_size,std::set<int>& L, std::set<int>& V) {
         L.insert(start_idx);
         V.clear(); //empty set
-        //L-V
         std::vector<int>difference;
         difference.reserve(L.size());
         std::set_difference(L.begin(), L.end(), V.begin(), V.end(),
 //                        std::inserter(difference, difference.begin()));
                         std::back_inserter(difference));
-        // std::cout<<"size(L-V): "<<difference.size()<<std::endl;
-        // std::cout<<"L-V:"<<std::endl;
-        //     for(auto &item:difference) std::cout<<item<<" ";
-        //     std::cout<<std::endl;
-        // std::cout<<"good"<<std::endl;
         while( !(difference.empty()) ){
             int p_star_idx=-1;
             double min_dist=std::numeric_limits<double>::max();
             for(auto i:difference){
-                auto dist=Matrix<T>::sq_euclid(query,db->get_row(i));
-//                dist=sq_euclid(reinterpret_cast<float *>(query.data()),reinterpret_cast<float *>(db->get_row(i).data()),db->dim);
+                auto dist=Matrix<T>::sq_euclid(query,db->row(i));
+//                dist=sq_euclid(reinterpret_cast<float *>(query.data()),reinterpret_cast<float *>(db->row(i).data()),db->dim);
                 if(dist<min_dist){
                     min_dist=dist;
                     p_star_idx=i;
                 }
             }
             //update L <- L U Nout(p_star)
-//            for(auto neighbor:graph[p_star_idx]){
-//                L.insert(neighbor);
-//            }
             std::set_union(
                 L.begin(), L.end(),
                 graph[p_star_idx].begin(), graph[p_star_idx].end(),
@@ -148,25 +139,22 @@ struct VamanaIndex {
             difference.clear();
             std::set_difference(L.begin(), L.end(), V.begin(), V.end(),
                         std::inserter(difference, difference.begin()));
-            // std::cout<<"size(L-V): "<<difference.size()<<std::endl;
-            // std::cout<<"L-V:"<<std::endl;
-            // for(auto &item:difference) std::cout<<item<<" ";
-            // std::cout<<std::endl;
         }
         //return k closest points from L
         keep_k_closest(L,k,query);
     }
 
-    void keep_k_closest(std::set<int>& source,int k,const std::span<T>& query){
+    void keep_k_closest(std::set<int>& source,int k,const std::span<T>& query) {
         if( k<=0 || (size_t) k > source.size()) return;
         std::vector<int> temp(std::make_move_iterator(source.begin()),std::make_move_iterator(source.end()));
         std::sort(temp.begin(),temp.end(),[&](int a,int b){
-            return Matrix<T>::sq_euclid(query,db->get_row(a))<Matrix<T>::sq_euclid(query,db->get_row(b));
+            return Matrix<T>::sq_euclid(query,db->row(a))<Matrix<T>::sq_euclid(query,db->row(b));
         });
         source.clear();
         for(int i=0;i<k;i++){
             source.insert(temp[i]);
         }
+    }
 ////        temp.reserve(k);
 //        // std::cout<<"\nfor query: ";
 //        // for(auto & item: query) std::cout<<item<<" ";
@@ -180,8 +168,8 @@ struct VamanaIndex {
 //                // for(auto& item:db->vecs.subspan(source[j]*(db->dim),db->dim)){
 //                //     std::cout<<item<<" ";
 //                // }
-//                dist=Matrix<T>::sq_euclid(query,db->get_row(item));
-////                dist=sq_euclid(reinterpret_cast<float *>(query.data()),reinterpret_cast<float *>(db->get_row(item).data()),db->dim);
+//                dist=Matrix<T>::sq_euclid(query,db->row(item));
+////                dist=sq_euclid(reinterpret_cast<float *>(query.data()),reinterpret_cast<float *>(db->row(item).data()),db->dim);
 //                // std::cout<<"dist:"<<dist<<std::endl;
 //                if(dist<min_dist){
 //                    min_dist=dist;
@@ -197,35 +185,36 @@ struct VamanaIndex {
 //        //kratame auta pou einai sto temp
 //        source = std::move(temp);
 //        return ;
-    }
+//    }
 
-    void robust_prune(int p,std::set<int>& V,float a,size_t R){
-        for(auto item:graph[p]){ //bazoume tous geitones tou p
-            V.insert(item);
-        }
-        V.erase(p); //bgazoume to p
+    void robust_prune(int p,std::vector<int>& V,float a,size_t R){
+//        for(auto item:graph[p]){ //bazoume tous geitones tou p
+//            V.insert(item);
+//        }
+        std::sort(V.begin(),V.end(),[&](int v1,int v2){
+            return Matrix<T>::sq_euclid(db->row(p),db->row(v1))<Matrix<T>::sq_euclid(db->row(p),db->row(v2));
+        });
+//        V.erase(V.begin()); //bgazoume to p
         // std::cout<<"p="<<p<<",(start)in V: ";
         // for(auto item:V) std::cout<<item<<" ";
         // std::cout<<std::endl;
         graph[p].clear();
         // std::cout<<"cleared neighbors of p"<<std::endl;
-        int p_star_idx;
         while(!V.empty()){
-            //std::cout<<"."<<std::endl;
-            double dist=0,min_dist=std::numeric_limits<double>::max();
-            for(auto i:V){
-                //distance tou p me kathe stoixeio tou V (p')
-                dist=Matrix<T>::sq_euclid(db->get_row(p),db->get_row(i));
-//                dist=sq_euclid(reinterpret_cast<float *>(db->get_row(p).data()),reinterpret_cast<float *>(db->get_row(i).data()),db->dim);
-                //std::cout<<"dist:"<<dist<<std::endl;
-                if(dist<min_dist){
-                    min_dist=dist;
-                    p_star_idx=i;
-                    //std::cout<<"(in if)p*: "<<p_star_idx<<std::endl;
-                }
-            }
+            /*argmin naive*/
+//            double dist=0,min_dist=std::numeric_limits<double>::max();
+//            for(auto i:V){
+//                //distance tou p me kathe stoixeio tou V (p')
+//                dist=Matrix<T>::sq_euclid(db->row(p),db->row(i));
+////                dist=sq_euclid(reinterpret_cast<float *>(db->row(p).data()),reinterpret_cast<float *>(db->row(i).data()),db->dim);
+//                if(dist<min_dist){
+//                    min_dist=dist;
+//                    p_star_idx=i;
+//                }
+//            }
             // std::cout<<"p*: "<<p_star_idx<<std::endl;
             //update neighbors of p
+            int p_star_idx = V[0];
             graph[p].insert(p_star_idx);
             // std::cout<<"added p* in neighbor,size:"<<graph[p].size()<<std::endl;
             if(graph[p].size()==R){
@@ -235,10 +224,10 @@ struct VamanaIndex {
             // std::cout<<"about to remove p' "<<std::endl;
             for (auto it=V.begin();it!=V.end();){
                 int item=*it;
-                auto vec1 = db->get_row(p_star_idx);
-                auto vec2 = db->get_row(item);
+                auto vec1 = db->row(p_star_idx);
+                auto vec2 = db->row(item);
                 auto d1 = db->sq_euclid(vec1, vec2);
-                vec1 = db->get_row(p);
+                vec1 = db->row(p);
                 auto d2 = db->sq_euclid(vec1, vec2);
 
 
@@ -270,22 +259,30 @@ struct VamanaIndex {
         // std::cout<<"permutation:\n";
         // for(auto item:sigma) std::cout<<item<<" ";
         // std::cout<<"\n";
-        for(size_t i=0;i<sigma.size();i++){
+        for(auto i:sigma){
 //            std::cout<<i<<"\n";
             std::set<int>L,V;
             //i must construct query
-            greedy_search(medoid,db->vecs.subspan(sigma[i]*(db->dim),db->dim),1,list_size,L,V);
-            robust_prune(sigma[i],V,a,R);
-            //for all points j in Nout(sigma[i])
-            for(auto j:graph[sigma[i]]){
+            greedy_search(medoid,db->vecs.subspan(i*(db->dim),db->dim),1,list_size,L,V);
+            std::vector<int> prune_set;
+            prune_set.reserve(L.size()+graph[i].size());
+            V.erase(i);
+            std::ranges::set_union(V,graph[i],std::back_inserter(prune_set));
+            robust_prune(i,prune_set,a,R);
+            //for all points j in Nout(i)
+            for(auto j:graph[i]){
                 //temp set to call search
-                std::set<int> temp_neighbors = graph[j];
-                temp_neighbors.insert(sigma[i]);
-                if(temp_neighbors.size() > R){
-                    robust_prune(j,temp_neighbors,a,R);
+                if(graph[j].size() > R){
+                    /*vector*/
+                    std::vector<int>tmp(graph[j].begin(),graph[j].end());
+                    tmp.push_back(i);
+                    robust_prune(j,tmp,a,R);
+                    /*set*/
+//                    graph[j].insert(i);
+//                    robust_prune(j,graph[j],a,R);
                 }
                 else{
-                    graph[j].insert(sigma[i]);
+                    graph[j].insert(i);
                 }
             }
         }

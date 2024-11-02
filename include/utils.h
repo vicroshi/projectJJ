@@ -47,8 +47,8 @@ void execute(std::string base_file_path,std::string query_file_path,int k,float 
 //    int query_idx = query_num - 1;
     double recallsum = 0;
     for (int query_idx = 0; query_idx < query_vecnum; query_idx++) {
-        v_m.greedy_search(MEDOID,query_m.get_row(query_idx),k,L, l ,v);
-        auto gt = gt_m.get_row(query_idx);
+        v_m.greedy_search(MEDOID,query_m.row(query_idx),k,L, l ,v);
+        auto gt = gt_m.row(query_idx);
         std::set<int> t(gt.begin(), gt.begin() + k);
         double recall = recall_k(k,l,t);
         recallsum += recall;
@@ -69,7 +69,7 @@ void execute(std::string base_file_path,std::string query_file_path,int k,float 
 //    std::string ground_path("../datasets/siftsmall/siftsmall_groundtruth.ivecs");
 //    int* ground=read_from_file<int>(&ground_path,&ground_dim,&ground_vecs_num);
 //    Matrix<int> ground_m(ground_dim,ground_vecs_num,ground);
-//    auto row=ground_m.get_row(1);
+//    auto row=ground_m.row(1);
 //    std::set<int> G(row.begin(),row.begin()+k);
 }
 

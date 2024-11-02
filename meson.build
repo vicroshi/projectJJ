@@ -29,8 +29,11 @@ endif
 # not the executables that use the library.
 includes = include_directories('include')
 subdir('src')
-executable('projectJJ', ['main.cpp'], include_directories : includes, link_with : vamana_lib)
-
+pjj = executable('projectJJ', ['main.cpp'], include_directories : includes, link_with : vamana_lib)
+run_target('run',
+    command: pjj,
+    depends: vamana_lib
+)
 # test_src = ['tests/tests_all.cpp',
 #             'tests/test_matrix.cpp',
 #             'tests/test_utils.cpp',

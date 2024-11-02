@@ -46,11 +46,11 @@ void test_euclid() {
     TEST_CHECK(sq_euclid(&p[0][0], &p[2][0], 8) == 114);
     TEST_CHECK(sq_euclid(&p[0][0], &p[3][0], 8) == 87);
     TEST_CHECK(sq_euclid(&p[2][0], &p[3][0], 8) == 51);
-//    std::cout<<Matrix<float>::sq_euclid(m.get_row(0), m.get_row(1))<<std::endl;
-//    TEST_CHECK(Matrix<float>::sq_euclid(m.get_row(0), m.get_row(1)) == 4);
-//    TEST_CHECK(Matrix<float>::sq_euclid(m.get_row(0), m.get_row(2)) == 114);
-//    TEST_CHECK(Matrix<float>::sq_euclid(m.get_row(0), m.get_row(3)) == 87);
-//    TEST_CHECK(Matrix<float>::sq_euclid(m.get_row(2), m.get_row(3)) == 51);
+//    std::cout<<Matrix<float>::sq_euclid(m.row(0), m.row(1))<<std::endl;
+//    TEST_CHECK(Matrix<float>::sq_euclid(m.row(0), m.row(1)) == 4);
+//    TEST_CHECK(Matrix<float>::sq_euclid(m.row(0), m.row(2)) == 114);
+//    TEST_CHECK(Matrix<float>::sq_euclid(m.row(0), m.row(3)) == 87);
+//    TEST_CHECK(Matrix<float>::sq_euclid(m.row(2), m.row(3)) == 51);
 //    int i[4][4] = {
 //        {0, 0, 0, 0},
 //        {1, 1, 1, 1},
@@ -60,11 +60,11 @@ void test_euclid() {
 //    Matrix<int> n(4,4,&i[0][0]);
 //    // Matrix<int> n(4,4,reinterpret_cast<int*>(&p[0][0]));
 //
-////    std::cout << n.sq_euclid(m.get_row(0), m.get_row(1)) << std::endl;
-//    TEST_ASSERT(n.sq_euclid(n.get_row(0), n.get_row(1)) == 4);
-//    TEST_ASSERT(n.sq_euclid(n.get_row(0), n.get_row(2)) == 114);
-//    TEST_ASSERT(n.sq_euclid(n.get_row(0), n.get_row(3)) == 87);
-//    TEST_ASSERT(n.sq_euclid(n.get_row(2), n.get_row(3)) == 51);
+////    std::cout << n.sq_euclid(m.row(0), m.row(1)) << std::endl;
+//    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(1)) == 4);
+//    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(2)) == 114);
+//    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(3)) == 87);
+//    TEST_ASSERT(n.sq_euclid(n.row(2), n.row(3)) == 51);
 }
 
 
@@ -81,13 +81,13 @@ void test_medoid() {
 //    };
 //    Matrix<int> m(4,8,&p[0][0]);
 //    TEST_ASSERT(m.medoid_naive() == 5);
-//    std::span<int> vec = m.get_row(5);
+//    std::span<int> vec = m.row(5);
 //    TEST_ASSERT(std::equal(vec.begin(),vec.end(),std::array{3, 3, 3, 3}.begin()));
 //    TEST_CASE("distance matrix");
 //    double cdist[8][8];
 //    for (int i = 0; i < 8; i++) {
 //        for (int j = 0; j < 8; j++) {
-//            cdist[i][j] = Matrix<int>::sq_euclid(m.get_row(i), m.get_row(j));
+//            cdist[i][j] = Matrix<int>::sq_euclid(m.row(i), m.row(j));
 //        }
 //    }
 //    double true_dist[8][8] = {
