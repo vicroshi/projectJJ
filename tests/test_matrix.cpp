@@ -31,7 +31,6 @@ void test_constructor(){
 }
 
 void test_euclid() {
-    double d1,d2,d3;
     float p[4][4] = {
         {0, 0, 0, 0},
         {1, 1, 1, 1},
@@ -39,11 +38,21 @@ void test_euclid() {
         {2, 3, 5, 7}
     };
     Matrix<float> m(4,4,&p[0][0]);
-//    std::cout << m.sq_euclid(0, 1) << std::endl;
-    TEST_ASSERT(m.sq_euclid(m.get_row(0), m.get_row(1)) == 4);
-    TEST_ASSERT(m.sq_euclid(m.get_row(0), m.get_row(2)) == 114);
-    TEST_ASSERT(m.sq_euclid(m.get_row(0), m.get_row(3)) == 87);
-    TEST_ASSERT(m.sq_euclid(m.get_row(2), m.get_row(3)) == 51);
+    std::cout<<"m0:";
+    for(const auto &i: m.row(0)){
+        std::cout<< i<<std::endl;
+    }
+    std::cout<<"m1:";
+    for(const auto &i: m.row(1)){
+        std::cout<< i<<std::endl;
+    }
+
+    // std::cout << m.row(0) <<","<< m.row(1) << std::endl;
+    std::cout<<"dist: "<<m.sq_euclid(m.row(0), m.row(1),m.row(0).size())<<std::endl;
+    TEST_ASSERT(m.sq_euclid(m.row(0), m.row(1),m.row(0).size()) == 4);
+    TEST_ASSERT(m.sq_euclid(m.row(0), m.row(2),m.row(0).size()) == 114);
+    TEST_ASSERT(m.sq_euclid(m.row(0), m.row(3),m.row(0).size()) == 87);
+    TEST_ASSERT(m.sq_euclid(m.row(2), m.row(3),m.row(0).size()) == 51);
     int i[4][4] = {
         {0, 0, 0, 0},
         {1, 1, 1, 1},
@@ -53,11 +62,11 @@ void test_euclid() {
     Matrix<int> n(4,4,&i[0][0]);
     // Matrix<int> n(4,4,reinterpret_cast<int*>(&p[0][0]));
     
-//    std::cout << n.sq_euclid(m.get_row(0), m.get_row(1)) << std::endl;
-    TEST_ASSERT(n.sq_euclid(n.get_row(0), n.get_row(1)) == 4);
-    TEST_ASSERT(n.sq_euclid(n.get_row(0), n.get_row(2)) == 114);
-    TEST_ASSERT(n.sq_euclid(n.get_row(0), n.get_row(3)) == 87);
-    TEST_ASSERT(n.sq_euclid(n.get_row(2), n.get_row(3)) == 51);
+    std::cout << n.sq_euclid(n.row(0), n.row(1),n.row(0).size()) << std::endl;
+    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(1),n.row(0).size()) == 4);
+    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(2),n.row(0).size()) == 114);
+    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(3),n.row(0).size()) == 87);
+    TEST_ASSERT(n.sq_euclid(n.row(2), n.row(3),n.row(0).size()) == 51);
 }
 
 void test_medoid() {
@@ -73,6 +82,6 @@ void test_medoid() {
     };
     Matrix<int> m(4,8,&p[0][0]);
     TEST_ASSERT(m.medoid_naive() == 5);
-    std::span<int> vec = m.get_row(5);
+    std::span<int> vec = m.row(5);
     TEST_ASSERT(std::equal(vec.begin(),vec.end(),std::array{3, 3, 3, 3}.begin()));
 }
