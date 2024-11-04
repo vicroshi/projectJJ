@@ -20,12 +20,6 @@ std::string getFileExtension(const std::string& filePath){
 
 void ann(){
     std::string base_file_path, query_file_path,ground_file_path;
-
-    //used for testing to not have to insert it every time
-    // base_file_path="/home/zenki/Documents/DIT/jj/projectJJ/datasets/siftsmall/siftsmall_base.fvecs";
-    // query_file_path="/home/zenki/Documents/DIT/jj/projectJJ/datasets/siftsmall/siftsmall_query.fvecs";
-    // ground_file_path="/home/zenki/Documents/DIT/jj/projectJJ/datasets/siftsmall/siftsmall_groundtruth.ivecs";
-
     std::cout << "base file path: ";
     std::cin >> base_file_path;
     std::cout << "query file path: ";
