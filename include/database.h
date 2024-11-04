@@ -34,7 +34,7 @@ struct Matrix{
         return vecs.subspan(row*dim, dim);
     }
 
-    //using AVX/AVX2 to calculate squared distance faster
+    //using SIMD instructions to calculate squared distance faster, AVX/AVX2 required
     static constexpr  double sq_euclid(const std::span<T>& row1,const std::span<T>& row2,const size_t& dim){
         //for floats
         if constexpr(std::is_floating_point_v<T>){

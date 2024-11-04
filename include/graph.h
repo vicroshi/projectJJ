@@ -38,9 +38,9 @@ struct VamanaIndex {
     //constructor for testing where we need to have a fixed graph each time. we add neighbors manually
     VamanaIndex(Matrix<T>*db):db(db){
         graph.resize(db->vecnum);
-    }; 
+    } 
     
-    void init_graph(size_t r){
+    void init_graph(const size_t& r){
         graph.resize(vecnum);
         //generator for shuffle
         std::random_device rd; 
@@ -118,7 +118,7 @@ struct VamanaIndex {
         return ;
     }
     
-    void keep_k_closest(std::unordered_set<int>& source,int k,const std::span<T>& query){
+    void keep_k_closest(std::unordered_set<int>& source,const int& k,const std::span<T>& query){
         if( k<=0 || (size_t) k > source.size()) return;
         std::unordered_set<int> temp;
         for (int i=0;i<k;i++){

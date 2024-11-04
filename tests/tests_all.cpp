@@ -37,6 +37,9 @@ extern void test_recall();
 extern void test_constructor();
 extern void test_medoid();
 extern void test_euclid();
+
+
+
 TEST_LIST = {
     {"matrix_constructor", test_constructor},
     {"euclid", test_euclid},

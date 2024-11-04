@@ -29,7 +29,7 @@ void test_read(){
     TEST_ASSERT((std::is_same<decltype(result2), float*>::value)); //check if its a float*
     
     size_t dim3,vecs3;
-    std::string file_path3="non_existing_file";
+    std::string file_path3="./non_existing_file";
     float *result3=read_from_file<float>(file_path3,&dim3,&vecs3);
     TEST_ASSERT(result3 == nullptr); //check if its a nullptr*
     

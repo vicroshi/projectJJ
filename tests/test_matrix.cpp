@@ -85,4 +85,22 @@ void test_medoid() {
     TEST_ASSERT(m.medoid_naive() == 5);
     std::span<int> vec = m.row(5);
     TEST_ASSERT(std::equal(vec.begin(),vec.end(),std::array{3, 3, 3, 3}.begin()));
+
+    float p_f[8][4] = {
+        {1.0f, 2.0f, 3.0f, 4.0f},
+        {4.0f, 5.0f, 6.0f, 7.0f},
+        {1.0f, 1.0f, 1.0f, 1.0f},
+        {2.0f, 3.0f, 5.0f, 7.0f},
+        {8.0f, 6.0f, 7.0f, 5.0f},
+        {3.0f, 3.0f, 3.0f, 3.0f},
+        {6.0f, 6.0f, 6.0f, 6.0f},
+        {5.0f, 8.0f, 5.0f, 3.0f}
+    };
+    Matrix<float> n(4,8,&p_f[0][0]);
+    TEST_ASSERT(n.medoid_naive() == 5);
+    std::span<float> vec_f = n.row(5);
+    TEST_ASSERT(std::equal(vec_f.begin(),vec_f.end(),std::array{3.0f, 3.0f, 3.0f, 3.0f}.begin()));
+
+
+
 }
