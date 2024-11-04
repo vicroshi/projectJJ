@@ -27,6 +27,7 @@ extern void test_vamana_index();
 //utils tests
 extern void test_fileType();
 extern void test_read();
+extern void test_recall();
 /*
  *
  *
@@ -36,6 +37,9 @@ extern void test_read();
 extern void test_constructor();
 extern void test_medoid();
 extern void test_euclid();
+
+
+
 TEST_LIST = {
     {"matrix_constructor", test_constructor},
     {"euclid", test_euclid},
@@ -46,5 +50,6 @@ TEST_LIST = {
     {"k_closest",test_k_closest},
     {"prune",test_prune},
     {"vamana_index",test_vamana_index},
+    {"recall",test_recall},
     {nullptr, nullptr}
 };
