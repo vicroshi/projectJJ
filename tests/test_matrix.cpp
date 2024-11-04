@@ -12,6 +12,7 @@ void test_constructor(){
         p[i] = static_cast<float>(i) + 0.2;
     }
     Matrix<float> m(10, 10, p);
+                                //alliws 0.2f
     TEST_ASSERT(m.get(0, 0) == (float)0.2);
     TEST_ASSERT(m.get(1, 1) == (float)11.2);
     TEST_ASSERT(m.dim == 10);
@@ -49,10 +50,10 @@ void test_euclid() {
 
     // std::cout << m.row(0) <<","<< m.row(1) << std::endl;
     std::cout<<"dist: "<<m.sq_euclid(m.row(0), m.row(1),m.row(0).size())<<std::endl;
-    TEST_ASSERT(m.sq_euclid(m.row(0), m.row(1),m.row(0).size()) == 4);
-    TEST_ASSERT(m.sq_euclid(m.row(0), m.row(2),m.row(0).size()) == 114);
-    TEST_ASSERT(m.sq_euclid(m.row(0), m.row(3),m.row(0).size()) == 87);
-    TEST_ASSERT(m.sq_euclid(m.row(2), m.row(3),m.row(0).size()) == 51);
+    TEST_ASSERT(m.sq_euclid(m.row(0), m.row(1),m.row(0).size()) == 4.0);
+    TEST_ASSERT(m.sq_euclid(m.row(0), m.row(2),m.row(0).size()) == 114.0);
+    TEST_ASSERT(m.sq_euclid(m.row(0), m.row(3),m.row(0).size()) == 87.0);
+    TEST_ASSERT(m.sq_euclid(m.row(2), m.row(3),m.row(0).size()) == 51.0);
     int i[4][4] = {
         {0, 0, 0, 0},
         {1, 1, 1, 1},
@@ -63,10 +64,10 @@ void test_euclid() {
     // Matrix<int> n(4,4,reinterpret_cast<int*>(&p[0][0]));
     
     std::cout << n.sq_euclid(n.row(0), n.row(1),n.row(0).size()) << std::endl;
-    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(1),n.row(0).size()) == 4);
-    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(2),n.row(0).size()) == 114);
-    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(3),n.row(0).size()) == 87);
-    TEST_ASSERT(n.sq_euclid(n.row(2), n.row(3),n.row(0).size()) == 51);
+    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(1),n.row(0).size()) == 4.0);
+    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(2),n.row(0).size()) == 114.0);
+    TEST_ASSERT(n.sq_euclid(n.row(0), n.row(3),n.row(0).size()) == 87.0);
+    TEST_ASSERT(n.sq_euclid(n.row(2), n.row(3),n.row(0).size()) == 51.0);
 }
 
 void test_medoid() {

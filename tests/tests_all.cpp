@@ -27,6 +27,7 @@ extern void test_vamana_index();
 //utils tests
 extern void test_fileType();
 extern void test_read();
+extern void test_recall();
 /*
  *
  *
@@ -46,5 +47,6 @@ TEST_LIST = {
     {"k_closest",test_k_closest},
     {"prune",test_prune},
     {"vamana_index",test_vamana_index},
+    {"recall",test_recall},
     {nullptr, nullptr}
 };

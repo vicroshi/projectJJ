@@ -15,14 +15,12 @@
 
 
 void ann();
-std::string getFileExtension( const std::string& );
+std::string getFileExtension(const std::string&);
 
 template <typename T>
-T* read_from_file(const std::string&, size_t*, size_t*);
+T* read_from_file(const std::string&,size_t*,size_t*);
 
-double recall_k(const int& ,std::vector<int>& , std::vector<int>& );
-
-
+double recall_k(const int&,std::vector<int>&,std::vector<int>&);
 
 template <typename T>
 void execute(const std::string& base_file_path,const std::string& query_file_path,const std::string& ground_file_path){
@@ -55,9 +53,9 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
             std::cin.clear();  // clear error state
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');  // discard invalid input
             std::cout<<"Invalid input. Please submit a positive integer in range [1,"<<base_vecs_num<<"]\n";
-        }else{
-            break;  // valid input received
-        }
+        }else
+            break;  //valid input received
+        
     }
     // Get valid integer input for `alpha`
     while(true){
@@ -67,9 +65,9 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
             std::cout << "Invalid input. Please submit a float greater or equal to 1.\n";
-        }else{
+        }else
             break;
-        }
+        
     }
     // Get valid integer input for Lise_size
     while(true){
@@ -79,9 +77,9 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
             std::cout << "Invalid input. Please submit a positive integer.\n";
-        }else{
+        }else
             break;
-        }
+        
     }
     // Get valid integer input for `R`
     while(true){
@@ -91,12 +89,15 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
             std::cout << "Invalid input. Please submit a positive integer in range [1,"<<base_vecs_num-1<<"]\n";
-        }else{
+        }else
             break;
-        }
+        
     }
-    auto init_start = std::chrono::high_resolution_clock::now();
+
+    //times for each action
+
     //R-regular graph initialization
+    auto init_start = std::chrono::high_resolution_clock::now();
     VamanaIndex<T> v_m(R,&base_m);
     auto init_end = std::chrono::high_resolution_clock::now();
     auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
@@ -130,17 +131,16 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     std::cout<<"Averall recall: "<<sum/(double) query_vecs_num<<"\n";
 
 
-
-    //get input in a loop to show k-nearest neighbors for any queries in file
+    //get input in a loop to show k-nearest neighbors for any query in file
     int query_point_index;
     //get valid integer input for query input, indexing starts at 0
     while(true){
     std::cout<<"Enter query index (-1 to exit): ";
     std::cin>>query_point_index;
         //check if -1 was given at start
-        if(query_point_index==-1){
+        if(query_point_index==-1)
             break;
-        }
+        
         //inner loop to validate input
         while(std::cin.fail() || query_point_index<0 || (size_t) query_point_index>=query_vecs_num){
             std::cin.clear();  // clear error flag
@@ -148,14 +148,14 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
             std::cout<<"Please enter a positive integer in range [0,"<<query_vecs_num-1<<"] or -1 to exit: ";
             std::cin>>query_point_index;
             //check again if the user entered -1 to exit
-            if(query_point_index ==-1){
+            if(query_point_index ==-1)
                 break;
-            }
+            
         }
         //if -1 was entered during inner validation loop,break out of the outer loop as well
-        if(query_point_index==-1){
+        if(query_point_index==-1)
             break;
-        }
+        
 
         //run greedy search to return the k-closest of requested query node
         std::span<T> query_span(query_m.row(query_point_index));
@@ -170,8 +170,24 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         std::vector<int>vecL(L.begin(),L.end());
         std::cout<<"recall:"<<recall_k(k,vecL,G)<<std::endl;
     }
+
+    //free mmaps, no leaks whatsoever?? 
+    size_t mapped_size = (base_dim + 1) * base_vecs_num * 4;
+    if (munmap(base, mapped_size) == -1) {
+        std::cerr << "Error unmapping the memory" << std::endl;
+    }
+    mapped_size= (query_dim + 1) * query_vecs_num * 4;
+    if (munmap(query, mapped_size) == -1) {
+        std::cerr << "Error unmapping the memory" << std::endl;
+    }
+    mapped_size= (ground_dim + 1) * ground_vecs_num * 4;
+    if (munmap(ground, mapped_size) == -1) {
+        std::cerr << "Error unmapping the memory" << std::endl;
+    }
+
 }
 
+//function to read a file and store it in a flat array for efficiency
 template <typename T>
 T* read_from_file(const std::string& name, size_t* dim, size_t* vecnum) {
     int fd = open(name.c_str(), O_RDONLY);
@@ -193,10 +209,8 @@ T* read_from_file(const std::string& name, size_t* dim, size_t* vecnum) {
     int d = *reinterpret_cast<int *>(p);
     *dim = d;
     *vecnum = sb.st_size / ((d + 1) * 4);
-//    float* x = new float[*vecnum * d];
     for (size_t i = 0; i < *vecnum; i++) {
         std::memmove(p + i * d, p + 1 + i * (d + 1), d * sizeof(*p));
     }
-//    munmap(p, sb.st_size);
     return p;
 }

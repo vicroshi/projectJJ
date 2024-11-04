@@ -6,18 +6,17 @@
 #include "database.h"
 #include "graph.h"
 #include <iterator> // for std::back_inserter
-std::string getFileExtension(const std::string& filePath) {
+
+std::string getFileExtension(const std::string& filePath){
     // Find the last dot in the file path
     size_t dotPosition = filePath.find_last_of(".");
-    
-    // If there's no dot or the dot is the first character (e.g., ".hiddenfile"), return an empty string
+    // If there's no dot or the dot is the first character (eg: .git),return an empty string
     if (dotPosition == std::string::npos || dotPosition == 0 || dotPosition == filePath.length() - 1) {
         return "";
     }
     // Extract the substring after the last dot
     return filePath.substr(dotPosition + 1);
 }
-
 
 void ann(){
     std::string base_file_path, query_file_path,ground_file_path;
@@ -55,8 +54,7 @@ double recall_k(const int& k, std::vector<int>& X, std::vector<int>& G){
     std::vector<int>intersection;
     std::sort(X.begin(), X.end());
     std::sort(G.begin(), G.end());
-    std::set_intersection(X.begin(), X.end(), G.begin(), G.end(),
-                        std::back_inserter(intersection));
+    std::set_intersection(X.begin(), X.end(), G.begin(), G.end(),std::back_inserter(intersection));
     
     // std::cout<<"recall: "<< (double) intersection.size()/(double) k <<std::endl;
     return (double) intersection.size()/(double) k;

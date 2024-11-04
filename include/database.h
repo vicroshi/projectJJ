@@ -34,11 +34,11 @@ struct Matrix{
         return vecs.subspan(row*dim, dim);
     }
 
-
+    //using AVX/AVX2 to calculate squared distance faster
     static constexpr  double sq_euclid(const std::span<T>& row1,const std::span<T>& row2,const size_t& dim){
-        // Using AVX for float types
+        //for floats
         if constexpr(std::is_floating_point_v<T>){
-            __m256 sum = _mm256_setzero_ps(); // Initialize sum to 0
+            __m256 sum = _mm256_setzero_ps(); //Initialize sum to 0
             size_t i = 0;
             // Process 8 floats at a time
             for (; i + 8 <= dim; i += 8) {
@@ -83,7 +83,7 @@ struct Matrix{
         }
     }
     
-
+    //naive approach, not used
     // static double sq_euclid(std::span<T> row1, std::span<T> row2,const size_t size){
     //     double dist = 0;
     //     double diff;
@@ -105,7 +105,6 @@ struct Matrix{
             for (size_t j = 0; j < vecnum; j++) {
                 if (i != j) {
                     dist += sq_euclid(row(i),row(j),row(i).size());
-                    // dist += sq_euclid(get_row(i), get_row(j));
                 }
             }
             if (dist < min_dist) {
