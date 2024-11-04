@@ -12,6 +12,7 @@
 	>[Οδηγίες εγκατάστασης ninja](https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages)
     
  # Compilation & Execution
+ Αρχικά, τρέχουμε `meson build` για να δημιουργηθεί ***το directory build που θα περιέχει τα εκτελέσιμα***.
  Το compilation μπορεί να γίνει με τους εξής δύο τρόπους:
 - εκτέλεση της εντολής `ninja -C build` εντός του directory **/projectjj**
 - εκτέλεση της εντολής `ninja` εντός του directory **/projectjj/build**
