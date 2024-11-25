@@ -208,7 +208,7 @@ T* read_from_file(const std::string& name, size_t* dim, size_t* vecnum) {
     close(fd);
     int d = *reinterpret_cast<int *>(p);
     *dim = d;
-    *vecnum = sb.st_size / ((d + 1) * 4);
+    *vecnum = sb.st_size / ((d + 1) * sizeof(T));
     for (size_t i = 0; i < *vecnum; i++) {
         std::memmove(p + i * d, p + 1 + i * (d + 1), d * sizeof(*p));
     }

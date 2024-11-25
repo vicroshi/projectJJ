@@ -17,17 +17,20 @@ void test_fileType(){
 
 void test_read(){
     size_t dim1,vecs1;
-    std::string file_path1="../datasets/siftsmall/siftsmall_base.fvecs";
-    int *result1=read_from_file<int>(file_path1,&dim1,&vecs1);
+    std::string file_path1="../datasets/dummy/dummy.fvecs";
+    float *result1=read_from_file<float>(file_path1,&dim1,&vecs1);
     TEST_ASSERT(result1 != nullptr);
-    TEST_ASSERT((std::is_same<decltype(result1), int*>::value)); //check if its a int*
-
+    TEST_ASSERT((std::is_same<decltype(result1), float*>::value)); //check if its a int*
+    TEST_ASSERT(dim1==128);
+    printf("vecs1: %ld\n",vecs1);
+    TEST_ASSERT(vecs1==10);
     size_t dim2,vecs2;
-    std::string file_path2="../datasets/siftsmall/siftsmall_groundtruth.ivecs";
-    float *result2=read_from_file<float>(file_path2,&dim2,&vecs2);
+    std::string file_path2="../datasets/dummy/dummy_groundtruth.ivecs";
+    int *result2=read_from_file<int>(file_path2,&dim2,&vecs2);
     TEST_ASSERT(result2 != nullptr);
-    TEST_ASSERT((std::is_same<decltype(result2), float*>::value)); //check if its a float*
-    
+    TEST_ASSERT((std::is_same<decltype(result2), int*>::value)); //check if its a float*
+    TEST_ASSERT(dim2==100);
+    TEST_ASSERT(vecs2==10);
     size_t dim3,vecs3;
     std::string file_path3="./non_existing_file";
     float *result3=read_from_file<float>(file_path3,&dim3,&vecs3);

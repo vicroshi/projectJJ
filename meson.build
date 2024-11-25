@@ -34,5 +34,6 @@ e = executable('unit_tests',
                 link_with : vamana_lib
                 )
 
+dummy_exe = executable('dummy', 'datasets/dummy/dummy_create.cpp')
 
 test('unit_tests',e)
