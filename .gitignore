@@ -1,4 +1,6 @@
 .idea
 build
 datasets
+!datasets/dummy
+!datasets/dummy/*
 .vscode
