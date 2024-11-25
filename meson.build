@@ -1,6 +1,6 @@
 project('projectJJ', 'cpp',
         version : '1.0.0',
-        default_options : ['warning_level=3', 'cpp_std=c++23','optimization=3'])
+        default_options : ['warning_level=3', 'cpp_std=c++20','optimization=3'])
 
 cpp = meson.get_compiler('cpp')
 # Setting compiler arguments for AVX/AVX2, if supported
