@@ -19,9 +19,7 @@
 #include <database.h>
 #include "database.h"
 #include <iterator> // for std::back_inserter
-
-
-
+#include <unordered_map>
 
 
 template <typename T>
@@ -210,8 +208,102 @@ struct VamanaIndex {
             }
         }
     }
-};
+    void filtered_greedy_search(std::unordered_map<float,int>& S, const std::span<T>& query, const size_t& k, const size_t& list_size,const float& Fq, std::unordered_set<int>& L, std::unordered_set<int>& V) {
+        L.clear();
+        V.clear();
+        if(Fq==-1.0f){ //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
+            for(auto &f:(*db->filters_set)){
+                auto it = S.find(f); //[] operator adds a default value if the key is not already inside it, we dont want that
+                if (it != S.end()) {
+                    L.insert(it->second); //add all starting points
+                }
+            }
+        }
+        else{ //its a node with only one filter, I only have one starting node.
+            auto it = S.find(Fq);
+            if (it != S.end()) {
+                L.insert(it->second);
+            }
+        }
+        //L-V
+        std::vector<int> vecL(L.begin(),L.end());
+        std::vector<int> vecV(V.begin(), V.end());
+        std::sort(vecL.begin(), vecL.end());
+        std::sort(vecV.begin(), vecV.end());
+        std::vector<int> difference;
+        std::set_difference(vecL.begin(), vecL.end(), vecV.begin(), vecV.end(), std::back_inserter(difference));
+        while( !(difference.empty()) ){
+            //p*
+            int p_star_idx=-1;
+            double min_dist=std::numeric_limits<double>::max();
+            for(const auto& item:difference){//p in L-V
+                auto vec1 = db->row(item);
+                auto vec2 = query; //query point
+                auto dist =Matrix<T>::sq_euclid(vec1,vec2, vec1.size());
+                // std::cout<<dist<<std::endl;
+                if(dist<min_dist){
+                    min_dist=dist;
+                    p_star_idx=item;
+                    // std::cout<<"new min dist:"<<min_dist<<std::endl;
+                }
+            }
+            //probably unnecessary check, p* gets inserted in V
+            if(p_star_idx!=-1)
+                V.insert(p_star_idx);
 
+            std::unordered_set<int> temp; //keeping N'out(p*)
+            for(auto& p: graph[p_star_idx]){
+                // if(q)                    std::cout<<"--\n";
+
+                // if(q){
+                //     std::cout<<"Fp':"<<(*db->vec_filter)[p]<<", Fq:"<<Fq<<"\n";
+
+
+                // }
+                if(((*db->vec_filter)[p]==Fq || Fq==-1.0f ) && (V.count(p)==0)){
+                    temp.insert(p); //insert it
+                }
+            }
+            //update L with N'out(p*)
+            L.insert(temp.begin(),temp.end()); //add it in L
+
+            //keep list_size closest to Xq
+            if(L.size()>list_size)
+                keep_k_closest(L,list_size,query);
+
+            //L-V
+            difference.clear();
+            std::vector<int> vecL(L.begin(),L.end()); //copy to vector for mutable operations
+            std::vector<int> vecV(V.begin(),V.end());
+            std::sort(vecL.begin(),vecL.end());
+            std::sort(vecV.begin(),vecV.end());
+            std::set_difference(vecL.begin(), vecL.end(),vecV.begin(),vecV.end(), std::back_inserter(difference));
+                            // if(q)                    std::cout<<"--\n";
+
+            // if(q){
+            //     std::cout<<"VecV:\n";
+            //     for(auto &i: vecV){
+            //         std::cout<<i<<" ";
+
+            //     }
+            //     std::cout<<std::endl;
+            //     std::cout<<"VecL:\n";
+            //     for(auto &i: vecL){
+            //         std::cout<<i<<" ";
+
+            //     }
+            //     std::cout<<std::endl;
+
+            //     std::cout<<"---\n";
+            // }
+
+        }
+        //return k closest points from L
+        keep_k_closest(L,k,query);
+        // std::cout<<"L.size before return:"<<L.size();
+        // std::cout<<"\n----------\n";
+    }
+};
 
 
 
