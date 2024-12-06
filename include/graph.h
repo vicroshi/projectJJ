@@ -283,6 +283,62 @@ struct VamanaIndex {
         keep_k_closest(L,k,query);
 
     }
+
+    void filtered_robust_prune(const int& p, std::unordered_set<int>& V, const float& a, const size_t& R){
+        //add neighbors of p but remove p
+        V.insert(graph[p].begin(),graph[p].end());
+        V.erase(p);
+        //neighbors of p are deleted
+        graph[p].clear();
+        int p_star_idx;
+        while(V.size()>0){
+
+            //min distance (p,p'), p' IN V
+            double min_dist=std::numeric_limits<double>::max(); 
+            for(const auto & item:V){
+                //distance of p with each element of V (p')      
+                auto vec1 = db->row(p);
+                auto vec2 = db->row(item); //p'
+                auto dist = Matrix<T>::sq_euclid(vec1, vec2,vec1.size());
+                if(dist<min_dist){
+                    min_dist=dist;
+                    p_star_idx=item;
+                }
+            }
+
+            //update neighbors of p
+            graph[p].insert(p_star_idx);
+
+            if(graph[p].size()==R)
+                break;
+
+            //for each p' in V
+            for (auto it=V.begin();it!=V.end();){
+                int p_tonos=*it;
+
+                //first if with filters, condition is Fp' == Fp AND Fp* != Fp'
+                if( ((*db->vec_filter)[p_tonos] == (*db->vec_filter)[p]) && ((*db->vec_filter)[p_star_idx] != (*db->vec_filter)[p_tonos])){
+                    ++it;  // Increment the iterator before skipping to the next iteration
+                    continue;
+                }
+                    
+
+                //second if, for the distances
+                auto vec1 = db->row(p_star_idx);
+                auto vec2 = db->row(p_tonos);
+                //d(p*,p')
+                auto d1 =Matrix<T>::sq_euclid(vec1,vec2, vec1.size());                
+                                                                    
+                vec1 = db->row(p);
+                //d(p,p')
+                auto d2 = Matrix<T>::sq_euclid(vec1,vec2,vec1.size());   
+                if(a*d1<=d2)
+                    it=V.erase(it);//erase and get new iterator position
+                else
+                    it++; //only increment if not erased
+            }
+        }
+    }
 };
 
 
