@@ -299,7 +299,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     auto medoid_start = std::chrono::high_resolution_clock::now();
     std::unordered_map<T, int> Medoid;          // st(f)
     std::unordered_map<T, std::vector<int>> Pf; // points for each filter
-    v_m.db->FindMedoid(t, Medoid, Pf);
+    v_m.db->find_medoid(t, Medoid, Pf);
 
     auto medoid_end = std::chrono::high_resolution_clock::now();
     auto medoid_duration = std::chrono::duration_cast<std::chrono::microseconds>(medoid_end - medoid_start).count();
@@ -307,7 +307,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
     // actual indexing
     auto indexing_start = std::chrono::high_resolution_clock::now();
-    v_m.FilteredVamanaIndexing(Medoid, a, List_size, R);
+    v_m.filtered_greedy_search(Medoid, a, List_size, R);
     auto indexing_end = std::chrono::high_resolution_clock::now();
     auto indexing_duration = std::chrono::duration_cast<std::chrono::microseconds>(indexing_end - indexing_start).count();
     std::cout << ">Time taken for Indexing: " << indexing_duration / 1e6 << " sec(s)." << std::endl;
@@ -319,7 +319,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
             // std::cout<<"for i:"<<i<<",with filter:"<<(*query_m.vec_filter)[i] <<std::endl;
             std::unordered_set<int> L, V;
             std::span<T> query_span(query_m.row(i));
-            v_m.FilteredGreedySearch(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+            v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
             std::vector<int> L_vec(L.begin(), L.end());
                 std::cout<<"==============================\n"<<"for i:"<<i<<" with filter:"<<(*query_m.vec_filter)[i]<< ", L.size():"<<L.size()<<", ground.size():"<<ground_data[i].size()<<"\n";
                 // std::cout<<"L:";

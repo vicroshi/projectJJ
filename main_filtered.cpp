@@ -14,9 +14,9 @@
 int main(int argc,char **argv){
     int opt;
     float a=0.0;
-    size_t R=0,L=0,k=0;
+    size_t R=0,L=0,k=0,t=0;
     std::string base_file_path,query_file_path,ground_file_path;
-    while((opt = getopt(argc, argv, "a:R:L:b:q:g:"))!=-1){
+    while((opt = getopt(argc, argv, "a:R:L:b:q:g:t:"))!=-1){
         try{
             switch(opt){
                 case 'a':
@@ -40,24 +40,27 @@ int main(int argc,char **argv){
                 case 'k':
                     k=std::stoul(optarg);
                     break;
+                case 't':
+                    t=std::stoul(optarg);
+                    break;
                 default:
                     throw std::invalid_argument("Invalid option");
             }
         //something was given incorrectly
         }catch(const std::invalid_argument& e){
             std::cerr << "Error: Invalid argument for option -" << static_cast<char>(optopt) << ": " << optarg << std::endl;
-            std::cerr << "Usage: ./projectjj -a <value> -R <value> -L <value> -base <value> -query <value> -ground <value>" << std::endl;
+            std::cerr << "Usage: ./projectjj_filtered -a <value> -R <value> -L <value> -t <value> -base <value> -query <value> -ground <value>" << std::endl;
             return 1;
         }
     }
     // Check if file paths are not empty
     if(base_file_path.empty() || query_file_path.empty() || ground_file_path.empty()){
-        std::cerr << "Usage: ./projectjj -a <value> -R <value> -k <value> -L <value> -base <value> -query <value> -ground <value>" << std::endl;
+        std::cerr << "Usage: ./projectjj_filtered -a <value> -R <value> -k <value> -L <value> -t <value> -base <value> -query <value> -ground <value>" << std::endl;
         return 1;
     }
 
-    //call ann() here to check file type for first project and then call execute
-    ann(base_file_path,query_file_path,ground_file_path,a,k,R,L);
+    //call immediately execute for filtered vamana
+    execute<float>(base_file_path,query_file_path,ground_file_path,a,k,R,L,t);
 
 
     return 0;
