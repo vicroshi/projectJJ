@@ -13,10 +13,17 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
+      - name: Cache APT Packages
+        id: cacheAPT
+        uses: awalsh128/cache-apt-pkgs-action@latest    
+        with: 
+          packages: meson ninja-build libc6-dev
+          version: 1.0
       - name: Set up dependencies
+        if: steps.cacheAPT.cache-hit != true
         run: |
           sudo apt update
-          sudo apt install -y meson ninja-build gcc libc6-dev
+          sudo apt install -y meson ninja-build libc6-dev
       - name: Create build directory
         run: meson setup build
       - name: Build project
