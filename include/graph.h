@@ -354,16 +354,16 @@ struct VamanaIndex {
 
         for(size_t i=0;i<sigma.size();i++){
             std::unordered_set<int> L,V;
-            FilteredGreedySearch(M,db->row(sigma[i]),0,list_size, (*db->vec_filter)[sigma[i]],L,V);    
+            filtered_greedy_search(M,db->row(sigma[i]),0,list_size, (*db->vec_filter)[sigma[i]],L,V);    
             
-            FilteredRobustPrune(sigma[i],V,a,R); 
+            filtered_robust_prune(sigma[i],V,a,R); 
             
             for(const auto& j:graph[sigma[i]]){
 
                 graph[j].insert(sigma[i]);
 
                 if(graph[j].size() > R){
-                    FilteredRobustPrune(j,graph[j],a,R);
+                    filtered_robust_prune(j,graph[j],a,R);
                 }
 
             }
