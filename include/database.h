@@ -27,10 +27,14 @@ struct Matrix{
     std::span<T> vecs;
     std::vector<T>* vec_filter; //filter for each vec
     std::unordered_set<T>* filters_set; //set of all filters
+    
+    //constructor for project 1
     Matrix(size_t dim, size_t vecnum, T* data): dim(dim), vecnum(vecnum), vecs(data, vecnum * dim), vec_filter(nullptr), filters_set(nullptr){}
 
+    //constructor for project 2
     Matrix(size_t dim, size_t vecnum,std::vector<T>* data ,std::vector<T>* vec_filter,  std::unordered_set<T>* filter_set):
             dim(dim), vecnum(vecnum), vecs(data->data(),vecnum*dim), vec_filter(vec_filter), filters_set(filter_set){}
+
     T get(int row, int col){
         return vecs[row*dim+col];
     }
@@ -118,6 +122,40 @@ struct Matrix{
             }
         }
         return medoid_idx;
+    }
+
+                                                        //M keeps the index of the starting point for each filter
+    void find_medoid(const size_t& t,std::unordered_map<float,int>& M,std::unordered_map<float, std::vector<int>>& Pf){
+        static std::random_device rd;                                                                                  //Pf keeps points' index for each filter
+        static std::mt19937 g(rd());
+        size_t tau; //if t > no. of points with a specific filter, i have to use the no. of filters, so tau= t>no. of points ? no. of points : t 
+        std::unordered_map<int, int>T_counter; //T is a counter for each point
+        for(size_t i=0;i<vecnum;i++){//fill hashmap
+            Pf[(*vec_filter)[i]].push_back(i);
+            T_counter[i]=0; //initialize counter to 0 for all points
+        }
+        
+        // for each filter, i shuffle the hash map vectors and i take the first tau
+        for(auto& f:(*filters_set)){
+            size_t no_of_points=Pf[f].size();
+            tau= t>no_of_points ? no_of_points : t;
+            std::shuffle(Pf[f].begin(),Pf[f].end(),g); //shuffle the whole vector
+
+            //find the min,looking upto tau
+            int min = std::numeric_limits<int>::max(),p_star_idx=-1;
+            for(size_t j=0;j<tau;j++){
+                if(T_counter[Pf[f][j]] < min){
+                    min=T_counter[Pf[f][j]];
+                    p_star_idx=Pf[f][j];
+                }
+            }
+
+            //update M and T_counter
+            M[f]=p_star_idx;
+            T_counter[p_star_idx]++;
+
+        }
+
     }
 
 };
