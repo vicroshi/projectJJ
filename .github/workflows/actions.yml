@@ -19,11 +19,6 @@ jobs:
         with: 
           packages: meson ninja-build libc6-dev
           version: 1.0
-      - name: Set up dependencies
-        if: steps.cacheAPT.cache-hit != true
-        run: |
-          sudo apt update
-          sudo apt install -y meson ninja-build libc6-dev
       - name: Create build directory
         run: meson setup build
       - name: Build project
