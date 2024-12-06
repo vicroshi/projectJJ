@@ -16,6 +16,7 @@
 #include <limits>
 #include <immintrin.h>
 #include <cstddef>
+#include <unordered_map>
 #include <set>
 
 template <typename T>
