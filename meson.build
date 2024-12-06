@@ -23,7 +23,7 @@ includes = include_directories('include')
 subdir('src')
 executable('projectJJ', ['main.cpp'], include_directories : includes, link_with : vamana_lib)
 
-# executable('projectJJ_filtered', ['main_filtered.cpp'], include_directories : includes, link_with : vamana_lib)
+executable('projectJJ_filtered', ['main_filtered.cpp'], include_directories : includes, link_with : vamana_lib)
 
 test_src = ['tests/tests_all.cpp',
             'tests/test_matrix.cpp',

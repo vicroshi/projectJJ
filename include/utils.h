@@ -307,7 +307,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
     // actual indexing
     auto indexing_start = std::chrono::high_resolution_clock::now();
-    v_m.filtered_greedy_search(Medoid, a, List_size, R);
+    v_m.filtered_vamana_indexing(Medoid, a, List_size, R);
     auto indexing_end = std::chrono::high_resolution_clock::now();
     auto indexing_duration = std::chrono::duration_cast<std::chrono::microseconds>(indexing_end - indexing_start).count();
     std::cout << ">Time taken for Indexing: " << indexing_duration / 1e6 << " sec(s)." << std::endl;
