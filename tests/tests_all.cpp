@@ -25,6 +25,7 @@ extern void test_vamana_index();
  */
 //filtered tests
 extern void test_filtered_greedy();
+extern void test_filtered_prune();
 /*
  *
  *
@@ -59,5 +60,6 @@ TEST_LIST = {
     {"vamana_index",test_vamana_index},
     {"recall",test_recall},
     {"filtered_greedy",test_filtered_greedy},
+    {"filtered_prune",test_filtered_prune},
     {nullptr, nullptr}
 };

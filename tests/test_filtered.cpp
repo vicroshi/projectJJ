@@ -47,3 +47,7 @@ void test_filtered_greedy(){
 
 
 }
+
+void test_filtered_prune() {
+
+}
