@@ -21,7 +21,7 @@
 #include <vector>
 #include <unordered_map>
 #include <random>
-
+#include <algorithm>
 template <typename T>
 struct Matrix{
     size_t dim;
@@ -147,6 +147,7 @@ struct Matrix{
             for(size_t j=0;j<tau;j++){
                 if(T_counter[Pf[f][j]] < min){
                     min=T_counter[Pf[f][j]];
+
                     p_star_idx=Pf[f][j];
                 }
             }
