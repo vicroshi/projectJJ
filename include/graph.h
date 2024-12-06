@@ -20,6 +20,7 @@
 #include "database.h"
 #include <iterator> // for std::back_inserter
 #include <unordered_map>
+#include <random>
 
 
 template <typename T>
@@ -339,6 +340,39 @@ struct VamanaIndex {
             }
         }
     }
+
+
+    void filtered_vamana_indexing(std::unordered_map<T,int>& M, const float& a,const size_t& list_size, const size_t& R){
+        std::random_device rd;
+        std::mt19937 g(rd());
+        
+        //random permutation
+        std::vector<int>sigma;
+        for(size_t i=0;i<db->vecnum;i++) sigma.push_back(i);
+        // std::cout<<"vecnum:"<<db->vecnum<<"\n";
+        std::shuffle(sigma.begin(), sigma.end(), g);
+
+        for(size_t i=0;i<sigma.size();i++){
+            std::unordered_set<int> L,V;
+            FilteredGreedySearch(M,db->row(sigma[i]),0,list_size, (*db->vec_filter)[sigma[i]],L,V);    
+            
+            FilteredRobustPrune(sigma[i],V,a,R); 
+            
+            for(const auto& j:graph[sigma[i]]){
+
+                graph[j].insert(sigma[i]);
+
+                if(graph[j].size() > R){
+                    FilteredRobustPrune(j,graph[j],a,R);
+                }
+
+            }
+                    
+        }
+    
+    }
+
+
 };
 
 
