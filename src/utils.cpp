@@ -18,24 +18,17 @@ std::string getFileExtension(const std::string& filePath){
     return filePath.substr(dotPosition + 1);
 }
 
-void ann(){
-    std::string base_file_path, query_file_path,ground_file_path;
-    std::cout << "base file path: ";
-    std::cin >> base_file_path;
-    std::cout << "query file path: ";
-    std::cin >> query_file_path;
-    std::cout<< "ground file path: ";
-    std::cin >> ground_file_path;
+void ann(const std::string& base_file_path, const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const size_t& List_size){
     //makes sense to first check if the ground_truth is the right type of file
     if(getFileExtension(ground_file_path)=="ivecs"){
         //check for file type to call the execute with proper <type>
         //if user gives a .fvecs base file and a .ivecs as query, should exit
         std::string type=getFileExtension(base_file_path);
         if(type==getFileExtension(query_file_path) && type=="fvecs"){
-            execute<float>(base_file_path,query_file_path,ground_file_path);
+            execute<float>(base_file_path,query_file_path,ground_file_path,a,k,R,List_size);
         }
         else if(type==getFileExtension(query_file_path) && type=="ivecs"){
-            execute<int>(base_file_path,query_file_path,ground_file_path);
+            execute<int>(base_file_path,query_file_path,ground_file_path,a,k,R,List_size);
         }
         //any other case: they're incompatible
         else {

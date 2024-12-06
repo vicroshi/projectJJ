@@ -29,14 +29,13 @@ struct Matrix{
     std::span<T> vecs;
     std::vector<T>* vec_filter; //filter for each vec
     std::unordered_set<T>* filters_set; //set of all filters
-    
-    //constructor for project 1
-    Matrix(size_t dim, size_t vecnum, T* data): dim(dim), vecnum(vecnum), vecs(data, vecnum * dim), vec_filter(nullptr), filters_set(nullptr){}
 
-    //constructor for project 2
+    //project 1 constructor
+    Matrix(size_t dim, size_t vecnum, T* data): dim(dim), vecnum(vecnum), vecs(data, vecnum * dim), vec_filter(nullptr), filters_set(nullptr){}
+    //project 2 constructor
     Matrix(size_t dim, size_t vecnum,std::vector<T>* data ,std::vector<T>* vec_filter,  std::unordered_set<T>* filter_set):
             dim(dim), vecnum(vecnum), vecs(data->data(),vecnum*dim), vec_filter(vec_filter), filters_set(filter_set){}
-
+    
     T get(int row, int col){
         return vecs[row*dim+col];
     }
