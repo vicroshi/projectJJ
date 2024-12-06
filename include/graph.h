@@ -208,7 +208,7 @@ struct VamanaIndex {
             }
         }
     }
-    void filtered_greedy_search(std::unordered_map<float,int>& S, const std::span<T>& query, const size_t& k, const size_t& list_size,const float& Fq, std::unordered_set<int>& L, std::unordered_set<int>& V) {
+    void filtered_greedy_search(std::unordered_map<T,int>& S, const std::span<T>& query, const size_t& k, const size_t& list_size,const T& Fq, std::unordered_set<int>& L, std::unordered_set<int>& V) {
         L.clear();
         V.clear();
         if(Fq==-1.0f){ //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter

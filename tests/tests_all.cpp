@@ -23,6 +23,13 @@ extern void test_vamana_index();
  *
  *
  */
+//filtered tests
+extern void test_filtered_greedy();
+/*
+ *
+ *
+ *
+ */
 
 //utils tests
 extern void test_fileType();
@@ -51,5 +58,6 @@ TEST_LIST = {
     {"prune",test_prune},
     {"vamana_index",test_vamana_index},
     {"recall",test_recall},
+    {"filtered_greedy",test_filtered_greedy},
     {nullptr, nullptr}
 };
