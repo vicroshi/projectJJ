@@ -1,9 +1,6 @@
 name: CI for Meson C Project
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
     branches:
       - master
