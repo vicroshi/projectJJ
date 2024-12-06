@@ -12,6 +12,8 @@
 #include <set>
 #include <chrono> //for timing
 #include <iterator> // for std::back_inserter
+#include <fstream>
+#include "assert.h"
 
 
 void ann(const std::string& , const std::string& ,const std::string& ,const float& , const size_t& ,const size_t& ,const size_t& );
@@ -155,6 +157,81 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
 }
 
+//functions for project 2
+
+
+//from sigmod repo
+template <typename T>
+void ReadBin(const std::string &file_path,const int num_dimensions,std::vector<std::vector<T>> &data, uint32_t& N) {
+    std::cout << "Reading Data: " << file_path << std::endl;
+    std::ifstream ifs;
+    ifs.open(file_path, std::ios::binary);
+    assert(ifs.is_open());
+    // uint32_t N;  // num of points
+    ifs.read((char *)&N, sizeof(uint32_t));
+    data.resize(N);
+    std::cout << "# of points: " << N << std::endl;
+    std::vector<float> buff(num_dimensions);
+    int counter = 0;
+    while (ifs.read((char *)buff.data(), num_dimensions * sizeof(float))) {
+        std::vector<float> row(num_dimensions);
+        for (int d = 0; d < num_dimensions; d++) {
+        row[d] = static_cast<float>(buff[d]);
+        }
+        data[counter++] = std::move(row);
+    }
+    ifs.close();
+    std::cout << "Finish Reading Data" << std::endl;
+}
+
+// moves the first element other vectors and flattens the 2-D data vector.
+template <typename T>
+void extract_base_vector_info(std::vector<std::vector<T>>& data,std::vector<T>& point_filter,std::unordered_set<T>& filters_set,std::vector<T>& flattened_data){
+    flattened_data.reserve(data.size()*100); //100 dimensions for each vector * num of vectors
+    for(auto& point:data){
+        point_filter.push_back(point[0]);    //move the first element to filter
+        filters_set.insert(point[0]); //insert filter to the set. if it already is in the set, its not re-entered
+        flattened_data.insert(flattened_data.end(), point.begin() + 2, point.end());  //skip the first two elements and insert the rest
+    }
+    data.clear(); //delete the vector since its not needed
+}
+
+//keeps the first two query types and flattens the 2-D vector.
+template <typename T>
+void extract_query_vector_info(std::vector<std::vector<T>>& data,std::vector<T>& filter,std::vector<int>&query_type,std::vector<T>& flattened_data,size_t& num_filtered_points,size_t& num_unfiltered_points){
+    flattened_data.reserve(data.size()*100); //100 dimensions for each vector * num of vectors
+    for(auto& point:data){
+            if(static_cast<int>(point[0])==1) num_filtered_points++; //count how many filtered points there are for recall
+            if(static_cast<int>(point[0])==0) num_unfiltered_points++; //count how many filtered points there are for recall
+
+            filter.push_back(point[1]); //move filter value
+            query_type.push_back(static_cast<int>(point[0])); //move query type
+            flattened_data.insert(flattened_data.end(), point.begin() + 4, point.end());  //skip the first 4 elements and insert the rest
+        
+    }
+    data.clear();
+}
+
+// while trying to get the groundtruth with brute force, i return -1 as indexes for any query nodes 
+// with query type 2 or 3 and if a query node doesn't have 100 neighbors, i fill the vector with negative values
+// for readBin to work
+template <typename T>
+void RemoveNegativeElements(std::vector<std::vector<T>> &data,std::vector<std::vector<int>> &result) {
+    result.clear();
+    result.reserve(data.size());
+    for (auto &row : data) {
+            std::vector<int> newRow;
+            newRow.reserve(row.size());
+            for (auto &value : row) {
+                if (value >= 0) {
+                    newRow.push_back(static_cast<int>(value));
+                }
+            }
+            result.push_back(std::move(newRow));
+    }
+}
+
+
 //overloading execute for second project
 template <typename T>
 void execute(const std::string& base_file_path,const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const size_t& List_size,const size_t& t){
@@ -220,8 +297,8 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
     // calculate medoid once and pass it to functions later
     auto medoid_start = std::chrono::high_resolution_clock::now();
-    std::unordered_map<float, int> Medoid;          // st(f)
-    std::unordered_map<float, std::vector<int>> Pf; // points for each filter
+    std::unordered_map<T, int> Medoid;          // st(f)
+    std::unordered_map<T, std::vector<int>> Pf; // points for each filter
     v_m.db->FindMedoid(t, Medoid, Pf);
 
     auto medoid_end = std::chrono::high_resolution_clock::now();
@@ -320,3 +397,7 @@ T* read_from_file(const std::string& name, size_t* dim, size_t* vecnum) {
     }
     return p;
 }
+
+
+
+ 

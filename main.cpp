@@ -39,6 +39,7 @@ int main(int argc,char **argv){
                     break;
                 case 'k':
                     k=std::stoul(optarg);
+                    break;
                 default:
                     throw std::invalid_argument("Invalid option");
             }
