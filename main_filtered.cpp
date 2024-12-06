@@ -16,7 +16,7 @@ int main(int argc,char **argv){
     float a=0.0;
     size_t R=0,L=0,k=0,t=0;
     std::string base_file_path,query_file_path,ground_file_path;
-    while((opt = getopt(argc, argv, "a:R:L:b:q:g:t:"))!=-1){
+    while((opt = getopt(argc, argv, "a:R:L:k:b:q:g:t:"))!=-1){
         try{
             switch(opt){
                 case 'a':

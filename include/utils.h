@@ -281,7 +281,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
     // parameters input
     // size_t k, List_size, R, t;
-    size_t L_small, R_small, R_stitched;
+    // size_t L_small, R_small, R_stitched;
     // float a;
     
 
