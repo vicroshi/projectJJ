@@ -127,7 +127,7 @@ struct Matrix{
     }
 
                                                         //M keeps the index of the starting point for each filter
-    void find_medoid(const size_t& t,std::unordered_map<T,int>& M,std::unordered_map<float, std::vector<int>>& Pf){
+    void find_medoid(const size_t& t,std::unordered_map<T,int>& M,std::unordered_map<T, std::vector<int>>& Pf){
         std::random_device rd;                                                                                  //Pf keeps points' index for each filter
         std::mt19937 g(rd());
         size_t tau; //if t > no. of points with a specific filter, i have to use the no. of filters, so tau= t>no. of points ? no. of points : t 
