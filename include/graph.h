@@ -226,12 +226,16 @@ struct VamanaIndex {
             }
         }
         //L-V
-        std::vector<int> vecL(L.begin(),L.end());
-        std::vector<int> vecV(V.begin(), V.end());
-        std::sort(vecL.begin(), vecL.end());
-        std::sort(vecV.begin(), vecV.end());
-        std::vector<int> difference;
-        std::set_difference(vecL.begin(), vecL.end(), vecV.begin(), vecV.end(), std::back_inserter(difference));
+        // std::vector<int> vecL(L.begin(),L.end());
+        // std::vector<int> vecV(V.begin(), V.end());
+        // std::sort(vecL.begin(), vecL.end());
+        // std::sort(vecV.begin(), vecV.end());
+        // std::vector<int> difference;
+        // std::set_difference(vecL.begin(), vecL.end(), vecV.begin(), vecV.end(), std::back_inserter(difference));
+        
+        //at first iteration only elements of L will be used, since V is empty, L-V = L
+        std::vector<int> difference(L.begin(),L.end()); 
+
         while( !(difference.empty()) ){
             //p*
             int p_star_idx=-1;
@@ -253,13 +257,7 @@ struct VamanaIndex {
 
             std::unordered_set<int> temp; //keeping N'out(p*)
             for(auto& p: graph[p_star_idx]){
-                // if(q)                    std::cout<<"--\n";
 
-                // if(q){
-                //     std::cout<<"Fp':"<<(*db->vec_filter)[p]<<", Fq:"<<Fq<<"\n";
-
-
-                // }
                 if(((*db->vec_filter)[p]==Fq || Fq==-1.0f ) && (V.count(p)==0)){
                     temp.insert(p); //insert it
                 }
@@ -278,30 +276,12 @@ struct VamanaIndex {
             std::sort(vecL.begin(),vecL.end());
             std::sort(vecV.begin(),vecV.end());
             std::set_difference(vecL.begin(), vecL.end(),vecV.begin(),vecV.end(), std::back_inserter(difference));
-                            // if(q)                    std::cout<<"--\n";
 
-            // if(q){
-            //     std::cout<<"VecV:\n";
-            //     for(auto &i: vecV){
-            //         std::cout<<i<<" ";
-
-            //     }
-            //     std::cout<<std::endl;
-            //     std::cout<<"VecL:\n";
-            //     for(auto &i: vecL){
-            //         std::cout<<i<<" ";
-
-            //     }
-            //     std::cout<<std::endl;
-
-            //     std::cout<<"---\n";
-            // }
 
         }
         //return k closest points from L
         keep_k_closest(L,k,query);
-        // std::cout<<"L.size before return:"<<L.size();
-        // std::cout<<"\n----------\n";
+
     }
 };
 
