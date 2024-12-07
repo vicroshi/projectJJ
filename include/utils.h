@@ -207,13 +207,13 @@ template <typename T>
 void extract_query_vector_info(std::vector<std::vector<T>>& data,std::vector<T>& filter,std::vector<int>&query_type,std::vector<T>& flattened_data,size_t& num_filtered_points,size_t& num_unfiltered_points){
     flattened_data.reserve(data.size()*100); //100 dimensions for each vector * num of vectors
     for(auto& point:data){
+        if(point[0]<2.0f){ //only keep the first two query types
             if(static_cast<int>(point[0])==1) num_filtered_points++; //count how many filtered points there are for recall
             if(static_cast<int>(point[0])==0) num_unfiltered_points++; //count how many filtered points there are for recall
-
             filter.push_back(point[1]); //move filter value
             query_type.push_back(static_cast<int>(point[0])); //move query type
             flattened_data.insert(flattened_data.end(), point.begin() + 4, point.end());  //skip the first 4 elements and insert the rest
-
+        }
     }
     data.clear();
 }
