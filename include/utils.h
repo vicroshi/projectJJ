@@ -361,7 +361,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << ">Time taken for Indexing: " << std::chrono::duration_cast<std::chrono::microseconds>(end-start).count() / 1e6 << " sec(s)." << std::endl;
     double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
-    for (auto i = 0; i < query_m.vecnum; i++) {
+    for (size_t i = 0; i < query_m.vecnum; i++) {
         if (query_type[i] < 2.0f) {
             std::unordered_set<int> L, V;
             std::span<T> query_span(query_m.row(i));

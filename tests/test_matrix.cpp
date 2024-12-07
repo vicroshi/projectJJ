@@ -104,3 +104,37 @@ void test_medoid() {
 
 
 }
+
+void test_find_medoid(){
+    float p_f[8][4] = {
+        {1.0f, 2.0f, 3.0f, 4.0f},
+        {4.0f, 5.0f, 6.0f, 7.0f},
+        {1.0f, 1.0f, 1.0f, 1.0f},
+        {2.0f, 3.0f, 5.0f, 7.0f},
+        {8.0f, 6.0f, 7.0f, 5.0f},
+        {3.0f, 3.0f, 3.0f, 3.0f},
+        {6.0f, 6.0f, 6.0f, 6.0f},
+        {5.0f, 8.0f, 5.0f, 3.0f}
+    };
+
+    std::vector<float> vecs(&p_f[0][0], &p_f[0][0] + 8*4);
+    std::vector<float> vecs_filters ={1.0f,2.0f,3.0f,1.0f,2.0f,3.0f,1.0f,2.0f};
+    std::unordered_set<float> filters = {1.0f,2.0f,3.0f};
+    Matrix<float> f_m(4,8,&vecs, &vecs_filters, &filters);
+    size_t t=5;
+
+    std::unordered_map<float, int> Medoid;          
+    std::unordered_map<float, std::vector<int>> Pf;
+    f_m.find_medoid(t, Medoid, Pf);
+    for(auto &f: filters){
+        auto it = Medoid.find(f);
+        TEST_ASSERT(it != Medoid.end()); //test that filter has been successfully been inserted
+    }
+
+    //test that Pf has the right amount of points
+    TEST_ASSERT(Pf[1.0f].size()==3); 
+    TEST_ASSERT(Pf[2.0f].size()==3); 
+    TEST_ASSERT(Pf[3.0f].size()==2); 
+
+
+}

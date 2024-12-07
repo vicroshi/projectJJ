@@ -46,7 +46,7 @@ extern void test_recall();
 extern void test_constructor();
 extern void test_medoid();
 extern void test_euclid();
-
+extern void test_find_medoid();
 
 
 TEST_LIST = {
@@ -63,5 +63,6 @@ TEST_LIST = {
     {"recall",test_recall},
     {"filtered_greedy",test_filtered_greedy},
     {"filtered_prune",test_filtered_prune},
+    {"find_medoid",test_find_medoid},
     {nullptr, nullptr}
 };
