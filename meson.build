@@ -38,6 +38,6 @@ e = executable('unit_tests',
                 link_with : vamana_lib
                 )
 
-#dummy_exe = executable('dummy', 'datasets/dummy/dummy_create.cpp')
+#dummy_exe = executable('test', 'datasets/test/dummy_create.cpp')
 
 test('unit_tests',e)

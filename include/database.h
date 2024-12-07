@@ -106,13 +106,20 @@ struct Matrix{
     //     return dist;
     // }
 
-    int medoid_naive() {
+    int medoid_naive(const std::vector<int>& Pf = {}) {
         double dist;
         double min_dist = std::numeric_limits<double>::max();
         int medoid_idx = 0;
-        for (size_t i = 0; i < vecnum; i++) {
+        std::vector<int> vec;
+        if (Pf.empty()) {
+            vec.resize(vecnum);
+            std::iota(vec.begin(), vec.end(), 0);
+        } else {
+            vec = Pf;
+        }
+        for (auto i : vec) {
             dist = 0;
-            for (size_t j = 0; j < vecnum; j++) {
+            for (auto j : vec) {
                 if (i != j) {
                     dist += sq_euclid(row(i),row(j),row(i).size());
                 }

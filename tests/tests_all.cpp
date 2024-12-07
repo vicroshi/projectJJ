@@ -18,6 +18,7 @@ extern void test_greedy();
 extern void test_k_closest();
 extern void test_prune();
 extern void test_vamana_index();
+extern void test_init();
 /*
  *
  *
@@ -52,6 +53,7 @@ TEST_LIST = {
     {"matrix_constructor", test_constructor},
     {"euclid", test_euclid},
     {"medoid_naive", test_medoid},
+    {"init",test_init},
     {"greedy_search",test_greedy},
     {"file_Type",test_fileType},
     {"file_read",test_read},
