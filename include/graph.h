@@ -28,7 +28,7 @@ struct VamanaIndex {
     std::vector<std::unordered_set<int>> graph;
     Matrix<T>* db;
     int vecnum;
-    
+    std::unordered_map<T,std::vector<int>> Pf;
     //constructor used for main
     VamanaIndex(size_t deg, Matrix<T>* db):db(db){
         this->vecnum = db->vecnum;
@@ -184,10 +184,15 @@ struct VamanaIndex {
         }
     }
 
-    void vamana_indexing(const int& medoid,float a,int list_size,size_t R){
+    void vamana_indexing(const int& medoid,float a,int list_size,size_t R, std::vector<int> P = {}){
         //create the permuation
         std::vector<int>sigma;
-        for(size_t i=0;i<db->vecnum;i++) sigma.push_back(i);
+        if (P.empty()) {
+            for(size_t i=0;i<db->vecnum;i++) sigma.push_back(i);
+        }
+        else{
+            sigma=P;
+        }
         std::random_device rd;
         std::mt19937 g(rd());
         // Shuffle the vector to get a random permutation
@@ -372,6 +377,15 @@ struct VamanaIndex {
     
     }
 
+    void stitched_vamana_indexing() {
+        graph.reserve(db->vecnum);
+        std::unordered_set<T,VamanaIndex> Gf;
+        Gf.reserve(*db->filters_set->size());
+        for (auto f: *db->filters_set) {
+            Gf[f] = VamanaIndex(db);
+
+        }
+    }
 
 };
 
