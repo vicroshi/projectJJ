@@ -88,7 +88,7 @@ void test_filtered_prune() {
     V_F.print_graph();
     
     //graph must be of at most R-out degree
-    for(size_t i=0;i<V_F.graph.size();i++){
+    for(size_t i=0;i<V_F.vecnum;i++){
         TEST_ASSERT(V_F.graph[i].size()<=R);
     }
 

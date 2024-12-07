@@ -85,7 +85,7 @@ struct VamanaIndex {
     }
 
     void print_graph(){
-        int i=0;
+        // int i=0;
         for (auto &i : graph) {
             std::cout<<"for node "<<std::setw(3)<< i.first + 1<<": ";
             for (auto &j : i.second) {

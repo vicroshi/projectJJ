@@ -402,7 +402,7 @@ void test_vamana_index(){
     {15, 1, 5, 10},
     {8, 12, 2, 4}
     };
-    int R=7;
+    size_t R=7;
     float a=1.1;
     size_t list_size=10;
     std::set<int>closest={4, 10, 6, 7, 0};
@@ -418,7 +418,7 @@ void test_vamana_index(){
     std::cout<<"after indexing:\n";
     V.print_graph();
     //graph must be of at most R-out degree
-    for(int i=0;i<V.vecnum;i++){
+    for(size_t i=0;i<V.vecnum;i++){
         TEST_ASSERT(V.graph[i].size()<=7);
     }
 
@@ -453,7 +453,7 @@ void test_vamana_index(){
     std::cout<<"after indexing:\n";
     V_F.print_graph();
     //graph must be of at most R-out degree
-    for(int i=0;i<V_F.vecnum;i++){
+    for(size_t i=0;i<V_F.vecnum;i++){
         TEST_ASSERT(V_F.graph[i].size()<=R);
     }
 
