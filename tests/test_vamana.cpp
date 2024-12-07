@@ -454,7 +454,7 @@ void test_vamana_index(){
     V_F.print_graph();
     //graph must be of at most R-out degree
     for(int i=0;i<V_F.vecnum;i++){
-        TEST_ASSERT(V_F.graph[i].size()<=7);
+        TEST_ASSERT(V_F.graph[i].size()<=R);
     }
 
 }
