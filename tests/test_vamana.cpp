@@ -7,6 +7,34 @@
 #include "database.h"
 #include "graph.h"
 #include <set>
+
+void test_init() {
+    int points[6][4] = {
+        {3, 7, 12, 8},
+        {10, 2, 6, 14},
+        {5, 15, 1, 9},
+        {0, 13, 4, 11},
+        {7, 3, 10, 2},
+        {12, 5, 8, 6}
+    };
+    //distances are squared here!
+    // Point [0]: 78
+    // Point [1]: 118
+    // Point [2]: 202
+    // Point [3]: 132
+    // Point [4]: 98
+    // Point [5]: 143
+    //in order:{0,4,1,3,5,2}
+
+    Matrix<int> i_m(4,6,&points[0][0]);
+    VamanaIndex<int> V(&i_m);
+    V.init_graph(3);
+    TEST_ASSERT(V.graph.size()==6);
+    for (auto& kv : V.graph) {
+        TEST_ASSERT(kv.second.size()==3);
+    }
+}
+
 void test_greedy(){
     std::cout<<std::endl;
     int points[6][4] = {

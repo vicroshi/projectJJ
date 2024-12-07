@@ -1,3 +1,5 @@
+#ifndef UTILS_H
+#define UTILS_H
 #include <iostream>
 #include <unistd.h>
 #include <string>
@@ -62,7 +64,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         std::cout<<"Invalid input for R. Please submit a positive integer in range [1,"<<base_vecs_num-1<<"]\n";
         exit(1);
     }
-    
+
 
     //times for each action
 
@@ -72,7 +74,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     auto init_end = std::chrono::high_resolution_clock::now();
     auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
     std::cout << ">Time taken to initialize "<<R<<"-regular Graph: " << init_duration / 1e6 << " sec(s)." << std::endl;
-    
+
     //calculate medoid once and pass it to functions later
     auto medoid_start = std::chrono::high_resolution_clock::now();
     int medoid=v_m.db->medoid_naive();
@@ -110,7 +112,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         //check if -1 was given at start
         if(query_point_index==-1)
             break;
-        
+
         //inner loop to validate input
         while(std::cin.fail() || query_point_index<0 || (size_t) query_point_index>=query_vecs_num){
             std::cin.clear();  // clear error flag
@@ -120,12 +122,12 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
             //check again if the user entered -1 to exit
             if(query_point_index ==-1)
                 break;
-            
+
         }
         //if -1 was entered during inner validation loop,break out of the outer loop as well
         if(query_point_index==-1)
             break;
-        
+
 
         //run greedy search to return the k-closest of requested query node
         std::span<T> query_span(query_m.row(query_point_index));
@@ -141,7 +143,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         std::cout<<"recall:"<<recall_k(k,vecL,G)<<std::endl;
     }
 
-    //free mmaps, no leaks whatsoever?? 
+    //free mmaps, no leaks whatsoever??
     size_t mapped_size = (base_dim + 1) * base_vecs_num * 4;
     if (munmap(base, mapped_size) == -1) {
         std::cerr << "Error unmapping the memory" << std::endl;
@@ -211,12 +213,12 @@ void extract_query_vector_info(std::vector<std::vector<T>>& data,std::vector<T>&
             filter.push_back(point[1]); //move filter value
             query_type.push_back(static_cast<int>(point[0])); //move query type
             flattened_data.insert(flattened_data.end(), point.begin() + 4, point.end());  //skip the first 4 elements and insert the rest
-        
+
     }
     data.clear();
 }
 
-// while trying to get the groundtruth with brute force, i return -1 as indexes for any query nodes 
+// while trying to get the groundtruth with brute force, i return -1 as indexes for any query nodes
 // with query type 2 or 3 and if a query node doesn't have 100 neighbors, i fill the vector with negative values
 // for readBin to work
 template <typename T>
@@ -276,20 +278,20 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     // database init                                                        //no need to keep all filters used in queries, we have them from DB.
     Matrix<T> query_m(static_cast<size_t>(100), query_no_of_points, &flat_query, &query_filter, NULL);
 
-    
+
     // groundtruth read
     uint32_t ground_no_of_points;
     std::vector<std::vector<float>> ground_data_float;
     std::vector<std::vector<int>> ground_data;
     ReadBin(ground_file_path, 100, ground_data_float, ground_no_of_points);
     RemoveNegativeElements(ground_data_float,ground_data); // format it as needed because binary is read with readBin and dimensions must be constant for each vector
-    
+
 
     // parameters input
     // size_t k, List_size, R, t;
     // size_t L_small, R_small, R_stitched;
     // float a;
-    
+
 
     // times for each action
 
@@ -300,7 +302,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     auto init_end = std::chrono::high_resolution_clock::now();
     auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
     std::cout << ">Time taken to initialize Graph: " << init_duration / 1e6 << " sec(s)." << std::endl;
-    
+
 
     // calculate medoid once and pass it to functions later
     auto medoid_start = std::chrono::high_resolution_clock::now();
@@ -323,55 +325,74 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
     for (uint32_t i = 0; i < query_no_of_points; i++){
         if(query_type[i]<2.0f){
-            // std::cout<<"for i:"<<i<<",with filter:"<<(*query_m.vec_filter)[i] <<std::endl;
             std::unordered_set<int> L, V;
             std::span<T> query_span(query_m.row(i));
             v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
             std::vector<int> L_vec(L.begin(), L.end());
-                std::cout<<"==============================\n"<<"for i:"<<i<<" with filter:"<<(*query_m.vec_filter)[i]<< ", L.size():"<<L.size()<<", ground.size():"<<ground_data[i].size()<<"\n";
-                // std::cout<<"L:";
-                // for(auto j:L_vec){
-                //     std::cout<<j<<" ";
-                // }
-                // std::cout<<"\n";
-                // std::cout<<"G:";
-                // for(auto j:ground_data[i]){
-                //     std::cout<<j<<" ";
-                // }
-                std::cout<<"\n";
-                // size_t common_elements = 0;
-                // for (const auto &elem : ground_data[i]) {
-                //     if (std::find(L_vec.begin(), L_vec.end(), elem) != L_vec.end()) {
-                //         common_elements++;
-                //     }
-                
-                //     if(common_elements != ground_data[i].size()) std::cout<<"!NOT identical\n";
-                //     std::cout << "Number of common elements: " << common_elements <<"\n";
-                // }
+//                std::cout<<"==============================\n"<<"for i:"<<i<<" with filter:"<<(*query_m.vec_filter)[i]<< ", L.size():"<<L.size()<<", ground.size():"<<ground_data[i].size()<<"\n";
+//                std::cout<<"\n";
                 size_t n = std::min(k, ground_data[i].size());
                 std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
                 if(query_type[i]==1.0f){
-                    auto recall=recall_k(n,L_vec,G_vec);
-                    std::cout << std::fixed << std::setprecision(2);
-                    std::cout<<"--recall:"<<recall<<std::endl;
+                    auto recall= recall_k(n,L_vec,G_vec);
                     sum_filtered+=recall;
                 }
                 else if(query_type[i]==0.0f){
                     auto recall=recall_k(n,L_vec,G_vec);
-                    std::cout << std::fixed << std::setprecision(2);
-                    std::cout<<"--recall:"<<recall<<std::endl;
+//                    std::cout << std::fixed << std::setprecision(2);
+//                    std::cout<<"--recall:"<<recall<<std::endl;
                     sum_unfiltered+=recall;
                 }
 
-                std::cout<<"=============================="<< std::endl<<std::endl;
+//                std::cout<<"=============================="<< std::endl<<std::endl;
         }
     }
-    std::cout << "sum_filtered: " << sum_filtered << ", num_filtered_points: " << num_filtered_points << std::endl;
+//    std::cout << "sum_filtered: " << sum_filtered << ", num_filtered_points: " << num_filtered_points << std::endl;
     std::cout << std::fixed << std::setprecision(2);
     std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
-    std::cout << "sum_unfiltered: " << sum_unfiltered << ", num_unfiltered_points: " << num_unfiltered_points << std::endl;
+//    std::cout << "sum_unfiltered: " << sum_unfiltered << ", num_unfiltered_points: " << num_unfiltered_points << std::endl;
     std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
     std::cout<<"\n\n--END--";
+    VamanaIndex<T> v_stitched(&base_m);
+    v_stitched.Pf = Pff;
+    std::cout << "\nSTITCHED" << std::endl;
+    auto start = std::chrono::high_resolution_clock::now();
+    v_stitched.stitched_vamana_indexing(a, 5, R, 10);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << ">Time taken for Indexing: " << std::chrono::duration_cast<std::chrono::microseconds>(end-start).count() / 1e6 << " sec(s)." << std::endl;
+    double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
+    for (auto i = 0; i < query_m.vecnum; i++) {
+        if (query_type[i] < 2.0f) {
+            std::unordered_set<int> L, V;
+            std::span<T> query_span(query_m.row(i));
+            v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+            std::vector<int> L_vec(L.begin(), L.end());
+//            std::cout << "==============================\n" << "for i:" << i << " with filter:"
+//                      << (*query_m.vec_filter)[i] << ", L.size():" << L.size() << ", ground.size():" << ground_data[i].size()
+//                      << "\n";
+//            std::cout << "\n";
+            size_t n = std::min(k, ground_data[i].size());
+            std::vector<int> G_vec(ground_data[i].begin(), ground_data[i].begin() + n);
+            if (query_type[i] == 1.0f) {
+                auto recall = recall_k(n, L_vec, G_vec);
+//                std::cout << std::fixed << std::setprecision(2);
+//                std::cout << "--recall:" << recall << std::endl;
+                st_sum_filtered += recall;
+            } else if (query_type[i] == 0.0f) {
+                auto recall = recall_k(n, L_vec, G_vec);
+//                std::cout << std::fixed << std::setprecision(2);
+//                std::cout << "--recall:" << recall << std::endl;
+                st_sum_unfiltered += recall;
+            }
+
+//            std::cout << "==============================" << std::endl << std::endl;
+        }
+    }
+//    std::cout << "st_sum_filtered: " << st_sum_filtered << ", num_filtered_points: " << num_filtered_points << std::endl;
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "TOTAL recall for filtered: " << st_sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
+    std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
+
 
 }
 
@@ -406,5 +427,4 @@ T* read_from_file(const std::string& name, size_t* dim, size_t* vecnum) {
 }
 
 
-
- 
+#endif // UTILS_H

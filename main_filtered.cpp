@@ -5,10 +5,6 @@
 #include <cstring>
 #include <filesystem>
 #include <random>
-#include <sys/stat.h>
-#include <iomanip> // Include iomanip for setprecision
-#include "graph.h"
-#include "database.h"
 #include "utils.h"
 
 int main(int argc,char **argv){
@@ -49,7 +45,7 @@ int main(int argc,char **argv){
         //something was given incorrectly
         }catch(const std::invalid_argument& e){
             std::cerr << "Error: Invalid argument for option -" << static_cast<char>(optopt) << ": " << optarg << std::endl;
-            std::cerr << "Usage: ./projectjj_filtered -a <value> -R <value> -L <value> -t <value> -base <value> -query <value> -ground <value>" << std::endl;
+            std::cerr << "Usage: ./projectJJ_filtered -a <value> -R <value> -L <value> -t <value> -b <value> -q <value> -g <value>" << std::endl;
             return 1;
         }
     }

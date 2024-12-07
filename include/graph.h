@@ -25,44 +25,71 @@
 
 template <typename T>
 struct VamanaIndex {
-    std::vector<std::unordered_set<int>> graph;
+//    std::vector<std::unordered_set<int>> graph;
+    std::unordered_map<int,std::unordered_set<int>> graph;
     Matrix<T>* db;
-    int vecnum;
+    size_t vecnum;
+    size_t deg;
     std::unordered_map<T,std::vector<int>> Pf;
+    VamanaIndex() : db(nullptr), vecnum(0), deg(0) {}
+
     //constructor used for main
     VamanaIndex(size_t deg, Matrix<T>* db):db(db){
         this->vecnum = db->vecnum;
         init_graph(deg);
     }
+
+    //gia stitched
+    VamanaIndex(Matrix<T>*db, size_t deg, size_t vecnum):db(db),vecnum(vecnum),deg(deg){
+    }
     //constructor for testing where we need to have a fixed graph each time. we add neighbors manually
     VamanaIndex(Matrix<T>*db):db(db){
-        graph.resize(db->vecnum);
-    } 
+//        graph.resize(db->vecnum);
+        this->vecnum = db->vecnum;
+        graph.reserve(db->vecnum);
+    }
     
-    void init_graph(const size_t& r){
-        graph.resize(vecnum);
+    void init_graph(const size_t& r, const std::vector<int>& P = {}){
+        if (r>vecnum){
+            std::cerr<<"r should be less than the number of vectors in the database"<<std::endl;
+            exit(1);
+        }
+//        graph.reserve(vecnum);
         //generator for shuffle
         std::random_device rd; 
-        std::mt19937 rndm(rd()); 
-        for(int idx = 0; idx < vecnum; ++idx){
+        std::mt19937 rndm(rd());
+        std::vector<int> vec(vecnum);
+        if(P.empty()){
+            std::iota(vec.begin(), vec.end(), 0);
+        }
+        else{
+            vec=P;
+        }
+        std::vector shuff_vec = vec;
+        for (auto p : vec) {
             std::unordered_set<int> neighbors;
-            while(neighbors.size()<r){
+            while (neighbors.size() < r) {
                 //get a random permutation of all nodes and add 1 each time making sure we dont add itself
-                int sample=std::uniform_int_distribution<int>(0,vecnum-1)(rndm);
-                if(sample!=idx){
-                    neighbors.insert(sample);
+                std::shuffle(shuff_vec.begin(), shuff_vec.end(), rndm);
+                for (auto i : shuff_vec) {
+                    if (i != p) {
+                        neighbors.insert(i);
+                    }
+                    if (neighbors.size() == r) {
+                        break;
+                    }
                 }
             }
-            graph[idx]=std::move(neighbors);        
+            graph[p] = std::move(neighbors);
         }
     }
 
     void print_graph(){
         int i=0;
-        for (auto &set : graph) {
-            std::cout<<"for node "<<std::setw(3)<< i++<<": ";
-            for (auto &i : set) {
-                std::cout <<std::setw(3) << i << " ";
+        for (auto &i : graph) {
+            std::cout<<"for node "<<std::setw(3)<< i.first + 1<<": ";
+            for (auto &j : i.second) {
+                std::cout <<std::setw(3) << j << " ";
             }
             std::cout << std::endl;
         }
@@ -184,7 +211,7 @@ struct VamanaIndex {
         }
     }
 
-    void vamana_indexing(const int& medoid,float a,int list_size,size_t R, std::vector<int> P = {}){
+    void vamana_indexing(const int& medoid,float a,int list_size,size_t R, const std::vector<int> &P = {}){
         //create the permuation
         std::vector<int>sigma;
         if (P.empty()) {
@@ -377,14 +404,21 @@ struct VamanaIndex {
     
     }
 
-    void stitched_vamana_indexing() {
+    void stitched_vamana_indexing(float a, size_t R_small, size_t R_stitched, size_t L_small){
         graph.reserve(db->vecnum);
-        std::unordered_set<T,VamanaIndex> Gf;
-        Gf.reserve(*db->filters_set->size());
+        std::unordered_map<T,std::unique_ptr<VamanaIndex>> Gf;
+        Gf.reserve(db->filters_set->size());
         for (auto f: *db->filters_set) {
-            Gf[f] = VamanaIndex(db);
-
+            Gf[f] = std::make_unique<VamanaIndex>(db);
+            Gf[f]->init_graph(R_small, Pf[f]);
+            int med = db->medoid_naive(Pf[f]);
+            Gf[f]->vamana_indexing(med, a, L_small, R_small, Pf[f]);
+//            Gf[f]->vamana_indexing(med, a, L_small, R_stitched, Pf[f]);
+            for (auto& kv: Gf[f]->graph) { //pare kathe vertice to Gf, pou ousiastika einai to Pf, kai valta ston megalo grafo G (this->graph)
+                graph[kv.first] = std::move(kv.second);
+            }
         }
+
     }
 
 };

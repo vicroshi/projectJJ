@@ -17,7 +17,7 @@ void test_fileType(){
 
 void test_read(){
     size_t dim1,vecs1;
-    std::string file_path1="../datasets/dummy/dummy.fvecs";
+    std::string file_path1="../datasets/test/test.fvecs";
     float *result1=read_from_file<float>(file_path1,&dim1,&vecs1);
     TEST_ASSERT(result1 != nullptr);
     TEST_ASSERT((std::is_same<decltype(result1), float*>::value)); //check if its a int*
@@ -25,7 +25,7 @@ void test_read(){
     printf("vecs1: %ld\n",vecs1);
     TEST_ASSERT(vecs1==10);
     size_t dim2,vecs2;
-    std::string file_path2="../datasets/dummy/dummy_groundtruth.ivecs";
+    std::string file_path2="../datasets/test/test_groundtruth.ivecs";
     int *result2=read_from_file<int>(file_path2,&dim2,&vecs2);
     TEST_ASSERT(result2 != nullptr);
     TEST_ASSERT((std::is_same<decltype(result2), int*>::value)); //check if its a float*

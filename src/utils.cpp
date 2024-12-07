@@ -41,6 +41,9 @@ void ann(const std::string& base_file_path, const std::string& query_file_path,c
 }
 
 double recall_k(const int& k, std::vector<int>& X, std::vector<int>& G){
+    if (!k) {
+        return !X.size()? 1.0f : 0.0f;
+    }
     std::vector<int>intersection;
     std::sort(X.begin(), X.end());
     std::sort(G.begin(), G.end());
