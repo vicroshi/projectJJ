@@ -186,12 +186,16 @@ void ReadBin(const std::string &file_path,const int num_dimensions,std::vector<s
 
 // moves the first element other vectors and flattens the 2-D data vector.
 template <typename T>
-void extract_base_vector_info(std::vector<std::vector<T>>& data,std::vector<T>& point_filter,std::unordered_set<T>& filters_set,std::vector<T>& flattened_data){
+void extract_base_vector_info(std::vector<std::vector<T>>& data,std::vector<T>& point_filter,std::unordered_set<T>& filters_set,std::vector<T>& flattened_data,
+std::unordered_map<T, std::vector<int>> Pf){
     flattened_data.reserve(data.size()*100); //100 dimensions for each vector * num of vectors
+    int idx = 0;
     for(auto& point:data){
         point_filter.push_back(point[0]);    //move the first element to filter
         filters_set.insert(point[0]); //insert filter to the set. if it already is in the set, its not re-entered
+        Pf[point[0]].push_back(idx); //insert point to the filter map
         flattened_data.insert(flattened_data.end(), point.begin() + 2, point.end());  //skip the first two elements and insert the rest
+        idx++;
     }
     data.clear(); //delete the vector since its not needed
 }
@@ -247,7 +251,9 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     std::unordered_set<T> filters_set; // ola ta filters pou uparxoun
     base_filter.reserve(base_no_of_points);
     filters_set.reserve(base_no_of_points / 5); // rough estimate
-    extract_base_vector_info(base_data, base_filter, filters_set, flat_base);
+    std::unordered_map<T, std::vector<int>> Pff; // so it won't break find medoid
+    std::unordered_map<T, std::vector<int>> Pf; // points for each filter
+    extract_base_vector_info(base_data, base_filter, filters_set, flat_base, Pff);
 
     // database init
     Matrix<T> base_m(static_cast<size_t>(100), base_no_of_points, &flat_base, &base_filter, &filters_set);
@@ -290,6 +296,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     // R-regular graph initialization
     auto init_start = std::chrono::high_resolution_clock::now();
     VamanaIndex<T> v_m(&base_m);
+    v_m.Pf = Pff;
     auto init_end = std::chrono::high_resolution_clock::now();
     auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
     std::cout << ">Time taken to initialize Graph: " << init_duration / 1e6 << " sec(s)." << std::endl;
@@ -298,7 +305,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     // calculate medoid once and pass it to functions later
     auto medoid_start = std::chrono::high_resolution_clock::now();
     std::unordered_map<T, int> Medoid;          // st(f)
-    std::unordered_map<T, std::vector<int>> Pf; // points for each filter
+
     v_m.db->find_medoid(t, Medoid, Pf);
 
     auto medoid_end = std::chrono::high_resolution_clock::now();
