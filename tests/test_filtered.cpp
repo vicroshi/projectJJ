@@ -81,11 +81,8 @@ void test_filtered_prune() {
     std::unordered_map<float, std::vector<int>> Pf;
     f_m.find_medoid(t, Medoid, Pf);
 
-    std::cout<<"before indexing:\n";
-    V_F.print_graph();
     V_F.filtered_vamana_indexing(Medoid,a,list_size,R);
-    std::cout<<"after indexing:\n";
-    V_F.print_graph();
+
     
     //graph must be of at most R-out degree
     for(size_t i=0;i<V_F.vecnum;i++){
