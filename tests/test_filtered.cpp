@@ -50,4 +50,47 @@ void test_filtered_greedy(){
 
 void test_filtered_prune() {
 
+    float points_f[14][4] = {
+    {3.0f, 7.0f, 12.0f, 8.0f},
+    {5.0f, 15.0f, 1.0f, 9.0f},
+    {0.0f, 13.0f, 4.0f, 11.0f},
+    {10.0f, 2.0f, 6.0f, 14.0f},
+    {12.0f, 5.0f, 8.0f, 6.0f},
+    {9.0f, 0.0f, 7.0f, 13.0f},
+    {14.0f, 2.0f, 11.0f, 3.0f},
+    {4.0f, 8.0f, 15.0f, 5.0f},
+    {6.0f, 10.0f, 3.0f, 12.0f},
+    {1.0f, 9.0f, 14.0f, 0.0f},
+    {11.0f, 4.0f, 13.0f, 7.0f},
+    {2.0f, 6.0f, 9.0f, 15.0f},
+    {15.0f, 1.0f, 5.0f, 10.0f},
+    {8.0f, 12.0f, 2.0f, 4.0f}
+    };
+    std::vector<float> vecs(&points_f[0][0], &points_f[0][0] + 14*4);
+
+    size_t R=2;
+    float a=1.1;
+    size_t t=10;
+    size_t list_size=10;
+    std::vector<float> vecs_filters = {1.0f,5.0f,2.0f,2.0f,1.0f,3.0f,1.0f,2.0f,3.0f,5.0f,1.0f,2.0f,3.0f,5.0f};
+    std::unordered_set<float> filters = {1.0f, 2.0f, 3.0f, 5.0f};
+    Matrix<float> f_m(4,14,&vecs, &vecs_filters, &filters);
+    VamanaIndex V_F(&f_m);
+
+    std::unordered_map<float, int> Medoid;          
+    std::unordered_map<float, std::vector<int>> Pf;
+    f_m.find_medoid(t, Medoid, Pf);
+
+    std::cout<<"before indexing:\n";
+    V_F.print_graph();
+    V_F.filtered_vamana_indexing(Medoid,a,list_size,R);
+    std::cout<<"after indexing:\n";
+    V_F.print_graph();
+    
+    //graph must be of at most R-out degree
+    for(size_t i=0;i<V_F.graph.size();i++){
+        TEST_ASSERT(V_F.graph[i].size()<=R);
+    }
+
+
 }
