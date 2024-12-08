@@ -36,7 +36,6 @@ void test_init() {
 }
 
 void test_greedy(){
-    std::cout<<std::endl;
     int points[6][4] = {
         {3, 7, 12, 8}, 
         {10, 2, 6, 14},
@@ -91,13 +90,11 @@ void test_greedy(){
     V.graph[5].insert(4);
     V.graph[5].insert(1);
     V.graph[5].insert(2);
-    V.print_graph();
     std::unordered_set<int>L={},v={};
     std::vector<int> int_q ={1,2,5,8};
     const std::span<int> q_i(int_q.data(), int_q.size());
     // int start_ind=i_m.medoid_naive();
     int start_ind=0;
-    std::cout<<"medoid: "<<start_ind<<std::endl;
     //for k=1:
     V.greedy_search(start_ind,q_i,1,5,L,v);
     TEST_ASSERT(L.size()==1);
@@ -109,10 +106,6 @@ void test_greedy(){
     V.greedy_search(start_ind,q_i,2,5,L,v);
     TEST_ASSERT(L.size()==2);
     sol={0,4};
-    for(auto item:sol) std::cout<<item<<",";
-    std::cout<<std::endl;
-    for(auto item:L) std::cout<<item<<","; 
-    std::cout<<std::endl;std::cout<<std::endl;     
     TEST_ASSERT(L==sol);
     //for k=3:
     L.clear();
@@ -120,10 +113,6 @@ void test_greedy(){
     V.greedy_search(start_ind,q_i,3,5,L,v);
     TEST_ASSERT(L.size()==3);
     sol={0,4,1};
-    for(auto item:sol) std::cout<<item<<",";
-    std::cout<<std::endl;
-    for(auto item:L) std::cout<<item<<","; 
-    std::cout<<std::endl;std::cout<<std::endl;     
     TEST_ASSERT(L==sol);
     //for k=4:
     L.clear();
@@ -131,10 +120,6 @@ void test_greedy(){
     V.greedy_search(start_ind,q_i,4,5,L,v);
     TEST_ASSERT(L.size()==4);   
     sol={0,4,1,3};
-    for(auto item:sol) std::cout<<item<<",";
-    std::cout<<std::endl;
-    for(auto item:L) std::cout<<item<<","; 
-    std::cout<<std::endl;std::cout<<std::endl;
     TEST_ASSERT(L==sol);
     //for k=5:
     L.clear();
@@ -142,14 +127,9 @@ void test_greedy(){
     V.greedy_search(start_ind,q_i,5,5,L,v);
     TEST_ASSERT(L.size()==5);   
     sol={0,4,1,3,5};
-    for(auto item:sol) std::cout<<item<<",";
-    std::cout<<std::endl;
-    for(auto item:L) std::cout<<item<<","; 
-    std::cout<<std::endl;std::cout<<std::endl;
     TEST_ASSERT(L==sol);
     
     //floats
-    std::cout<<std::endl;
     float points_f[6][4] = {
         {3.0, 7.0, 12.0, 8.0}, //78
         {10.0, 2.0, 6.0, 14.0}, //118
@@ -204,23 +184,16 @@ void test_greedy(){
     Vf.graph[5].insert(4);
     Vf.graph[5].insert(1);
     Vf.graph[5].insert(2);
-    // V.print_graph();
     L={};
     v={};
     std::vector<float> float_q ={1.0,2.0,5.0,8.0};
     const std::span<float> q_f(float_q.data(), float_q.size());
-    // start_ind=i_m.medoid_naive();
-    std::cout<<"medoid: "<<start_ind<<std::endl;
     //for k=1:
     L.clear();
     v.clear();
     Vf.greedy_search(start_ind,q_f,1,5,L,v);
     TEST_ASSERT(L.size()==1);
     sol={0};
-    for(auto item:sol) std::cout<<item<<",";
-    std::cout<<std::endl;
-    for(auto item:L) std::cout<<item<<","; 
-    std::cout<<std::endl;std::cout<<std::endl; 
     TEST_ASSERT(L==sol);
     //for k=2:
     L.clear();
@@ -228,10 +201,6 @@ void test_greedy(){
     Vf.greedy_search(start_ind,q_f,2,5,L,v);
     TEST_ASSERT(L.size()==2);
     sol={0,4};
-    for(auto item:sol) std::cout<<item<<",";
-    std::cout<<std::endl;
-    for(auto item:L) std::cout<<item<<","; 
-    std::cout<<std::endl;std::cout<<std::endl;
     TEST_ASSERT(L==sol);
     //for k=3:
     L.clear();
@@ -239,10 +208,6 @@ void test_greedy(){
     Vf.greedy_search(start_ind,q_f,3,5,L,v);
     TEST_ASSERT(L.size()==3);
     sol={4,1,0};
-    for(auto item:sol) std::cout<<item<<",";
-    std::cout<<std::endl;
-    for(auto item:L) std::cout<<item<<","; 
-    std::cout<<std::endl;std::cout<<std::endl;
     TEST_ASSERT(L==sol);
     //for k=4:
     L.clear();
@@ -250,10 +215,6 @@ void test_greedy(){
     Vf.greedy_search(start_ind,q_f,4,5,L,v);
     TEST_ASSERT(L.size()==4);
     sol={4,1,3,0};
-    for(auto item:sol) std::cout<<item<<",";
-    std::cout<<std::endl;
-    for(auto item:L) std::cout<<item<<","; 
-    std::cout<<std::endl;std::cout<<std::endl;
     TEST_ASSERT(L==sol);
     //k==5
     L.clear();
@@ -261,10 +222,6 @@ void test_greedy(){
     Vf.greedy_search(start_ind,q_f,5,5,L,v);
     TEST_ASSERT(L.size()==5);
     sol={4,1,3,5,0};
-    for(auto item:sol) std::cout<<item<<",";
-    std::cout<<std::endl;
-    for(auto item:L) std::cout<<item<<","; 
-    std::cout<<std::endl;std::cout<<std::endl;
     TEST_ASSERT(L==sol);
 }
 
@@ -314,7 +271,6 @@ void test_k_closest(){
 }
 
 void test_prune(){
-    std::cout<<std::endl;
     int points[15][4] = {
     {3, 7, 12, 8},
     {10, 2, 6, 14},
@@ -335,8 +291,7 @@ void test_prune(){
 
     Matrix<int> i_m(4,15,&points[0][0]);
     VamanaIndex<int> V(7,&i_m);
-    std::cout<<"before pruning: "<<std::endl;
-    V.print_graph();
+    
     float a=2.4f;
     std::unordered_set<int>L={},v={};
     size_t R=5;
@@ -344,11 +299,8 @@ void test_prune(){
     TEST_ASSERT(V.graph[0].size()<=R); //node should now have at most R neighbors
     V.robust_prune(5,v,a,R);
     TEST_ASSERT(V.graph[5].size()<=R); //node should now have at most R neighbors
-    std::cout<<"\nafter pruning: "<<std::endl;
-    V.print_graph();
-
+    
     //for floats too
-    std::cout<<"/////////\n";
     float points_f[14][4] = {
     {3.0f, 7.0f, 12.0f, 8.0f},
     {5.0f, 15.0f, 1.0f, 9.0f},
@@ -368,15 +320,12 @@ void test_prune(){
 
     Matrix<float> f_m(4,14,&points_f[0][0]);
     VamanaIndex<float> V_F(7,&f_m);
-    std::cout<<"before pruning:"<<std::endl;
-    V_F.print_graph();
+    
     a=1.0f;
     std::unordered_set<int>Lf={},vf={};
     R=5;
     V_F.robust_prune(0,vf,a,R);
     V_F.robust_prune(3,vf,a,R);
-    std::cout<<"\nafter pruning:\n"<<std::endl;
-    V_F.print_graph();
     TEST_ASSERT(V_F.graph[0].size()<=R); //node should now have at most R neighbors
     TEST_ASSERT(V_F.graph[3].size()<=R); //node should now have at most R neighbors
     
@@ -384,8 +333,6 @@ void test_prune(){
 
 
 void test_vamana_index(){
-    //ints
-    std::cout<<std::endl;
     int points[14][4] = {
     {3, 7, 12, 8},
     {5, 15, 1, 9},
@@ -411,19 +358,15 @@ void test_vamana_index(){
     Matrix<int> i_m(4,14,&points[0][0]);
     VamanaIndex<int> V(R,&i_m);
     auto start_ind=i_m.medoid_naive();
-    std::cout<<"medoid: "<<start_ind<<std::endl;
-    std::cout<<"before indexing:\n";
-    V.print_graph();
+    
     V.vamana_indexing(start_ind,a,list_size,R);
-    std::cout<<"after indexing:\n";
-    V.print_graph();
+    
     //graph must be of at most R-out degree
     for(size_t i=0;i<V.vecnum;i++){
         TEST_ASSERT(V.graph[i].size()<=7);
     }
 
     //floats
-    std::cout<<std::endl;
     float points_f[14][4] = {
     {3.0f, 7.0f, 12.0f, 8.0f},
     {5.0f, 15.0f, 1.0f, 9.0f},
@@ -446,12 +389,8 @@ void test_vamana_index(){
     Matrix<float> f_m(4,14,&points_f[0][0]);
     VamanaIndex<float> V_F(R,&f_m);
     start_ind=f_m.medoid_naive();
-    std::cout<<"medoid: "<<start_ind<<std::endl;
-    std::cout<<"before indexing:\n";
-    V_F.print_graph();
+    
     V_F.vamana_indexing(start_ind,a,list_size,R);
-    std::cout<<"after indexing:\n";
-    V_F.print_graph();
     //graph must be of at most R-out degree
     for(size_t i=0;i<V_F.vecnum;i++){
         TEST_ASSERT(V_F.graph[i].size()<=R);

@@ -28,6 +28,7 @@ extern void test_init();
 extern void test_filtered_greedy();
 extern void test_filtered_prune();
 extern void test_filtered_vamana_indexing();
+extern void test_stitched();
 /*
  *
  *
@@ -68,6 +69,7 @@ TEST_LIST = {
     {"recall",test_recall},
     {"filtered_greedy",test_filtered_greedy},
     {"filtered_prune",test_filtered_prune},
+    {"stitched",    test_stitched},
     {"find_medoid",test_find_medoid},
     {"extract_data",test_extract_data},
     {"extract_query",test_extract_query},
