@@ -189,7 +189,7 @@ void ReadBin(const std::string &file_path,const int num_dimensions,std::vector<s
 // moves the first element other vectors and flattens the 2-D data vector.
 template <typename T>
 void extract_base_vector_info(std::vector<std::vector<T>>& data,std::vector<T>& point_filter,std::unordered_set<T>& filters_set,std::vector<T>& flattened_data,
-std::unordered_map<T, std::vector<int>> Pf){
+std::unordered_map<T, std::vector<int>>& Pf){
     flattened_data.reserve(data.size()*100); //100 dimensions for each vector * num of vectors
     int idx = 0;
     for(auto& point:data){
@@ -222,7 +222,7 @@ void extract_query_vector_info(std::vector<std::vector<T>>& data,std::vector<T>&
 // with query type 2 or 3 and if a query node doesn't have 100 neighbors, i fill the vector with negative values
 // for readBin to work
 template <typename T>
-void RemoveNegativeElements(std::vector<std::vector<T>> &data,std::vector<std::vector<int>> &result) {
+void remove_negative_elements(std::vector<std::vector<T>> &data,std::vector<std::vector<int>> &result) {
     result.clear();
     result.reserve(data.size());
     for (auto &row : data) {
@@ -284,7 +284,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     std::vector<std::vector<float>> ground_data_float;
     std::vector<std::vector<int>> ground_data;
     ReadBin(ground_file_path, 100, ground_data_float, ground_no_of_points);
-    RemoveNegativeElements(ground_data_float,ground_data); // format it as needed because binary is read with readBin and dimensions must be constant for each vector
+    remove_negative_elements(ground_data_float,ground_data); // format it as needed because binary is read with readBin and dimensions must be constant for each vector
 
 
     // parameters input
@@ -324,7 +324,6 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     double sum_filtered=0.0f,sum_unfiltered=0.0f;
 
     for (uint32_t i = 0; i < query_no_of_points; i++){
-        if(query_type[i]<2.0f){
             std::unordered_set<int> L, V;
             std::span<T> query_span(query_m.row(i));
             v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
@@ -345,7 +344,6 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
                 }
 
 //                std::cout<<"=============================="<< std::endl<<std::endl;
-        }
     }
 //    std::cout << "sum_filtered: " << sum_filtered << ", num_filtered_points: " << num_filtered_points << std::endl;
     std::cout << std::fixed << std::setprecision(2);
@@ -362,7 +360,6 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     std::cout << ">Time taken for Indexing: " << std::chrono::duration_cast<std::chrono::microseconds>(end-start).count() / 1e6 << " sec(s)." << std::endl;
     double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
     for (size_t i = 0; i < query_m.vecnum; i++) {
-        if (query_type[i] < 2.0f) {
             std::unordered_set<int> L, V;
             std::span<T> query_span(query_m.row(i));
             v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
@@ -386,7 +383,6 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
             }
 
 //            std::cout << "==============================" << std::endl << std::endl;
-        }
     }
 //    std::cout << "st_sum_filtered: " << st_sum_filtered << ", num_filtered_points: " << num_filtered_points << std::endl;
     std::cout << std::fixed << std::setprecision(2);

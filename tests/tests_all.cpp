@@ -37,6 +37,10 @@ extern void test_filtered_prune();
 extern void test_fileType();
 extern void test_read();
 extern void test_recall();
+extern void test_extract_data();
+extern void test_extract_query();
+extern void test_remove_negative_elements();
+
 /*
  *
  *
@@ -64,5 +68,8 @@ TEST_LIST = {
     {"filtered_greedy",test_filtered_greedy},
     {"filtered_prune",test_filtered_prune},
     {"find_medoid",test_find_medoid},
+    {"extract_data",test_extract_data},
+    {"extract_query",test_extract_query},
+    {"remove_negative_elements",test_remove_negative_elements},
     {nullptr, nullptr}
 };
