@@ -39,17 +39,17 @@ void test_euclid() {
         {2, 3, 5, 7}
     };
     Matrix<float> m(4,4,&p[0][0]);
-    std::cout<<"m0:";
-    for(const auto &i: m.row(0)){
-        std::cout<< i<<std::endl;
-    }
-    std::cout<<"m1:";
-    for(const auto &i: m.row(1)){
-        std::cout<< i<<std::endl;
-    }
+//    std::cout<<"m0:";
+//    for(const auto &i: m.row(0)){
+//        std::cout<< i<<std::endl;
+//    }
+//    std::cout<<"m1:";
+//    for(const auto &i: m.row(1)){
+//        std::cout<< i<<std::endl;
+//    }
 
     // std::cout << m.row(0) <<","<< m.row(1) << std::endl;
-    std::cout<<"dist: "<<m.sq_euclid(m.row(0), m.row(1),m.row(0).size())<<std::endl;
+//    std::cout<<"dist: "<<m.sq_euclid(m.row(0), m.row(1),m.row(0).size())<<std::endl;
     TEST_ASSERT(m.sq_euclid(m.row(0), m.row(1),m.row(0).size()) == 4.0);
     TEST_ASSERT(m.sq_euclid(m.row(0), m.row(2),m.row(0).size()) == 114.0);
     TEST_ASSERT(m.sq_euclid(m.row(0), m.row(3),m.row(0).size()) == 87.0);

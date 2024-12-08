@@ -48,15 +48,11 @@ struct VamanaIndex {
         this->vecnum = db->vecnum;
         graph.reserve(db->vecnum);
     }
-    
+
     void init_graph(const size_t& r, const std::vector<int>& P = {}){
-        if (r>vecnum){
-            std::cerr<<"r should be less than the number of vectors in the database"<<std::endl;
-            exit(1);
-        }
 //        graph.reserve(vecnum);
         //generator for shuffle
-        std::random_device rd; 
+        std::random_device rd;
         std::mt19937 rndm(rd());
         std::vector<int> vec(vecnum);
         if(P.empty()){
@@ -65,17 +61,18 @@ struct VamanaIndex {
         else{
             vec=P;
         }
+        size_t R = r > vec.size() ? vec.size() : r;
         std::vector shuff_vec = vec;
         for (auto p : vec) {
             std::unordered_set<int> neighbors;
-            while (neighbors.size() < r) {
+            while (neighbors.size() < R) {
                 //get a random permutation of all nodes and add 1 each time making sure we dont add itself
                 std::shuffle(shuff_vec.begin(), shuff_vec.end(), rndm);
                 for (auto i : shuff_vec) {
                     if (i != p) {
                         neighbors.insert(i);
                     }
-                    if (neighbors.size() == r) {
+                    if (neighbors.size() == R) {
                         break;
                     }
                 }

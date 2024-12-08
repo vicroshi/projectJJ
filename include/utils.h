@@ -17,6 +17,8 @@
 #include <fstream>
 #include "assert.h"
 
+#define R_SMALL 32
+#define L_SMALL 100
 
 void ann(const std::string& , const std::string& ,const std::string& ,const float& , const size_t& ,const size_t& ,const size_t& );
 std::string getFileExtension(const std::string&);
@@ -333,16 +335,42 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
             std::span<T> query_span(query_m.row(i));
             v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
             std::vector<int> L_vec(L.begin(), L.end());
+//                std::cout<<"==============================\n"<<"for i:"<<i<<" with filter:"<<(*query_m.vec_filter)[i]<< ", L.size():"<<L.size()<<", ground.size():"<<ground_data[i].size()<<"\n";
+//                std::cout<<"\n";
+                size_t n = std::min(k, ground_data[i].size());
+                std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
+                if(query_type[i]==1.0f){
+                    auto recall= recall_k(n,L_vec,G_vec);
+                    sum_filtered+=recall;
+                }
+                else if(query_type[i]==0.0f){
+                    auto recall=recall_k(n,L_vec,G_vec);
+                    sum_unfiltered+=recall;
+                }
+    }
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
+    std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
+    std::cout<<"\n\n--END--";
+    VamanaIndex<T> v_stitched(&base_m);
+    v_stitched.Pf = Pff;
+    std::cout << "\nSTITCHED" << std::endl;
+    auto start = std::chrono::high_resolution_clock::now();
+    v_stitched.stitched_vamana_indexing(a, R_SMALL, R, L_SMALL); //harcoded for now
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << ">Time taken for Indexing: " << std::chrono::duration_cast<std::chrono::microseconds>(end-start).count() / 1e6 << " sec(s)." << std::endl;
+    double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
+    for (size_t i = 0; i < query_m.vecnum; i++) {
+            std::unordered_set<int> L, V;
+            std::span<T> query_span(query_m.row(i));
+            v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+            std::vector<int> L_vec(L.begin(), L.end());
             size_t n = std::min(k, ground_data[i].size());
             std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
             if(query_type[i]==1.0f){
-                // auto recall= recall_k(n,L_vec,G_vec);
-                // sum_filtered+=recall;
                 sum_filtered+=recall_k(n,L_vec,G_vec);
             }
             else if(query_type[i]==0.0f){
-                // auto recall=recall_k(n,L_vec,G_vec);
-                // sum_unfiltered+=recall;
                 sum_unfiltered+=recall_k(n,L_vec,G_vec);
             }
     }
@@ -350,48 +378,6 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
     std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
     std::cout<<"\n\n--END OF FILTERED VAMANA--\n\n";
-
-
-    //stitched vamana
-//     VamanaIndex<T> v_stitched(&base_m);
-//     v_stitched.Pf =& Pff;
-//     std::cout << "\nSTITCHED" << std::endl;
-//     auto start = std::chrono::high_resolution_clock::now();
-//     v_stitched.stitched_vamana_indexing(a, 5, R, 10);
-//     auto end = std::chrono::high_resolution_clock::now();
-//     std::cout << ">Time taken for Indexing: " << std::chrono::duration_cast<std::chrono::microseconds>(end-start).count() / 1e6 << " sec(s)." << std::endl;
-//     double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
-//     for (size_t i = 0; i < query_m.vecnum; i++) {
-//             std::unordered_set<int> L, V;
-//             std::span<T> query_span(query_m.row(i));
-//             v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-//             std::vector<int> L_vec(L.begin(), L.end());
-// //            std::cout << "==============================\n" << "for i:" << i << " with filter:"
-// //                      << (*query_m.vec_filter)[i] << ", L.size():" << L.size() << ", ground.size():" << ground_data[i].size()
-// //                      << "\n";
-// //            std::cout << "\n";
-//             size_t n = std::min(k, ground_data[i].size());
-//             std::vector<int> G_vec(ground_data[i].begin(), ground_data[i].begin() + n);
-//             if (query_type[i] == 1.0f) {
-//                 auto recall = recall_k(n, L_vec, G_vec);
-// //                std::cout << std::fixed << std::setprecision(2);
-// //                std::cout << "--recall:" << recall << std::endl;
-//                 st_sum_filtered += recall;
-//             } else if (query_type[i] == 0.0f) {
-//                 auto recall = recall_k(n, L_vec, G_vec);
-// //                std::cout << std::fixed << std::setprecision(2);
-// //                std::cout << "--recall:" << recall << std::endl;
-//                 st_sum_unfiltered += recall;
-//             }
-
-// //            std::cout << "==============================" << std::endl << std::endl;
-//     }
-// //    std::cout << "st_sum_filtered: " << st_sum_filtered << ", num_filtered_points: " << num_filtered_points << std::endl;
-//     std::cout << std::fixed << std::setprecision(2);
-//     std::cout << "TOTAL recall for filtered: " << st_sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
-//     std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
-
-
 }
 
 

@@ -11,6 +11,7 @@
 #include "graph.h"
 #include <set>
 #include <unordered_set>
+#include <utils.h>
 
 void test_filtered_greedy(){
     std::cout<<std::endl;
@@ -46,6 +47,33 @@ void test_filtered_greedy(){
     TEST_ASSERT(L.empty());
 
 
+}
+
+void test_stitched() {
+    int points[6][4] = {
+        {3, 7, 12, 8},
+        {10, 2, 6, 14},
+        {5, 15, 1, 9},
+        {0, 13, 4, 11},
+        {7, 3, 10, 2},
+        {12, 5, 8, 6}
+    };
+    std::vector vecs(&points[0][0], &points[0][0] + 6*4);
+    std::vector vecs_filters = {1,1,1,2,2,3};
+    std::unordered_set filters = {1,2,3};
+    int q[] = {0,0,0,0};
+    std::span query(q,4);
+    int fq = 2;
+    Matrix<int> i_m(4,6,&vecs, &vecs_filters, &filters);
+    VamanaIndex<int> V(&i_m);
+    std::unordered_map<int,int> S ={{1,2}};
+    std::unordered_set<int> L,V_f;
+    V.stitched_vamana_indexing(1.1f, 32, 32, 100);
+    V.filtered_greedy_search(S,query,1,5,fq,L,V_f);
+    TEST_ASSERT(L.size()==1);
+    TEST_ASSERT(L.contains(4));
+    V.filtered_greedy_search(S,query,2,5,4,L,V_f);
+    TEST_ASSERT(L.empty());
 }
 
 void test_filtered_prune() {
