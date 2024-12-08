@@ -61,3 +61,102 @@ void test_recall(){
     // std::cout<<result<<std::endl;
     TEST_ASSERT(result==1.0);
 }
+
+
+void test_extract_data(){
+    std::vector<std::vector<float>> data={
+        {1.0f,1.33f,1.0f,2.0f,5.5f,8.0f},
+        {1.0f,1.33f,2.0f,4.0f,2.1f,1.0f},
+        {2.0f,1.33f,4.4f,2.1f,2.7f,7.0f},
+        {2.0f,1.33f,5.1f,5.0f,1.1f,0.0f},
+        {3.0f,1.33f,0.0f,1.0f,2.1f,3.0f},
+        {3.0f,1.33f,0.0f,1.0f,2.1f,3.0f}
+    };
+    std::vector<float> expected_flattened_data = {
+        1.0f, 2.0f, 5.5f, 8.0f,
+        2.0f, 4.0f, 2.1f, 1.0f,
+        4.4f, 2.1f, 2.7f, 7.0f,
+        5.1f, 5.0f, 1.1f, 0.0f,
+        0.0f, 1.0f, 2.1f, 3.0f,
+        0.0f, 1.0f, 2.1f, 3.0f
+    };
+    std::vector<float>point_filter;
+    std::unordered_set<float>filters_set;
+    std::vector<float>flattened_data;
+    std::unordered_map<float, std::vector<int>> Pf;
+
+    extract_base_vector_info(data,point_filter,filters_set,flattened_data,Pf);
+
+    //test flattened data is properly formatted
+    TEST_ASSERT(flattened_data==expected_flattened_data);
+
+    //test that point's filter were extracted correctly
+    std::vector<float> expected_point_filter={1.0f,1.0f,2.0f,2.0f,3.0f,3.0f};
+
+    TEST_ASSERT(point_filter==expected_point_filter);
+
+    //test to see if all filters were extracted
+    std::unordered_set<float> expected_filters_set = {1.0f, 2.0f, 3.0f};
+    TEST_ASSERT(filters_set == expected_filters_set);
+
+    //test that Pf has the right amount of points
+    TEST_ASSERT(Pf[1.0f].size()==2); 
+    TEST_ASSERT(Pf[2.0f].size()==2); 
+    TEST_ASSERT(Pf[3.0f].size()==2); 
+
+}
+
+
+void test_extract_query(){
+    std::vector<std::vector<float>> data={
+        {1.0f,1.0f,1.33f,0.0f  ,1.0f,2.0f,5.5f,8.0f},
+        {0.0f,-1.0f,-1.0f,0.0f ,2.0f,4.0f,2.1f,1.0f},
+        {2.0f,1.33f,0.0f,0.0f  ,4.4f,2.1f,2.7f,7.0f},
+        {1.0f,12.0f,1.0f,11.0f ,5.1f,5.0f,1.1f,0.0f},
+        {1.0f,2.0f,0.0f,0.0f   ,0.0f,1.0f,2.1f,3.0f},
+        {0.0f,-1.0f,-1.0f,0.0f ,0.0f,1.0f,2.1f,3.0f}
+    };
+    std::vector<float> expected_flattened_data = {
+        1.0f, 2.0f, 5.5f, 8.0f,
+        2.0f, 4.0f, 2.1f, 1.0f,
+        5.1f, 5.0f, 1.1f, 0.0f,
+        0.0f, 1.0f, 2.1f, 3.0f,
+        0.0f, 1.0f, 2.1f, 3.0f
+    };
+    std::vector<float>point_filter;
+    std::vector<int>query_type;
+    std::vector<float>flattened_data;
+    size_t filter_num=0,unfil_num=0;
+    extract_query_vector_info(data,point_filter,query_type,flattened_data,filter_num,unfil_num);
+
+    std::vector<float> expected_point_filter={1.0f,-1.0f,12.0f,2.0f,-1.0f};
+    TEST_ASSERT(point_filter==expected_point_filter);
+
+    std::vector<int> expected_query_type={1,0,1,1,0};
+    TEST_ASSERT(query_type==expected_query_type);
+
+    TEST_ASSERT(filter_num==3);
+    TEST_ASSERT(unfil_num==2);
+
+    TEST_ASSERT(flattened_data==expected_flattened_data);
+
+}
+
+void test_remove_negative_elements(){
+    std::vector<std::vector<float>> data={
+        {-1.0f,1.0f,2.0f,5.0,8.0f},
+        {0.0f,-1.0f,-1.0f,0.0f ,2.0f,4.0f,2.0f,1.0f},
+        {1.0f,-2.0f,0.0f,0.0f ,0.0f,1.0f,2.0f,3.0f},
+        {-1.0f,-1.0f,-1.0f,0.0f ,0.0f,1.0f,2.0f,3.0f}
+    };
+    std::vector<std::vector<int>> result;
+    remove_negative_elements(data,result);
+    std::vector<std::vector<int>> expected_result={
+        {1, 2, 5, 8},
+        {0, 0, 2, 4, 2, 1},
+        {1, 0, 0, 0, 1, 2, 3},
+        {0, 0, 1, 2, 3}
+    };
+
+    TEST_ASSERT(result==expected_result);
+}

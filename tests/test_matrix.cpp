@@ -131,10 +131,6 @@ void test_find_medoid(){
         TEST_ASSERT(it != Medoid.end()); //test that filter has been successfully been inserted
     }
 
-    //test that Pf has the right amount of points
-    TEST_ASSERT(Pf[1.0f].size()==3); 
-    TEST_ASSERT(Pf[2.0f].size()==3); 
-    TEST_ASSERT(Pf[3.0f].size()==2); 
 
 
 }
