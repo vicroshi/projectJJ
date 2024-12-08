@@ -13,8 +13,10 @@ version=$1
 # standard variables,used in both project 1 and project 2
 a=1.0
 R=60
-L=150
+L=120
 k=100
+
+#paths for project 1
 base_file_path="../datasets/siftsmall/siftsmall_base.fvecs"
 query_file_path="../datasets/siftsmall/siftsmall_query.fvecs"
 ground_file_path="../datasets/siftsmall/siftsmall_groundtruth.ivecs"
@@ -25,11 +27,16 @@ R_small=10
 L_small=15
 R_stitched=10
 
+#paths for project 2
+filtered_base_file_path="/home/zenki/Documents/DIT/jj/datasets/2/dummy-data.bin"
+filtered_query_file_path="/home/zenki/Documents/DIT/jj/datasets/2/dummy-queries.bin"
+filtered_ground_file_path="/home/zenki/Documents/DIT/jj/datasets/2/ground.bin"
+
 # checking which version was provided to run the corresponding executable
 if [ $version -eq 1 ]; then
     ./build/projectJJ -a $a -R $R -L $L -k $k -b $base_file_path -q $query_file_path -g $ground_file_path
     exit 0
 else    
-    ./build/projectJJ_filtered -a $a -R $R -L $L -k $k -t $t -b $base_file_path -q $query_file_path -g $ground_file_path
+    ./build/projectJJ_filtered -a $a -R $R -L $L -k $k -t $t -b $filtered_base_file_path -q $filtered_query_file_path -g $filtered_ground_file_path
     exit 0
 fi

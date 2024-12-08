@@ -275,6 +275,11 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     size_t num_filtered_points=0,num_unfiltered_points=0;
     extract_query_vector_info(query_data, query_filter, query_type, flat_query,num_filtered_points,num_unfiltered_points);
 
+    //update how many actual points we have to check:
+    query_no_of_points=num_unfiltered_points+num_filtered_points;
+    std::cout<<"points after extraction:"<<query_no_of_points<<std::endl;
+
+
     // database init                                                        //no need to keep all filters used in queries, we have them from DB.
     Matrix<T> query_m(static_cast<size_t>(100), query_no_of_points, &flat_query, &query_filter, NULL);
 
