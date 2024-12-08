@@ -121,7 +121,7 @@ struct Matrix{
             dist = 0;
             for (auto j : vec) {
                 if (i != j) {
-                    dist += sq_euclid(row(i),row(j),row(i).size());
+                    dist += sq_euclid(row(i),row(j),dim);
                 }
             }
             if (dist < min_dist) {
