@@ -20,7 +20,8 @@ add_project_arguments('-O3', language: 'cpp')
 # These arguments are only used to build the shared library
 # not the executables that use the library.
 includes = include_directories('include')
-subdir('src')
+vamana_lib = static_library('vamana', ['src/utils.cpp'], include_directories : includes)
+
 executable('projectJJ', ['main.cpp'], include_directories : includes, link_with : vamana_lib)
 
 executable('projectJJ_filtered', ['main_filtered.cpp'], include_directories : includes, link_with : vamana_lib)

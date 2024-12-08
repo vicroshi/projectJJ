@@ -2,25 +2,21 @@
 // Created by vic on 17/10/2024.
 //
 
-#ifndef PROJECTJJ_GRAPH_H
-#define PROJECTJJ_GRAPH_H
+#ifndef GRAPH_H
+#define GRAPH_H
 
-#include <map>
 #include <list>
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <set>
 #include <unordered_set>
-#include <ranges>
 #include <random>
 #include <span>
 #include <iomanip>
-#include <database.h>
 #include "database.h"
 #include <iterator> // for std::back_inserter
 #include <unordered_map>
-#include <random>
 
 
 template <typename T>
@@ -169,28 +165,15 @@ struct VamanaIndex {
         return ;
     }
 
-    void robust_prune(int p,std::unordered_set<int>& V,float a,size_t R){
-        for(const auto & item:graph[p]){ //bazoume tous geitones tou p
-            V.insert(item);
-        }
-        V.erase(p); //bgazoume to p
+    void robust_prune(int p,std::vector<int>& V,float a,size_t R){
+//        V.erase(p); //bgazoume to p
         graph[p].clear();
-        int p_star_idx; 
-        
-        auto vec1 = db->row(p);
-
+        int p_star_idx;
+        std::sort(V.begin(),V.end(),[&](int v1,int v2){
+            return Matrix<T>::sq_euclid(db->row(p),db->row(v1), db->dim) < Matrix<T>::sq_euclid(db->row(p),db->row(v2),db->dim);
+        });
         while(!V.empty()){
-            double min_dist=std::numeric_limits<double>::max(); 
-            for(const auto & item:V){
-                //distance tou p me kathe stoixeio tou V (p')      
-               
-                auto vec2 = db->row(item); //
-                auto dist = Matrix<T>::sq_euclid(vec1, vec2,vec1.size());
-                if(dist<min_dist){
-                    min_dist=dist;
-                    p_star_idx=item;
-                }
-            }
+            p_star_idx=V[0];
             //update neighbors of p
             graph[p].insert(p_star_idx);
 
@@ -200,10 +183,10 @@ struct VamanaIndex {
             //vec1: p , vec2: p*, vec3: p' in V
             auto vec2 = db->row(p_star_idx);
             for (auto it=V.begin();it!=V.end();){
-                int item=*it;
-                
-                auto vec3 = db->row(item);
-                auto d1 =Matrix<T>::sq_euclid(vec2,vec3, vec3.size());  //d(p*,p')               
+                int i=*it;
+                auto vec1 = db->row(p_star_idx);
+                auto vec2 = db->row(i);
+                auto d1 =Matrix<T>::sq_euclid(vec1,vec2, vec1.size());                
                                                                     
                 auto d2 = Matrix<T>::sq_euclid(vec1,vec3,vec1.size());   //d(p,p')
 
@@ -229,20 +212,27 @@ struct VamanaIndex {
         std::mt19937 g(rd());
         // Shuffle the vector to get a random permutation
         std::shuffle(sigma.begin(), sigma.end(), g);
-        for(size_t i=0;i<sigma.size();i++){
+        for(auto i:sigma){
             std::unordered_set<int>L,V;
             //i must construct query
-            greedy_search(medoid,db->row(sigma[i]),1,list_size,L,V);
-            robust_prune(sigma[i],V,a,R);
-            //for all points j in Nout(sigma[i])
-            for(const auto & j:graph[sigma[i]]){
+            greedy_search(medoid,db->row(i),1,list_size,L,V);
+            V.erase(i);
+            std::vector<int> tmp;
+            tmp.reserve(V.size() + graph[i].size());
+            std::set_union(V.begin(), V.end(), graph[i].begin(), graph[i].end(), std::back_inserter(tmp));
+
+            robust_prune(i,tmp,a,R);
+            //for all points j in Nout(i)
+            for(const auto & j:graph[i]){
                 //temp vector to call search
-                std::unordered_set<int> temp_neighbors = graph[j];
-                temp_neighbors.insert(sigma[i]);
+//                std::unordered_set<int> temp_neighbors = graph[j];
+                std::vector<int> temp_neighbors(graph[j].begin(), graph[j].end());
+//                temp_neighbors.insert(i);
+                temp_neighbors.push_back(i);
                 if(temp_neighbors.size() > R)
                     robust_prune(j,temp_neighbors,a,R);
                 else
-                    graph[j].insert(sigma[i]);
+                    graph[j].insert(i);
             }
         }
     }
@@ -417,10 +407,10 @@ struct VamanaIndex {
     }
 
     void stitched_vamana_indexing(float a, size_t R_small, size_t R_stitched, size_t L_small){
-        graph.reserve(db->vecnum);
         std::unordered_map<T,std::unique_ptr<VamanaIndex>> Gf;
         Gf.reserve(db->filters_set->size());
         for (auto f: *db->filters_set) {
+            std::cout<<"filter: "<<f<< " ";
             Gf[f] = std::make_unique<VamanaIndex>(db);
             Gf[f]->init_graph(R_small, Pf[f]);
             int med = db->medoid_naive(Pf[f]);

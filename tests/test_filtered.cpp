@@ -68,6 +68,15 @@ void test_stitched() {
     VamanaIndex<int> V(&i_m);
     std::unordered_map<int,int> S ={{1,2}};
     std::unordered_set<int> L,V_f;
+    std::unordered_map<int, std::vector<int>> Pf = {
+        {1,{0,1,2}},
+        {2,{3,4}},
+        {3,{5}}
+    };
+    V.Pf = Pf;
+    TEST_ASSERT(V.vecnum==6);
+    TEST_ASSERT(V.db->filters_set->size()==3);
+
     V.stitched_vamana_indexing(1.1f, 32, 32, 100);
     V.filtered_greedy_search(S,query,1,5,fq,L,V_f);
     TEST_ASSERT(L.size()==1);

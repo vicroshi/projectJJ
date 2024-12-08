@@ -45,6 +45,7 @@ int main(int argc,char **argv){
             }
         //something was given incorrectly
         }catch(const std::invalid_argument& e){
+            
             std::cerr << "Error: Invalid argument for option -" << static_cast<char>(optopt) << ": " << optarg << std::endl;
             std::cerr << "Usage: ./projectjj -a <value> -R <value> -L <value> -b <value> -q <value> -g <value>" << std::endl;
             return 1;

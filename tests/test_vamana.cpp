@@ -293,7 +293,8 @@ void test_prune(){
     VamanaIndex<int> V(7,&i_m);
     
     float a=2.4f;
-    std::unordered_set<int>L={},v={};
+    std::unordered_set<int>L={};
+    std::vector<int> v={};
     size_t R=5;
     V.robust_prune(0,v,a,R);
     TEST_ASSERT(V.graph[0].size()<=R); //node should now have at most R neighbors
@@ -322,7 +323,8 @@ void test_prune(){
     VamanaIndex<float> V_F(7,&f_m);
     
     a=1.0f;
-    std::unordered_set<int>Lf={},vf={};
+    std::unordered_set<int>Lf={};
+    std::vector<int> vf={};
     R=5;
     V_F.robust_prune(0,vf,a,R);
     V_F.robust_prune(3,vf,a,R);
