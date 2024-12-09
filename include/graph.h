@@ -474,7 +474,6 @@ struct VamanaIndex {
             Gf[f] = std::make_unique<VamanaIndex>(db);
             Gf[f]->init_graph(R_small, Pf[f]);
             int med = db->medoid_naive(Pf[f]);
-            // std::cout << "Pf[" << f << "].size(): " << Pf[f].size() << std::endl;
             Gf[f]->vamana_indexing(med, a, L_small, R_small, Pf[f]);
             for (auto& kv: Gf[f]->graph) { //pare kathe vertice to Gf, pou ousiastika einai to Pf, kai valta ston megalo grafo G (this->graph)
                 graph[kv.first] = std::move(kv.second);
