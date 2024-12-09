@@ -20,6 +20,7 @@
 
 void ann(const std::string& , const std::string& ,const std::string& ,const float& , const size_t& ,const size_t& ,const size_t& );
 std::string getFileExtension(const std::string&);
+std::filesystem::path get_file_path(const size_t& , const size_t& , const size_t& , const float& ,std::string );
 
 template <typename T>
 T* read_from_file(const std::string&,size_t*,size_t*);
@@ -238,6 +239,9 @@ void remove_negative_elements(std::vector<std::vector<T>> &data,std::vector<std:
 }
 
 
+
+
+
 //overloading execute for second project
 template <typename T>
 void execute(const std::string& base_file_path,const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,const int& load,const int& save){
@@ -315,45 +319,50 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     auto medoid_duration = std::chrono::duration_cast<std::chrono::microseconds>(medoid_end - medoid_start).count();
     std::cout << ">Time taken to find medoid: " << medoid_duration / 1e6 << " sec(s)." << std::endl;
 
-    //load or build graph
-//     if(!load){
-//         // actual indexing
-//         auto indexing_start = std::chrono::high_resolution_clock::now();
-//         v_m.filtered_vamana_indexing(Medoid, a, List_size, R);
-//         auto indexing_end = std::chrono::high_resolution_clock::now();
-//         auto indexing_duration = std::chrono::duration_cast<std::chrono::microseconds>(indexing_end - indexing_start).count();
-//         std::cout << ">Time taken for Indexing: " << indexing_duration / 1e6 << " sec(s)." << std::endl;
-//     }
-//     else{
-//         //load from binary file
-//     }
+    // load or build graph
+    if(!load){
+        // actual indexing
+        auto indexing_start = std::chrono::high_resolution_clock::now();
+        v_m.filtered_vamana_indexing(Medoid, a, List_size, R);
+        auto indexing_end = std::chrono::high_resolution_clock::now();
+        auto indexing_duration = std::chrono::duration_cast<std::chrono::microseconds>(indexing_end - indexing_start).count();
+        std::cout << ">Time taken for Indexing: " << indexing_duration / 1e6 << " sec(s)." << std::endl;
+    }
+    else{
+        //load from binary file
+        std::filesystem::path load_path = get_file_path(k,List_size,R,a,"filtered_graph_");
+        std::cout<<"Loading graph from file:"<<load_path<<std::endl;
+        if(v_m.load_graph(load_path)==-1) exit(1);
+    }
 
-//     double sum_filtered=0.0f,sum_unfiltered=0.0f;
+    double sum_filtered=0.0f,sum_unfiltered=0.0f;
 
-//     for (uint32_t i = 0; i < query_no_of_points; i++){
-//             std::unordered_set<int> L, V;
-//             std::span<T> query_span(query_m.row(i));
-//             v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-//             std::vector<int> L_vec(L.begin(), L.end());
-// //                std::cout<<"==============================\n"<<"for i:"<<i<<" with filter:"<<(*query_m.vec_filter)[i]<< ", L.size():"<<L.size()<<", ground.size():"<<ground_data[i].size()<<"\n";
-// //                std::cout<<"\n";
-//                 size_t n = std::min(k, ground_data[i].size());
-//                 std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
-//                 if(query_type[i]==1.0f){
-//                     auto recall= recall_k(n,L_vec,G_vec);
-//                     sum_filtered+=recall;
-//                 }
-//                 else if(query_type[i]==0.0f){
-//                     auto recall=recall_k(n,L_vec,G_vec);
-//                     sum_unfiltered+=recall;
-//                 }
-//     }
-//     std::cout << std::fixed << std::setprecision(2);
-//     std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
-//     std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
-//     if(save){
-//         //write filtered graph in binary file()
-//     }
+    for (uint32_t i = 0; i < query_no_of_points; i++){
+            std::unordered_set<int> L, V;
+            std::span<T> query_span(query_m.row(i));
+            v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+            std::vector<int> L_vec(L.begin(), L.end());
+//                std::cout<<"==============================\n"<<"for i:"<<i<<" with filter:"<<(*query_m.vec_filter)[i]<< ", L.size():"<<L.size()<<", ground.size():"<<ground_data[i].size()<<"\n";
+//                std::cout<<"\n";
+                size_t n = std::min(k, ground_data[i].size());
+                std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
+                if(query_type[i]==1.0f){
+                    auto recall= recall_k(n,L_vec,G_vec);
+                    sum_filtered+=recall;
+                }
+                else if(query_type[i]==0.0f){
+                    auto recall=recall_k(n,L_vec,G_vec);
+                    sum_unfiltered+=recall;
+                }
+    }
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
+    std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
+    if(save){
+        //write filtered graph in binary file()
+        std::filesystem::path save_path = get_file_path(k,List_size,R,a,"filtered_graph_");
+        v_m.save_graph(save_path);
+    }
 
     // std::cout<<"\n\n--END OF FILTERED VAMANA--";
     VamanaIndex<T> v_stitched(&base_m);
@@ -369,26 +378,10 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     }
     else{
         //load from file
-        //get current path
-        std::filesystem::path current_path = std::filesystem::current_path();
-
-        std::filesystem::path temp=current_path;
-        while (!temp.empty() && temp.filename() != "projectJJ") {
-            temp = temp.parent_path();
-        }
-
-        // Find the project root directory
-        std::filesystem::path project_root = temp;
-
-        if (project_root.empty()){
-            std::cerr << "Project root 'projectJJ' not found." << std::endl;
-            return 1;
-        }
-
-        // Construct the desired file path
-        std::filesystem::path desired_directory = project_root / "graphs" ;
-
-
+        std::filesystem::path load_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
+        std::cout<<"Loading graph from file:"<<load_path<<std::endl;
+        if(v_stitched.load_graph(load_path) ==-1) exit(1) ;
+        
     }
 
     double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
@@ -411,6 +404,8 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     std::cout << "TOTAL recall for unfiltered: " << st_sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
     if(save){
         //write stitched graph in binary file()
+        std::filesystem::path save_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
+        v_stitched.save_graph(save_path);
     }
     std::cout<<"\n\n--END OF STITCHED VAMANA--\n\n";
 }

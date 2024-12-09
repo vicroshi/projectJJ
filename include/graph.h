@@ -267,21 +267,21 @@ struct VamanaIndex {
             std::vector<int> tmp;
             tmp.reserve(V.size() + graph[i].size());
             std::set_union(V.begin(), V.end(), graph[i].begin(), graph[i].end(), std::back_inserter(tmp));
-            if(i  == 4867){
-                std::cout<<"neighbors of 4867 before prune:\n";
-                for(auto j:tmp){
-                    std::cout<<j<<" ";
-                }
-                putchar('\n');
-            }
+            // if(i  == 4867){
+            //     std::cout<<"neighbors of 4867 before prune:\n";
+            //     for(auto j:tmp){
+            //         std::cout<<j<<" ";
+            //     }
+            //     putchar('\n');
+            // }
             robust_prune(i,tmp,a,R);
-            if(i  == 4867){
-                std::cout<<"neighbors of 4867 after prune:\n";
-                for(auto j:graph[i]){
-                    std::cout<<j<<" ";
-                }
-                putchar('\n');
-            }
+            // if(i  == 4867){
+            //     std::cout<<"neighbors of 4867 after prune:\n";
+            //     for(auto j:graph[i]){
+            //         std::cout<<j<<" ";
+            //     }
+            //     putchar('\n');
+            // }
             //for all points j in Nout(i)
             for(const auto & j:graph[i]){
                 //temp vector to call search
@@ -474,15 +474,15 @@ struct VamanaIndex {
             Gf[f] = std::make_unique<VamanaIndex>(db);
             Gf[f]->init_graph(R_small, Pf[f]);
             if (f==1.0f){
-                std::cout << "Graph for filter 1.0f\n";
-                Gf[f]->print_graph();   
+                // std::cout << "Graph for filter 1.0f\n";
+                // Gf[f]->print_graph();   
             }
             int med = db->medoid_naive(Pf[f]);
             // std::cout << "Pf[" << f << "].size(): " << Pf[f].size() << std::endl;
             Gf[f]->vamana_indexing(med, a, L_small, R_small, Pf[f]);
             if (f==1.0f){
-                std::cout << "Graph for filter 1.0f\n";
-                Gf[f]->print_graph();   
+                // std::cout << "Graph for filter 1.0f\n";
+                // Gf[f]->print_graph();   
             }
             for (auto& kv: Gf[f]->graph) { //pare kathe vertice to Gf, pou ousiastika einai to Pf, kai valta ston megalo grafo G (this->graph)
                 graph[kv.first] = std::move(kv.second);
