@@ -26,7 +26,7 @@ struct VamanaIndex {
     Matrix<T>* db;
     size_t vecnum;
     size_t deg;
-    std::unordered_map<T,std::vector<int>>* Pf;
+    std::unordered_map<T,std::vector<int>> Pf;
     VamanaIndex() : db(nullptr), vecnum(0), deg(0) {}
 
     //constructor used for main
@@ -187,7 +187,7 @@ struct VamanaIndex {
             for (auto it=V.begin();it!=V.end();){
                 int i=*it;
                 auto vec1 = db->row(p_star_idx);
-                auto vec2 = db->row(i);
+                auto vec3 = db->row(i);
                 auto d1 =Matrix<T>::sq_euclid(vec1,vec2, vec1.size());                
                                                                     
                 auto d2 = Matrix<T>::sq_euclid(vec1,vec3,vec1.size());   //d(p,p')

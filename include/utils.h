@@ -305,7 +305,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     // R-regular graph initialization
     auto init_start = std::chrono::high_resolution_clock::now();
     VamanaIndex<T> v_m(&base_m);
-    v_m.Pf = &Pff;
+    v_m.Pf = Pff;
     auto init_end = std::chrono::high_resolution_clock::now();
     auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
     std::cout << ">Time taken to initialize Graph: " << init_duration / 1e6 << " sec(s)." << std::endl;
