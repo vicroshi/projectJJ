@@ -143,6 +143,32 @@ struct VamanaIndex {
         return ;
     }
     
+    int save_graph(std::string& path, std::string& type){
+        std::ios_base::openmode mode;
+        if(type=="txt")
+            mode = std::ios::out;
+        else if(type=="binary")
+            mode = std::ios::binary;
+        else{
+            std::cerr<<"Invalid file type"<<std::endl;
+            return -1;
+        }
+        std::ofstream out(path, openmode | std::ios::trunc);
+        if(!out.is_open()){
+            std::cerr<<"Error opening file for writing"<<std::endl;
+            return -1;
+        }
+        for(const auto& kv:graph){
+            int dim = kv.second.size() + 1;
+            out.write(reinterpret_cast<const char*>(&dim), sizeof(int));
+            out.write(reinterpret_cast<const char*>(&kv.first), sizeof(int));
+            for(const auto e: kv.second){
+                out.write(reinterpret_cast<const char*>(&e), sizeof(int));
+            }
+        }
+        out.close();
+    }
+
     void keep_k_closest(std::unordered_set<int>& source,const int& k,const std::span<T>& query){
         if( k<=0 || (size_t) k > source.size()) return;
         std::unordered_set<int> temp;
