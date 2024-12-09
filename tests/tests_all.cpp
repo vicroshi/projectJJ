@@ -19,6 +19,8 @@ extern void test_k_closest();
 extern void test_prune();
 extern void test_vamana_index();
 extern void test_init();
+extern void test_save_graph();
+extern void test_load_graph();
 /*
  *
  *
@@ -66,6 +68,8 @@ TEST_LIST = {
     {"k_closest",test_k_closest},
     {"prune",test_prune},
     {"vamana_index",test_vamana_index},
+    {"save_graph",test_save_graph},
+    {"load_graph",test_load_graph},
     {"recall",test_recall},
     {"filtered_greedy",test_filtered_greedy},
     {"filtered_prune",test_filtered_prune},
