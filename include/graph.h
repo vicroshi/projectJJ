@@ -30,7 +30,7 @@ struct VamanaIndex {
     Matrix<T>* db;
     size_t vecnum;
     size_t deg;
-    std::unordered_map<T,std::vector<int>> Pf;
+    std::unordered_map<T,std::vector<int>>* Pf;
     VamanaIndex() : db(nullptr), vecnum(0), deg(0) {}
 
     //constructor used for main
@@ -99,19 +99,23 @@ struct VamanaIndex {
         L.insert(start_idx);
         V.clear(); //empty set
         //L-V
-        std::vector<int> vecL(L.begin(),L.end()); //copy to vector for mutable operations
-        std::vector<int> vecV(V.begin(), V.end());
-        std::sort(vecL.begin(), vecL.end());
-        std::sort(vecV.begin(), vecV.end());
-        std::vector<int> difference;
-        std::set_difference(vecL.begin(), vecL.end(), vecV.begin(), vecV.end(), std::back_inserter(difference));
+        // std::vector<int> vecL(L.begin(),L.end()); //copy to vector for mutable operations
+        // std::vector<int> vecV(V.begin(), V.end());
+        // std::sort(vecL.begin(), vecL.end());
+        // std::sort(vecV.begin(), vecV.end());
+        // std::vector<int> difference;
+        // std::set_difference(vecL.begin(), vecL.end(), vecV.begin(), vecV.end(), std::back_inserter(difference));
         
+        //at first iteration only elements of L will be used, since V is empty, L-V = L
+        std::vector<int> difference(L.begin(),L.end()); 
+        auto vec2 = query; //query point
+
         while( !(difference.empty()) ){
             int p_star_idx=-1;
             double min_dist=std::numeric_limits<double>::max();  
             for(const auto& item:difference){
                 auto vec1 = db->row(item); //p*
-                auto vec2 = query; //query point
+                
                 auto dist =Matrix<T>::sq_euclid(vec1,vec2, vec1.size());
                 if(dist<min_dist){
                     min_dist=dist;
@@ -174,12 +178,15 @@ struct VamanaIndex {
         }
         V.erase(p); //bgazoume to p
         graph[p].clear();
-        int p_star_idx;
+        int p_star_idx; 
+        
+        auto vec1 = db->row(p);
+
         while(!V.empty()){
             double min_dist=std::numeric_limits<double>::max(); 
             for(const auto & item:V){
                 //distance tou p me kathe stoixeio tou V (p')      
-                auto vec1 = db->row(p);
+               
                 auto vec2 = db->row(item); //
                 auto dist = Matrix<T>::sq_euclid(vec1, vec2,vec1.size());
                 if(dist<min_dist){
@@ -192,15 +199,16 @@ struct VamanaIndex {
 
             if(graph[p].size()==R)
                 break;
-            
+
+            //vec1: p , vec2: p*, vec3: p' in V
+            auto vec2 = db->row(p_star_idx);
             for (auto it=V.begin();it!=V.end();){
                 int item=*it;
-                auto vec1 = db->row(p_star_idx);
-                auto vec2 = db->row(item);
-                auto d1 =Matrix<T>::sq_euclid(vec1,vec2, vec1.size());                
+                
+                auto vec3 = db->row(item);
+                auto d1 =Matrix<T>::sq_euclid(vec2,vec3, vec3.size());  //d(p*,p')               
                                                                     
-                vec1 = db->row(p);
-                auto d2 = Matrix<T>::sq_euclid(vec1,vec2,vec1.size());   
+                auto d2 = Matrix<T>::sq_euclid(vec1,vec3,vec1.size());   //d(p,p')
 
                 if(a*d1<=d2)
                     it=V.erase(it);//erase and get new iterator position
@@ -273,9 +281,10 @@ struct VamanaIndex {
             //p*
             int p_star_idx=-1;
             double min_dist=std::numeric_limits<double>::max();
+            auto vec2 = query; //query point
             for(const auto& item:difference){//p in L-V
                 auto vec1 = db->row(item);
-                auto vec2 = query; //query point
+                
                 auto dist =Matrix<T>::sq_euclid(vec1,vec2, vec1.size());
                 // std::cout<<dist<<std::endl;
                 if(dist<min_dist){
@@ -324,13 +333,16 @@ struct VamanaIndex {
         //neighbors of p are deleted
         graph[p].clear();
         int p_star_idx;
+        
+        auto vec1 = db->row(p);
+
         while(V.size()>0){
 
             //min distance (p,p'), p' IN V
             double min_dist=std::numeric_limits<double>::max(); 
             for(const auto & item:V){
                 //distance of p with each element of V (p')      
-                auto vec1 = db->row(p);
+                
                 auto vec2 = db->row(item); //p'
                 auto dist = Matrix<T>::sq_euclid(vec1, vec2,vec1.size());
                 if(dist<min_dist){
@@ -346,6 +358,9 @@ struct VamanaIndex {
                 break;
 
             //for each p' in V
+            //vec1: p, vec2:p*, vec3: p' in V
+            auto vec2 = db->row(p_star_idx);
+
             for (auto it=V.begin();it!=V.end();){
                 int p_tonos=*it;
 
@@ -357,14 +372,14 @@ struct VamanaIndex {
                     
 
                 //second if, for the distances
-                auto vec1 = db->row(p_star_idx);
-                auto vec2 = db->row(p_tonos);
+                
+                auto vec3 = db->row(p_tonos);
                 //d(p*,p')
-                auto d1 =Matrix<T>::sq_euclid(vec1,vec2, vec1.size());                
+                auto d1 =Matrix<T>::sq_euclid(vec2,vec3, vec2.size());                
                                                                     
                 vec1 = db->row(p);
                 //d(p,p')
-                auto d2 = Matrix<T>::sq_euclid(vec1,vec2,vec1.size());   
+                auto d2 = Matrix<T>::sq_euclid(vec1,vec3,vec1.size());   
                 if(a*d1<=d2)
                     it=V.erase(it);//erase and get new iterator position
                 else

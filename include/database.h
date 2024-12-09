@@ -138,8 +138,9 @@ struct Matrix{
         std::mt19937 g(rd());
         size_t tau; //if t > no. of points with a specific filter, i have to use the no. of filters, so tau= t>no. of points ? no. of points : t 
         std::unordered_map<int, int>T_counter; //T is a counter for each point
-        for(size_t i=0;i<vecnum;i++){//fill hashmap
-            Pf[(*vec_filter)[i]].push_back(i);
+        for(size_t i=0;i<vecnum;i++){
+            //fill hashmap
+            // Pf[(*vec_filter)[i]].push_back(i);
             T_counter[i]=0; //initialize counter to 0 for all points
         }
         
