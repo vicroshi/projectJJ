@@ -3,6 +3,8 @@
 #include "utils.h"
 #include "graph.h"
 #include <iterator> // for std::back_inserter
+#include <fstream>
+#include <filesystem>
 
 std::string getFileExtension(const std::string& filePath){
     // Find the last dot in the file path
@@ -50,4 +52,39 @@ double recall_k(const int& k, std::vector<int>& X, std::vector<int>& G){
     return (double) intersection.size()/(double) k;
 }
 
+std::filesystem::path get_file_path(const size_t& k, const size_t& L, const size_t& R, const float& a,std::string type){
+    std::filesystem::path current_path = std::filesystem::current_path();
 
+        std::filesystem::path temp=current_path; //find common parent folder
+        while (!temp.empty() && temp.filename() != "projectJJ") {
+            temp = temp.parent_path();
+        }
+
+        // Find the project root directory
+        std::filesystem::path project_root = temp;
+
+        // Construct the desired dir path,create dir if not already existent
+        std::filesystem::path desired_directory = project_root / "graphs" ;
+        
+        if (!std::filesystem::exists(desired_directory)) {
+            std::filesystem::create_directories(desired_directory);
+            std::cout << "Directory created: " << desired_directory << std::endl;
+        }
+
+        //create file path.
+        std::string a_str = std::to_string(a);
+        std::string k_str = std::to_string(k);
+        std::string L_str = std::to_string(L);
+        std::string R_str = std::to_string(R);
+        if (a_str.length() > 3) { //keep only 1 decimal,assuming whole part is 1 digit
+            a_str = a_str.substr(0, 3);
+        }
+        //construct file name
+        std::ostringstream file_name_stream;
+        file_name_stream << type << k_str << "_" << L_str << "_" <<R_str<<"_"<<a_str<<"_" << "variation.bin";
+        std::string file_name = file_name_stream.str();
+
+        // Construct the desired file path
+        std::filesystem::path desired_file = desired_directory / file_name;
+        return desired_file;
+}

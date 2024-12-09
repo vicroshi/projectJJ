@@ -44,6 +44,7 @@ extern void test_recall();
 extern void test_extract_data();
 extern void test_extract_query();
 extern void test_remove_negative_elements();
+extern void test_file_path();
 
 /*
  *
@@ -79,5 +80,6 @@ TEST_LIST = {
     {"extract_query",test_extract_query},
     {"remove_negative_elements",test_remove_negative_elements},
     {"filtered_vamana_indexing",test_filtered_vamana_indexing},
+    {"file_path",test_file_path},
     {nullptr, nullptr}
 };
