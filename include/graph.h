@@ -211,6 +211,9 @@ struct VamanaIndex {
     void robust_prune(int p,std::vector<int>& V,float a,size_t R){
 //        V.erase(p); //bgazoume to p
         graph[p].clear();
+
+        auto vec1 = db->row(p);
+
         int p_star_idx;
         // std::sort(V.begin(),V.end(),[&](int v1,int v2){
         //     return Matrix<T>::sq_euclid(db->row(p),db->row(v1), db->dim) < Matrix<T>::sq_euclid(db->row(p),db->row(v2),db->dim);

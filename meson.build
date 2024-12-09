@@ -42,3 +42,5 @@ e = executable('unit_tests',
 #dummy_exe = executable('test', 'datasets/test/dummy_create.cpp')
 
 test('unit_tests',e)
+
+executable('brute', 'datasets/test/brute.cpp')
