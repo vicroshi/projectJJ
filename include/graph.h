@@ -50,14 +50,16 @@ struct VamanaIndex {
         //generator for shuffle
         std::random_device rd;
         std::mt19937 rndm(rd());
-        std::vector<int> vec(vecnum);
+        std::vector<int> vec;
         if(P.empty()){
+            vec.resize(vecnum);
             std::iota(vec.begin(), vec.end(), 0);
         }
         else{
+            // std::cout << "P is not empty\n";
             vec=P;
         }
-        size_t R = r > vec.size() ? vec.size() : r;
+        size_t R = r > vec.size() ? vec.size()-1 : r;
         std::vector shuff_vec = vec;
         for (auto p : vec) {
             std::unordered_set<int> neighbors;
@@ -80,7 +82,7 @@ struct VamanaIndex {
     void print_graph(){
         // int i=0;
         for (auto &i : graph) {
-            std::cout<<"for node "<<std::setw(3)<< i.first + 1<<": ";
+            std::cout<<"for node "<<std::setw(3)<< i.first<<": ";
             for (auto &j : i.second) {
                 std::cout <<std::setw(3) << j << " ";
             }
@@ -408,14 +410,13 @@ struct VamanaIndex {
 
     void stitched_vamana_indexing(float a, size_t R_small, size_t R_stitched, size_t L_small){
         std::unordered_map<T,std::unique_ptr<VamanaIndex>> Gf;
+        putchar('\n');
         Gf.reserve(db->filters_set->size());
         for (auto f: *db->filters_set) {
-            std::cout<<"filter: "<<f<< " ";
             Gf[f] = std::make_unique<VamanaIndex>(db);
             Gf[f]->init_graph(R_small, Pf[f]);
             int med = db->medoid_naive(Pf[f]);
             Gf[f]->vamana_indexing(med, a, L_small, R_small, Pf[f]);
-//            Gf[f]->vamana_indexing(med, a, L_small, R_stitched, Pf[f]);
             for (auto& kv: Gf[f]->graph) { //pare kathe vertice to Gf, pou ousiastika einai to Pf, kai valta ston megalo grafo G (this->graph)
                 graph[kv.first] = std::move(kv.second);
             }
