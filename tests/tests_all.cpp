@@ -27,6 +27,7 @@ extern void test_init();
 //filtered tests
 extern void test_filtered_greedy();
 extern void test_filtered_prune();
+extern void test_filtered_vamana_indexing();
 /*
  *
  *
@@ -71,5 +72,6 @@ TEST_LIST = {
     {"extract_data",test_extract_data},
     {"extract_query",test_extract_query},
     {"remove_negative_elements",test_remove_negative_elements},
+    {"filtered_vamana_indexing",test_filtered_vamana_indexing},
     {nullptr, nullptr}
 };
