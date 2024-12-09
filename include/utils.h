@@ -350,8 +350,11 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
     std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
     std::cout<<"\n\n--END OF FILTERED VAMANA--\n\n";
+
+
+    //stitched vamana
 //     VamanaIndex<T> v_stitched(&base_m);
-//     v_stitched.Pf = Pff;
+//     v_stitched.Pf =& Pff;
 //     std::cout << "\nSTITCHED" << std::endl;
 //     auto start = std::chrono::high_resolution_clock::now();
 //     v_stitched.stitched_vamana_indexing(a, 5, R, 10);
