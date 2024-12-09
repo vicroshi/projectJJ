@@ -4,3 +4,4 @@ datasets/*
 datasets/test/dummy_create.cpp
 !datasets/test
 .vscode
+./run.sh
