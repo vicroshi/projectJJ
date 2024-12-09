@@ -473,17 +473,17 @@ struct VamanaIndex {
         for (auto f: *db->filters_set) {
             Gf[f] = std::make_unique<VamanaIndex>(db);
             Gf[f]->init_graph(R_small, Pf[f]);
-            if (f==1.0f){
-                // std::cout << "Graph for filter 1.0f\n";
-                // Gf[f]->print_graph();   
-            }
+            // if (f==1.0f){
+            //     // std::cout << "Graph for filter 1.0f\n";
+            //     // Gf[f]->print_graph();   
+            // }
             int med = db->medoid_naive(Pf[f]);
             // std::cout << "Pf[" << f << "].size(): " << Pf[f].size() << std::endl;
             Gf[f]->vamana_indexing(med, a, L_small, R_small, Pf[f]);
-            if (f==1.0f){
-                // std::cout << "Graph for filter 1.0f\n";
-                // Gf[f]->print_graph();   
-            }
+            // if (f==1.0f){
+            //     // std::cout << "Graph for filter 1.0f\n";
+            //     // Gf[f]->print_graph();   
+            // }
             for (auto& kv: Gf[f]->graph) { //pare kathe vertice to Gf, pou ousiastika einai to Pf, kai valta ston megalo grafo G (this->graph)
                 graph[kv.first] = std::move(kv.second);
             }

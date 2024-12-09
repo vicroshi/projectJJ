@@ -318,7 +318,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     auto medoid_end = std::chrono::high_resolution_clock::now();
     auto medoid_duration = std::chrono::duration_cast<std::chrono::microseconds>(medoid_end - medoid_start).count();
     std::cout << ">Time taken to find medoid: " << medoid_duration / 1e6 << " sec(s)." << std::endl;
-
+    std::cout<<"\n\nFILTERED\n";
     // load or build graph
     if(!load){
         // actual indexing
@@ -364,7 +364,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         v_m.save_graph(save_path);
     }
 
-    // std::cout<<"\n\n--END OF FILTERED VAMANA--";
+    std::cout<<"\n\n--END OF FILTERED VAMANA--";
     VamanaIndex<T> v_stitched(&base_m);
     v_stitched.Pf = Pff;
     std::cout << "\n\nSTITCHED" << std::endl;
