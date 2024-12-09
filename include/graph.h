@@ -17,7 +17,7 @@
 #include "database.h"
 #include <iterator> // for std::back_inserter
 #include <unordered_map>
-
+#include <fstream>
 
 template <typename T>
 struct VamanaIndex {
@@ -143,17 +143,9 @@ struct VamanaIndex {
         return ;
     }
     
-    int save_graph(std::string& path, std::string& type){
-        std::ios_base::openmode mode;
-        if(type=="txt")
-            mode = std::ios::out;
-        else if(type=="binary")
-            mode = std::ios::binary;
-        else{
-            std::cerr<<"Invalid file type"<<std::endl;
-            return -1;
-        }
-        std::ofstream out(path, openmode | std::ios::trunc);
+    int save_graph(const std::string& path){
+        std::ofstream out(path, std::ios_base::binary | std::ios::trunc);
+
         if(!out.is_open()){
             std::cerr<<"Error opening file for writing"<<std::endl;
             return -1;
@@ -162,11 +154,34 @@ struct VamanaIndex {
             int dim = kv.second.size() + 1;
             out.write(reinterpret_cast<const char*>(&dim), sizeof(int));
             out.write(reinterpret_cast<const char*>(&kv.first), sizeof(int));
-            for(const auto e: kv.second){
-                out.write(reinterpret_cast<const char*>(&e), sizeof(int));
+            for(const auto& neighbor:kv.second){
+                out.write(reinterpret_cast<const char*>(&neighbor), sizeof(int));
             }
         }
         out.close();
+        return 0;
+    }
+
+    int load_graph(const std::string& path){
+        std::ifstream in(path, std::ios_base::binary);
+        if(!in.is_open()){
+            std::cerr<<"Error opening file for reading"<<std::endl;
+            return -1;
+        }
+        int dim;
+        while(in.read(reinterpret_cast<char*>(&dim), sizeof(int))){
+            std::unordered_set<int> neighbors;
+            int idx;
+            in.read(reinterpret_cast<char*>(&idx), sizeof(int));
+            for(int i=0;i<dim-1;i++){
+                int neighbor;
+                in.read(reinterpret_cast<char*>(&neighbor), sizeof(int));
+                neighbors.insert(neighbor);
+            }
+            graph[idx]=std::move(neighbors);
+        }
+        in.close();
+        return 0;
     }
 
     void keep_k_closest(std::unordered_set<int>& source,const int& k,const std::span<T>& query){
@@ -197,24 +212,25 @@ struct VamanaIndex {
 //        V.erase(p); //bgazoume to p
         graph[p].clear();
         int p_star_idx;
+        // std::sort(V.begin(),V.end(),[&](int v1,int v2){
+        //     return Matrix<T>::sq_euclid(db->row(p),db->row(v1), db->dim) < Matrix<T>::sq_euclid(db->row(p),db->row(v2),db->dim);
+        // });
         std::sort(V.begin(),V.end(),[&](int v1,int v2){
-            return Matrix<T>::sq_euclid(db->row(p),db->row(v1), db->dim) < Matrix<T>::sq_euclid(db->row(p),db->row(v2),db->dim);
-        });
+                return Matrix<T>::sq_euclid(db->row(p),db->row(v1), db->dim) < Matrix<T>::sq_euclid(db->row(p),db->row(v2),db->dim);
+        }); 
         while(!V.empty()){
             p_star_idx=V[0];
-            //update neighbors of p
             graph[p].insert(p_star_idx);
-
             if(graph[p].size()==R)
                 break;
 
             //vec1: p , vec2: p*, vec3: p' in V
+            auto vec1 = db->row(p);
             auto vec2 = db->row(p_star_idx);
             for (auto it=V.begin();it!=V.end();){
                 int i=*it;
-                auto vec1 = db->row(p_star_idx);
                 auto vec3 = db->row(i);
-                auto d1 =Matrix<T>::sq_euclid(vec1,vec2, vec1.size());                
+                auto d1 =Matrix<T>::sq_euclid(vec2,vec3, vec1.size()); //d(p*,p')
                                                                     
                 auto d2 = Matrix<T>::sq_euclid(vec1,vec3,vec1.size());   //d(p,p')
 
@@ -248,12 +264,25 @@ struct VamanaIndex {
             std::vector<int> tmp;
             tmp.reserve(V.size() + graph[i].size());
             std::set_union(V.begin(), V.end(), graph[i].begin(), graph[i].end(), std::back_inserter(tmp));
-
+            if(i  == 4867){
+                std::cout<<"neighbors of 4867 before prune:\n";
+                for(auto j:tmp){
+                    std::cout<<j<<" ";
+                }
+                putchar('\n');
+            }
             robust_prune(i,tmp,a,R);
+            if(i  == 4867){
+                std::cout<<"neighbors of 4867 after prune:\n";
+                for(auto j:graph[i]){
+                    std::cout<<j<<" ";
+                }
+                putchar('\n');
+            }
             //for all points j in Nout(i)
             for(const auto & j:graph[i]){
                 //temp vector to call search
-//                std::unordered_set<int> temp_neighbors = graph[j];
+//                std::unordered_set<int> temp_neighbors = gbraph[j];
                 std::vector<int> temp_neighbors(graph[j].begin(), graph[j].end());
 //                temp_neighbors.insert(i);
                 temp_neighbors.push_back(i);
@@ -441,13 +470,22 @@ struct VamanaIndex {
         for (auto f: *db->filters_set) {
             Gf[f] = std::make_unique<VamanaIndex>(db);
             Gf[f]->init_graph(R_small, Pf[f]);
+            if (f==1.0f){
+                std::cout << "Graph for filter 1.0f\n";
+                Gf[f]->print_graph();   
+            }
             int med = db->medoid_naive(Pf[f]);
+            // std::cout << "Pf[" << f << "].size(): " << Pf[f].size() << std::endl;
             Gf[f]->vamana_indexing(med, a, L_small, R_small, Pf[f]);
+            if (f==1.0f){
+                std::cout << "Graph for filter 1.0f\n";
+                Gf[f]->print_graph();   
+            }
             for (auto& kv: Gf[f]->graph) { //pare kathe vertice to Gf, pou ousiastika einai to Pf, kai valta ston megalo grafo G (this->graph)
                 graph[kv.first] = std::move(kv.second);
             }
         }
-
+        // print_graph();
     }
 
 };

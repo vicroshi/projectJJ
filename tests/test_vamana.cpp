@@ -7,7 +7,9 @@
 #include "database.h"
 #include "graph.h"
 #include <set>
-
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 void test_init() {
     int points[6][4] = {
         {3, 7, 12, 8},
@@ -398,5 +400,53 @@ void test_vamana_index(){
     for(size_t i=0;i<V_F.vecnum;i++){
         TEST_ASSERT(V_F.graph[i].size()<=R);
     }
+}
 
+void test_save_graph(){
+    std::unordered_map<int,std::unordered_set<int>>graph = {
+        {0,{1,2,5}},
+        {1,{0,2,3,5}},
+        {2,{0,1,4,5}},
+        {3,{0,1}},
+        {4,{0,3,5}},
+        {5,{0,1,2,3,4}}
+    };
+    int points[6][4] = {
+        {3, 7, 12, 8},
+        {10, 2, 6, 14},
+        {5, 15, 1, 9},
+        {0, 13, 4, 11},
+        {7, 3, 10, 2},
+        {12, 5, 8, 6}
+    };
+    Matrix<int> i_m(4,6,&points[0][0]);   
+    VamanaIndex<int> V(&i_m);
+    V.graph=graph;
+    int ret = V.save_graph("test_graph.bin");
+    TEST_ASSERT(ret!=-1);
+    struct stat bf;
+    TEST_ASSERT(stat("test_graph.bin",&bf)!=-1);
+    TEST_ASSERT(bf.st_size>0);
+    // remove("test_graph.bin");   
+}
+
+void test_load_graph(){
+    std::unordered_map<int, std::unordered_set<int>> graph = {
+        {0,{1,2,5}},
+        {1,{0,2,3,5}},
+        {2,{0,1,4,5}},
+        {3,{0,1}},
+        {4,{0,3,5}},
+        {5,{0,1,2,3,4}}
+    };
+    VamanaIndex<int> V;
+    V.load_graph("test_graph.bin");
+    TEST_ASSERT(V.graph.size()==6);
+    for(auto& kv:V.graph){
+        TEST_ASSERT(graph[kv.first]==kv.second);
+    }
+    V.graph.clear();
+    TEST_ASSERT(V.load_graph("non_existent.bin") == -1);
+    TEST_ASSERT(V.graph.size()==0);
+    remove("test_graph.bin");
 }
