@@ -66,7 +66,11 @@ void test_stitched() {
     int fq = 2;
     Matrix<int> i_m(4,6,&vecs, &vecs_filters, &filters);
     VamanaIndex<int> V(&i_m);
-    std::unordered_map<int,int> S ={{1,2}};
+    std::unordered_map<int,int> S ={
+        {1,2},
+        {2,3},
+        {3,5}
+    };
     std::unordered_set<int> L,V_f;
     std::unordered_map<int, std::vector<int>> Pf = {
         {1,{0,1,2}},
@@ -76,13 +80,23 @@ void test_stitched() {
     V.Pf = Pf;
     TEST_ASSERT(V.vecnum==6);
     TEST_ASSERT(V.db->filters_set->size()==3);
+    V.stitched_vamana_indexing(1.1f, 32, 32, 100);
+    V.filtered_greedy_search(S,query,1,5,fq,L,V_f);
+    // std::cout << "\nL.size():" << L.size() << std::endl;
+    putchar('\n');
+    V.print_graph();
+    for(auto i:L){
+        std::cout<<i<<" ";
+    }
+    putchar('\n');
+    for(auto i:V_f){
+        std::cout<<i<<" ";
+    }
+    // TEST_CHECK(L.size()==1);
 
-    // V.stitched_vamana_indexing(1.1f, 32, 32, 100);
-    // V.filtered_greedy_search(S,query,1,5,fq,L,V_f);
-    // TEST_ASSERT(L.size()==1);
     // TEST_ASSERT(L.contains(4));
-    // V.filtered_greedy_search(S,query,2,5,4,L,V_f);
-    // TEST_ASSERT(L.empty());
+    V.filtered_greedy_search(S,query,2,5,4,L,V_f);
+    TEST_ASSERT(L.empty());
 }
 
 void test_filtered_prune() {

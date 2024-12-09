@@ -29,6 +29,7 @@ void test_init() {
     Matrix<int> i_m(4,6,&points[0][0]);
     VamanaIndex<int> V(&i_m);
     V.init_graph(3);
+    // std::cout << 
     TEST_ASSERT(V.graph.size()==6);
     for (auto& kv : V.graph) {
         TEST_ASSERT(kv.second.size()==3);
