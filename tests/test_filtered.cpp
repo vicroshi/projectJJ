@@ -68,26 +68,67 @@ void test_filtered_prune() {
     };
     std::vector<float> vecs(&points_f[0][0], &points_f[0][0] + 14*4);
 
-    size_t R=2;
-    float a=1.1;
-    size_t t=10;
+    size_t R=3;
+    float a=1.1f;
+    std::vector<float> vecs_filters = {1.0f,5.0f,2.0f,2.0f,1.0f,3.0f,1.0f,2.0f,3.0f,5.0f,1.0f,2.0f,3.0f,5.0f};
+    std::unordered_set<float> filters = {1.0f, 2.0f, 3.0f, 5.0f};
+    Matrix<float> f_m(4,14,&vecs, &vecs_filters, &filters);
+    VamanaIndex V_F(6,&f_m); //make a random graph with 6 neighbors for each node
+
+    std::unordered_set<int>Lf={},vf={};
+    //prune some edges for some vectors
+    V_F.filtered_robust_prune(0,vf,a,R);
+    TEST_ASSERT(V_F.graph[0].size()<=3);
+
+    //prune some edges for some vectors
+    V_F.filtered_robust_prune(5,vf,a,R);
+    TEST_ASSERT(V_F.graph[5].size()<=3);
+
+
+
+}
+
+
+void test_filtered_vamana_indexing(){
+
+    float points_f[14][4] = {
+        {3.0f, 7.0f, 12.0f, 8.0f},
+        {5.0f, 15.0f, 1.0f, 9.0f},
+        {0.0f, 13.0f, 4.0f, 11.0f},
+        {10.0f, 2.0f, 6.0f, 14.0f},
+        {12.0f, 5.0f, 8.0f, 6.0f},
+        {9.0f, 0.0f, 7.0f, 13.0f},
+        {14.0f, 2.0f, 11.0f, 3.0f},
+        {4.0f, 8.0f, 15.0f, 5.0f},
+        {6.0f, 10.0f, 3.0f, 12.0f},
+        {1.0f, 9.0f, 14.0f, 0.0f},
+        {11.0f, 4.0f, 13.0f, 7.0f},
+        {2.0f, 6.0f, 9.0f, 15.0f},
+        {15.0f, 1.0f, 5.0f, 10.0f},
+        {8.0f, 12.0f, 2.0f, 4.0f}
+    };
+    std::vector<float> vecs(&points_f[0][0], &points_f[0][0] + 14*4);
+
+    size_t R=5;
+    float a=1.1f;
     size_t list_size=10;
     std::vector<float> vecs_filters = {1.0f,5.0f,2.0f,2.0f,1.0f,3.0f,1.0f,2.0f,3.0f,5.0f,1.0f,2.0f,3.0f,5.0f};
     std::unordered_set<float> filters = {1.0f, 2.0f, 3.0f, 5.0f};
     Matrix<float> f_m(4,14,&vecs, &vecs_filters, &filters);
-    VamanaIndex V_F(&f_m);
+    VamanaIndex V_F(&f_m); 
 
-    std::unordered_map<float, int> Medoid;          
-    std::unordered_map<float, std::vector<int>> Pf;
-    f_m.find_medoid(t, Medoid, Pf);
+    std::unordered_map<float, int> Medoid={
+        {1.0f, 0},
+        {2.0f, 3},
+        {3.0f, 5},
+        {5.0f, 13}
+    };   
 
     V_F.filtered_vamana_indexing(Medoid,a,list_size,R);
 
-    
-    //graph must be of at most R-out degree
+    //check each node has at most R neighbors
     for(size_t i=0;i<V_F.vecnum;i++){
         TEST_ASSERT(V_F.graph[i].size()<=R);
     }
-
 
 }
