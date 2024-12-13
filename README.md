@@ -35,7 +35,7 @@
  - Με την εντολή 	`./unit_tests` γίνεται κανονική εκτέλεση του κάθε test  function. 
 
 # Valgrind
-valgrind <executable_name> -[argument list]
+`valgrind <executable_name> -[argument list]`
 
 
 
