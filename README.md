@@ -34,7 +34,8 @@
  - Με την εντολή `meson test` δίνεται ένα σύντομο αποτέλεσμα **OK/FAIL** που αφορά αν όλα πέτυχαν ή έστω ένα απέτυχε.
  - Με την εντολή 	`./unit_tests` γίνεται κανονική εκτέλεση του κάθε test  function. 
 
-
+# Valgrind
+valgrind <executable_name> -[argument list]
 
 
 
