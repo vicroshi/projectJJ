@@ -220,7 +220,7 @@ void extract_query_vector_info(std::vector<std::vector<T>>& data,std::vector<T>&
 }
 
 // while trying to get the groundtruth with brute force, i return -1 as indexes for any query nodes
-// with query type 2 or 3 and if a query node doesn't have 100 neighbors, i fill the vector with negative values
+// with query type 2 or 3 avecnumnd if a query node doesn't have 100 neighbors, i fill the vector with negative values
 // for readBin to work
 template <typename T>
 void remove_negative_elements(std::vector<std::vector<T>> &data,std::vector<std::vector<int>> &result) {
