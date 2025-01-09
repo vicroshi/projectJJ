@@ -93,7 +93,7 @@ void test_greedy(){
     V.graph[5].insert(4);
     V.graph[5].insert(1);
     V.graph[5].insert(2);
-    std::unordered_set<int>L={},v={};
+    std::vector<int>L,v;
     std::vector<int> int_q ={1,2,5,8};
     const std::span<int> q_i(int_q.data(), int_q.size());
     // int start_ind=i_m.medoid_naive();
@@ -101,7 +101,7 @@ void test_greedy(){
     //for k=1:
     V.greedy_search(start_ind,q_i,1,5,L,v);
     TEST_ASSERT(L.size()==1);
-    std::unordered_set<int>sol={0};
+    std::vector<int>sol={0};
     TEST_ASSERT(L==sol);
     //for k=2:
     L.clear();
@@ -109,6 +109,9 @@ void test_greedy(){
     V.greedy_search(start_ind,q_i,2,5,L,v);
     TEST_ASSERT(L.size()==2);
     sol={0,4};
+    for (auto i:L) {
+        std::cout << i << " ";
+    }
     TEST_ASSERT(L==sol);
     //for k=3:
     L.clear();
@@ -210,32 +213,35 @@ void test_greedy(){
     v.clear();
     Vf.greedy_search(start_ind,q_f,3,5,L,v);
     TEST_ASSERT(L.size()==3);
-    sol={4,1,0};
+    sol={0,4,1};
+    for (auto& i:L) {
+        std::cout << i << " ";
+    }
     TEST_ASSERT(L==sol);
     //for k=4:
     L.clear();
     v.clear();
     Vf.greedy_search(start_ind,q_f,4,5,L,v);
     TEST_ASSERT(L.size()==4);
-    sol={4,1,3,0};
+    sol={0,4,1,3};
     TEST_ASSERT(L==sol);
     //k==5
     L.clear();
     v.clear();
     Vf.greedy_search(start_ind,q_f,5,5,L,v);
     TEST_ASSERT(L.size()==5);
-    sol={4,1,3,5,0};
+    sol = {0,4,1,3,5};
     TEST_ASSERT(L==sol);
 }
 
 void test_k_closest(){
     int points_i[6][3] = {
-        {0, 1, 30},
-        {4, 5, 6},
-        {8, 9, 10},
-        {12, 13, 14},
-        {0, 1, 4},  
-        {8, 3, 15}  
+        {0, 1, 30}, //627
+        {4, 5, 6}, //19
+        {8, 9, 10}, //123
+        {12, 13, 14}, //323
+        {0, 1, 4}, //3
+        {8, 3, 15} //150
     };
     Matrix<int> i_m(3,6,&points_i[0][0]);
     VamanaIndex<int> VI(&i_m);
@@ -243,21 +249,24 @@ void test_k_closest(){
     std::vector<int> int_q ={1,2,5};
     const std::span<int> q_i(int_q.data(), int_q.size());
 
-    std::unordered_set<int> L={0,1,2,3,4,5};
-    VI.keep_k_closest(L,2,q_i);
-    std::unordered_set<int> true_closest_idx={1,4};
-
+    std::vector<int> L={0,1,2,3,4,5};
+    std::sort(L.begin(), L.end(),
+        [&](int v1, int v2) {
+            return Matrix<int>::sq_euclid(q_i, i_m.row(v1), i_m.dim) < Matrix<int>::sq_euclid(q_i, i_m.row(v2), i_m.dim);
+        });
+    VI.keep_k_closest(L,2);
+    std::vector<int> true_closest_idx={4,1};
     TEST_ASSERT(true_closest_idx==L);
 
 
     //for floats
     float points_f[6][4] = {
-        {0.1f, 1.5f, 2.0f, 3.0f},
-        {4.0f, 5.0f, 6.0f, 7.0f},
-        {8.0f, 9.0f, 10.0f, 11.0f},
-        {12.0f, 13.0f, 14.0f, 15.0f},
-        {0.0f, 1.0f, 4.0f, 6.0f},  
-        {8.0f, 3.0f, 15.0f, 1.0f}  
+        {0.1, 1.5, 2.0, 3.0},
+        {4.0, 5.0, 6.0, 7.0}, //28
+        {8.0, 9.0, 10.0, 11.0},
+        {12.0, 13.0, 14.0, 15.0},
+        {0.0, 1.0, 4.0, 6.0},  //19
+        {8.0, 3.0, 15.0, 1.0}
     };
     Matrix<float> f_m(4,6,&points_f[0][0]);
     VamanaIndex<float> VF(&f_m);
@@ -267,9 +276,15 @@ void test_k_closest(){
     const std::span<float> q_f(float_q.data(), float_q.size());
 
     L={0,1,2,3,4,5};
-    VF.keep_k_closest(L,2,q_f);
-    true_closest_idx={1,4};
-
+    std::sort(L.begin(), L.end(),
+        [&](int v1, int v2) {
+            return Matrix<int>::sq_euclid(q_i, i_m.row(v1), i_m.dim) < Matrix<int>::sq_euclid(q_i, i_m.row(v2), i_m.dim);
+        });
+    VF.keep_k_closest(L,2);
+    true_closest_idx={4,1};
+    for (auto i:L) {
+        std::cout << i << " ";
+    }
     TEST_ASSERT(true_closest_idx==L);
 }
 
@@ -363,7 +378,6 @@ void test_vamana_index(){
     Matrix<int> i_m(4,14,&points[0][0]);
     VamanaIndex<int> V(R,&i_m);
     auto start_ind=i_m.medoid_naive();
-    
     V.vamana_indexing(start_ind,a,list_size,R);
     
     //graph must be of at most R-out degree

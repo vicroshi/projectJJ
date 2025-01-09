@@ -9,7 +9,6 @@
 #include <vector>
 #include "database.h"
 #include "graph.h"
-#include <set>
 #include <unordered_set>
 #include <utils.h>
 
@@ -19,8 +18,8 @@ void test_filtered_greedy(){
         {3, 7, 12, 8},
         {10, 2, 6, 14},
         {5, 15, 1, 9},
-        {0, 13, 4, 11},
-        {7, 3, 10, 2},
+        {0, 13, 4, 11}, //306
+        {7, 3, 10, 2}, //162
         {12, 5, 8, 6}
     };
     std::vector vecs(&points[0][0], &points[0][0] + 6*4);
@@ -39,10 +38,11 @@ void test_filtered_greedy(){
     V.graph[3].insert(4);
     V.graph[4].insert(3);
     std::unordered_map<int,int> S ={{2,3}};
-    std::unordered_set<int> L,V_f;
+    std::vector<int> L,V_f;
     V.filtered_greedy_search(S,query,1,5,fq,L,V_f);
     TEST_ASSERT(L.size()==1);
-    TEST_ASSERT(L.contains(4));
+//    std::cout << L[0];
+    TEST_ASSERT(L[0]==4);
     V.filtered_greedy_search(S,query,2,5,4,L,V_f);
     TEST_ASSERT(L.empty());
 
@@ -71,7 +71,7 @@ void test_stitched() {
         {2,3},
         {3,5}
     };
-    std::unordered_set<int> L,V_f;
+    std::vector<int> L,V_f;
     std::unordered_map<int, std::vector<int>> Pf = {
         {1,{0,1,2}},
         {2,{3,4}},
@@ -126,7 +126,7 @@ void test_filtered_prune() {
     Matrix<float> f_m(4,14,&vecs, &vecs_filters, &filters);
     VamanaIndex V_F(6,&f_m); //make a random graph with 6 neighbors for each node
 
-    std::unordered_set<int>Lf={},vf={};
+    std::vector<int>Lf,vf;
     //prune some edges for some vectors
     V_F.filtered_robust_prune(0,vf,a,R);
     TEST_ASSERT(V_F.graph[0].size()<=3);
@@ -176,7 +176,7 @@ void test_filtered_vamana_indexing(){
     };   
 
     V_F.filtered_vamana_indexing(Medoid,a,list_size,R);
-
+    printf("here\n");
     //check each node has at most R neighbors
     for(size_t i=0;i<V_F.vecnum;i++){
         TEST_ASSERT(V_F.graph[i].size()<=R);

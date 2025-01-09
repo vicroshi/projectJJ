@@ -94,7 +94,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     double sum=0.0;
     for(size_t i=0;i<query_vecs_num;i++){
         std::span<T> query_span(query_m.row(i));
-        std::unordered_set<int>L,V;
+        std::vector<int>L,V;
         v_m.greedy_search(medoid,query_span,k,List_size,L,V);
         auto row=ground_m.row(i);
         std::vector<int> G(row.begin(),row.begin()+k);
@@ -132,7 +132,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
         //run greedy search to return the k-closest of requested query node
         std::span<T> query_span(query_m.row(query_point_index));
-        std::unordered_set<int>L,V;
+        std::vector<int>L,V;
         v_m.greedy_search(medoid,query_span,k,List_size,L,V);
         std::cout<<"[ ";
         for(auto item:L)
@@ -293,13 +293,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     std::vector<std::vector<int>> ground_data;
     ReadBin(ground_file_path, 100, ground_data_float, ground_no_of_points);
     remove_negative_elements(ground_data_float,ground_data); // format it as needed because binary is read with readBin and dimensions must be constant for each vector
-
-
-
-
-
     // times for each action
-
     // R-regular graph initialization
     auto init_start = std::chrono::high_resolution_clock::now();
     VamanaIndex<T> v_m(&base_m);
@@ -334,24 +328,26 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         std::cout<<"Loading graph from file:"<<load_path<<std::endl;
         if(v_m.load_graph(load_path)==-1) exit(1);
     }
-
     double sum_filtered=0.0f,sum_unfiltered=0.0f;
-
     for (uint32_t i = 0; i < query_no_of_points; i++){
-            std::unordered_set<int> L, V;
+            std::vector<int> L, V;
             std::span<T> query_span(query_m.row(i));
             v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-            std::vector<int> L_vec(L.begin(), L.end());
-//                std::cout<<"==============================\n"<<"for i:"<<i<<" with filter:"<<(*query_m.vec_filter)[i]<< ", L.size():"<<L.size()<<", ground.size():"<<ground_data[i].size()<<"\n";
-//                std::cout<<"\n";
                 size_t n = std::min(k, ground_data[i].size());
                 std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
                 if(query_type[i]==1.0f){
-                    auto recall= recall_k(n,L_vec,G_vec);
+                    std::cout << "For node " << i << ": [";
+                    for(auto item:L)
+                        std::cout<<item<<" ";
+                    std::cout<<"] GT: [";
+                    for (auto item:G_vec)
+                        std::cout<<item<<" ";
+                    std::cout<<"]\n";
+                    auto recall= recall_k(n,L,G_vec);
                     sum_filtered+=recall;
                 }
                 else if(query_type[i]==0.0f){
-                    auto recall=recall_k(n,L_vec,G_vec);
+                    auto recall=recall_k(n,L,G_vec);
                     sum_unfiltered+=recall;
                 }
     }
@@ -363,13 +359,10 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         std::filesystem::path save_path = get_file_path(k,List_size,R,a,"filtered_graph_");
         v_m.save_graph(save_path);
     }
-
     std::cout<<"\n\n--END OF FILTERED VAMANA--";
-    
     VamanaIndex<T> v_stitched(&base_m);
     v_stitched.Pf = Pff;
     std::cout << "\n\nSTITCHED" << std::endl;
-
     //load of build graph
     if(!load){
         auto start = std::chrono::high_resolution_clock::now();
@@ -384,20 +377,18 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         if(v_stitched.load_graph(load_path) ==-1) exit(1) ;
         
     }
-
     double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
     for (size_t i = 0; i < query_m.vecnum; i++) {
-            std::unordered_set<int> L, V;
+            std::vector<int> L, V;
             std::span<T> query_span(query_m.row(i));
             v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-            std::vector<int> L_vec(L.begin(), L.end());
             size_t n = std::min(k, ground_data[i].size());
             std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
             if(query_type[i]==1.0f){
-                st_sum_filtered+=recall_k(n,L_vec,G_vec);
+                st_sum_filtered+=recall_k(n,L,G_vec);
             }
             else if(query_type[i]==0.0f){
-                st_sum_unfiltered+=recall_k(n,L_vec,G_vec);
+                st_sum_unfiltered+=recall_k(n,L,G_vec);
             }
     }
     std::cout << std::fixed << std::setprecision(2);
