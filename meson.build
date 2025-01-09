@@ -1,6 +1,6 @@
 project('projectJJ', 'cpp',
         version : '1.0.0',
-        default_options : ['warning_level=3', 'cpp_std=c++20','optimization=3'])
+        default_options : ['warning_level=3', 'cpp_std=c++20','optimization=2', 'debug=true'])
 
 cpp = meson.get_compiler('cpp')
 # Setting compiler arguments for AVX/AVX2, if supported
@@ -15,7 +15,7 @@ else
 endif
 
 # Adding optimization flag -O3
-add_project_arguments('-O3', language: 'cpp')
+add_project_arguments('-Og', language: 'cpp')
 
 # These arguments are only used to build the shared library
 # not the executables that use the library.

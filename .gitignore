@@ -6,3 +6,4 @@ datasets/test/dummy_create.cpp
 .vscode
 run.sh
 graphs/*
+profiler
