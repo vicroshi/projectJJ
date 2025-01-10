@@ -102,6 +102,9 @@ struct VamanaIndex {
         diff.reserve(list_size);
         diff.push_back(start_idx);
 //        while( !(difference.empty()) ){
+        auto cmp_dist = [&](int v1,int v2){
+            return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
+        };
         while (!diff.empty()) {
 //            for (auto d:diff) {
 //                std::cout << d << " ";
@@ -118,13 +121,9 @@ struct VamanaIndex {
 //            }
             //probably unnecessary check
             V.push_back(p_star_idx);
-            std::sort(V.begin(), V.end(), [&](int v1, int v2) {
-                return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
-            });
+            std::sort(V.begin(), V.end(), cmp_dist);
             L.insert(L.end(), graph[p_star_idx].begin(), graph[p_star_idx].end());
-            std::sort(L.begin(), L.end(), [&](int v1, int v2) {
-                return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
-            });
+            std::sort(L.begin(), L.end(), cmp_dist);
             auto l = std::unique(L.begin(), L.end());
             L.erase(l, L.end());
             //keep list_size closest to Xq
@@ -132,7 +131,7 @@ struct VamanaIndex {
                 keep_k_closest(L, list_size);
             }
             diff.clear();
-            std::ranges::set_difference(L,V,std::back_inserter(diff));
+            std::ranges::set_difference(L,V,std::back_inserter(diff),cmp_dist);
         }
         //return k closest points from L
         if (L.size() > k) {
@@ -295,10 +294,11 @@ struct VamanaIndex {
                 L.push_back(it->second);
             }
         }
+        auto cmp_dist = [&](int v1,int v2){
+            return Matrix<T>::sq_euclid(query,db->row(v1), db->dim) < Matrix<T>::sq_euclid(query,db->row(v2),db->dim);
+        };
         if (L.size()>1) {
-            std::sort(L.begin(),L.end(),[&](int v1,int v2){
-                return Matrix<T>::sq_euclid(query,db->row(v1), db->dim) < Matrix<T>::sq_euclid(query,db->row(v2),db->dim);
-            });
+            std::sort(L.begin(),L.end(),cmp_dist);
         }
         std::vector<int> diff(L.begin(),L.end());
         diff.reserve(list_size + L.size());
@@ -308,19 +308,15 @@ struct VamanaIndex {
             std::vector<int> temp; //keeping N'out(p*)
             temp.reserve(graph[p_star_idx].size());
             for (auto &p: graph[p_star_idx]) {
-                if (((*db->vec_filter)[p] == Fq || Fq == -1.0f) && (!std::ranges::binary_search(V, p))) {
+                if (((*db->vec_filter)[p] == Fq || Fq == -1.0f) && (!std::ranges::binary_search(V, p, cmp_dist))) {
                     temp.push_back(p); //insert it
                 }
             }
             V.push_back(p_star_idx);
             //update L with N'out(p*)
             L.insert(L.end(), temp.begin(), temp.end()); //add it in L
-            std::sort(V.begin(), V.end(), [&](int v1, int v2) {
-                return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
-            });
-            std::sort(L.begin(), L.end(), [&](int v1, int v2) {
-                return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
-            });
+            std::sort(V.begin(), V.end(), cmp_dist);
+            std::sort(L.begin(), L.end(), cmp_dist);
             auto l = std::unique(L.begin(), L.end());
             L.erase(l, L.end());
             //keep list_size closest to Xq
@@ -328,7 +324,7 @@ struct VamanaIndex {
                 keep_k_closest(L, list_size);
             }
             diff.clear();
-            std::ranges::set_difference(L,V,std::back_inserter(diff));
+            std::ranges::set_difference(L,V,std::back_inserter(diff),cmp_dist);
         }
         //return k closest points from L
         if (L.size() > k) {

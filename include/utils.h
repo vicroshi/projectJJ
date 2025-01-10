@@ -336,13 +336,13 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
                 size_t n = std::min(k, ground_data[i].size());
                 std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
                 if(query_type[i]==1.0f){
-                    std::cout << "For node " << i << ": [";
-                    for(auto item:L)
-                        std::cout<<item<<" ";
-                    std::cout<<"] GT: [";
-                    for (auto item:G_vec)
-                        std::cout<<item<<" ";
-                    std::cout<<"]\n";
+//                    std::cout << "For node " << i << ": [";
+//                    for(auto item:L)
+//                        std::cout<<item<<" ";
+//                    std::cout<<"] GT: [";
+//                    for (auto item:G_vec)
+//                        std::cout<<item<<" ";
+//                    std::cout<<"]\n";
                     auto recall= recall_k(n,L,G_vec);
                     sum_filtered+=recall;
                 }
