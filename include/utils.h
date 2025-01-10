@@ -101,7 +101,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         auto row=ground_m.row(i);
         std::vector<int> G(row.begin(),row.begin()+k);
 //        std::vector<int>vecL(L.begin(),L.end());
-        sum+=recall_k(k,L,G);
+        sum+=recall_k(k,L,G,0);
     }
     std::cout<<"Averall recall: "<<sum/(double) query_vecs_num<<"\n";
 
