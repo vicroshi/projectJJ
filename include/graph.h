@@ -134,7 +134,7 @@ struct VamanaIndex {
             std::ranges::set_difference(L,V,std::back_inserter(diff),cmp_dist);
         }
         //return k closest points from L
-        if (L.size() > k) {
+        if (L.size() >(size_t) k) {
             keep_k_closest(L, k);
         }
     }
@@ -327,7 +327,7 @@ struct VamanaIndex {
             std::ranges::set_difference(L,V,std::back_inserter(diff),cmp_dist);
         }
         //return k closest points from L
-        if (L.size() > k) {
+        if (L.size() > (size_t) k) {
             keep_k_closest(L, k);
         }
     }

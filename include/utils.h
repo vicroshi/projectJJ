@@ -25,7 +25,7 @@ std::filesystem::path get_file_path(const size_t& , const size_t& , const size_t
 template <typename T>
 T* read_from_file(const std::string&,size_t*,size_t*);
 
-double recall_k(const int&,std::vector<int>&,std::vector<int>&);
+double recall_k(const int&,std::vector<int>&,std::vector<int>&,int );
 
 template <typename T>
 void execute(const std::string& base_file_path,const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const size_t& List_size){
@@ -99,7 +99,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         auto row=ground_m.row(i);
         std::vector<int> G(row.begin(),row.begin()+k);
         std::vector<int>vecL(L.begin(),L.end());
-        sum+=recall_k(k,vecL,G);
+        sum+=recall_k(k,vecL,G,0);
     }
     std::cout<<"Averall recall: "<<sum/(double) query_vecs_num<<"\n";
 
@@ -134,14 +134,14 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         std::span<T> query_span(query_m.row(query_point_index));
         std::vector<int>L,V;
         v_m.greedy_search(medoid,query_span,k,List_size,L,V);
-        std::cout<<"[ ";
-        for(auto item:L)
-            std::cout<<item<<" ";
-        std::cout<<" ]\n";
+        // std::cout<<"[ ";
+        // for(auto item:L)
+        //     std::cout<<item<<" ";
+        // std::cout<<" ]\n";
         auto row=ground_m.row(query_point_index);
         std::vector<int> G(row.begin(),row.begin()+k);
         std::vector<int>vecL(L.begin(),L.end());
-        std::cout<<"recall:"<<recall_k(k,vecL,G)<<std::endl;
+        std::cout<<"recall:"<<recall_k(k,vecL,G,1)<<std::endl;
     }
 
     //free mmaps, no leaks whatsoever??
@@ -343,17 +343,54 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 //                    for (auto item:G_vec)
 //                        std::cout<<item<<" ";
 //                    std::cout<<"]\n";
-                    auto recall= recall_k(n,L,G_vec);
+                    auto recall= recall_k(n,L,G_vec,0);
                     sum_filtered+=recall;
                 }
                 else if(query_type[i]==0.0f){
-                    auto recall=recall_k(n,L,G_vec);
+                    auto recall=recall_k(n,L,G_vec,0);
                     sum_unfiltered+=recall;
                 }
     }
     std::cout << std::fixed << std::setprecision(2);
     std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
     std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
+
+    //get input in a loop to show k-nearest neighbors for any query in file
+    int query_point_index;
+    //get valid integer input for query input, indexing starts at 0
+    // while (true)
+    // {
+    //     std::cout << "Enter query index (-1 to exit): ";
+    //     std::cin >> query_point_index;
+
+    //     // check if -1 was given at start
+    //     if (query_point_index == -1)
+    //         break;
+
+    //     std::vector<int> L, V;
+    //     std::span<T> query_span(query_m.row(query_point_index));
+    //     v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
+    //     size_t n = std::min(k, ground_data[query_point_index].size());
+    //     std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
+    //     if (query_type[query_point_index] == 1.0f)
+    //     {
+    //         std::cout << "filtered query!\n";
+    //         auto recall = recall_k(n, L, G_vec, 1);
+    //         std::cout << "\n recall:" << recall << "\n\n";
+    //     }
+    //     else if (query_type[query_point_index] == 0.0f)
+    //     {
+    //         std::cout << "UNFILTERED QUERY!\n";
+    //         auto recall = recall_k(n, L, G_vec, 1);
+    //         std::cout << "\n recall:" << recall << "\n\n";
+    //     }
+    //     else
+    //     {
+    //         std::cout << "point with unsupported filter, continuing...\n";
+    //         continue;
+    //     }
+    // }
+
     if(save){
         //write filtered graph in binary file()
         std::filesystem::path save_path = get_file_path(k,List_size,R,a,"filtered_graph_");
@@ -385,15 +422,52 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
             size_t n = std::min(k, ground_data[i].size());
             std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
             if(query_type[i]==1.0f){
-                st_sum_filtered+=recall_k(n,L,G_vec);
+                st_sum_filtered+=recall_k(n,L,G_vec,0);
             }
             else if(query_type[i]==0.0f){
-                st_sum_unfiltered+=recall_k(n,L,G_vec);
+                st_sum_unfiltered+=recall_k(n,L,G_vec,0);
             }
     }
     std::cout << std::fixed << std::setprecision(2);
     std::cout << "TOTAL recall for filtered: " << st_sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
     std::cout << "TOTAL recall for unfiltered: " << st_sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
+
+    //get input in a loop to show k-nearest neighbors for any query in file
+    //get valid integer input for query input, indexing starts at 0
+
+    // while (true)
+    // {
+    //     std::cout << "Enter query index (-1 to exit): ";
+    //     std::cin >> query_point_index;
+
+    //     // check if -1 was given at start
+    //     if (query_point_index == -1)
+    //         break;
+
+    //     std::vector<int> L, V;
+    //     std::span<T> query_span(query_m.row(query_point_index));
+    //     v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
+    //     size_t n = std::min(k, ground_data[query_point_index].size());
+    //     std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
+    //     if (query_type[query_point_index] == 1.0f)
+    //     {
+    //         std::cout << "filtered query!\n";
+    //         auto recall = recall_k(n, L, G_vec, 1);
+    //         std::cout << "\n recall:" << recall << "\n\n";
+    //     }
+    //     else if (query_type[query_point_index] == 0.0f)
+    //     {
+    //         std::cout << "UNFILTERED QUERY!\n";
+    //         auto recall = recall_k(n, L, G_vec, 1);
+    //         std::cout << "\n recall:" << recall << "\n\n";
+    //     }
+    //     else
+    //     {
+    //         std::cout << "point with unsupported filter, continuing...\n";
+    //         continue;
+    //     }
+    // }
+
     if(save){
         //write stitched graph in binary file()
         std::filesystem::path save_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");

@@ -28,8 +28,8 @@ fi
 
 
 # initialize variables
-a1=1.05
-R1=50
+a1=1.2
+R1=100
 L1=120
 k1=100
 #paths for project 1
@@ -38,7 +38,7 @@ query_file_path="./datasets/siftsmall/siftsmall_query.fvecs"
 ground_file_path="./datasets/siftsmall/siftsmall_groundtruth.ivecs"
 
 a2=1.0
-R2=50
+R2=100
 L2=120
 k2=100
 t=1
