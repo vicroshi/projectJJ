@@ -45,19 +45,19 @@ void test_recall(){
     std::vector<int> X={0,1,2,3},G={0,1};
 
     int k=2;
-    double result=recall_k(k,X,G);
+    double result=recall_k(k,X,G,0);
     // std::cout<<result<<std::endl;
     TEST_ASSERT(result==1.0);
 
     G.push_back(4);
     k=3;
-    result=recall_k(k,X,G);
+    result=recall_k(k,X,G,0);
     // std::cout<<result<<std::endl;
     TEST_ASSERT(result==(double)2/3);
 
     X.push_back(4);
     k=3;
-    result=recall_k(k,X,G);
+    result=recall_k(k,X,G,0);
     // std::cout<<result<<std::endl;
     TEST_ASSERT(result==1.0);
 }

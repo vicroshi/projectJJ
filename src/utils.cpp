@@ -39,7 +39,7 @@ void ann(const std::string& base_file_path, const std::string& query_file_path,c
     return;
 }
 
-double recall_k(const int& k, std::vector<int>& X, std::vector<int>& G){
+double recall_k(const int& k, std::vector<int>& X, std::vector<int>& G,int prnt=0){
     if (!k) {
         return !X.size()? 1.0f : 0.0f;
     }
@@ -47,6 +47,21 @@ double recall_k(const int& k, std::vector<int>& X, std::vector<int>& G){
     std::sort(X.begin(), X.end());
     std::sort(G.begin(), G.end());
     std::set_intersection(X.begin(), X.end(), G.begin(), G.end(),std::back_inserter(intersection));
+
+    if(prnt){
+        std::cout<<"\nG:[";
+        for(auto i:G){
+            std::cout<<i<<" ";
+        }
+        std::cout<<"]\n\n";
+
+        std::cout<<"\nX:[";
+        for(auto i:X){
+            std::cout<<i<<" ";
+        }
+        std::cout<<"]\n\n";
+    }
+    
     
     // std::cout<<"recall: "<< (double) intersection.size()/(double) k <<std::endl;
     return (double) intersection.size()/(double) k;
