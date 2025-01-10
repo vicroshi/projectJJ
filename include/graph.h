@@ -34,7 +34,8 @@ struct VamanaIndex {
     //constructor used for main
     VamanaIndex(size_t deg, Matrix<T> *db): db(db) {
         this->vecnum = db->vecnum;
-        init_graph(deg);
+//        init_graph(deg);
+        init_graph();
     }
 
     //gia stitched
@@ -46,6 +47,26 @@ struct VamanaIndex {
 //        graph.resize(db->vecnum);
         this->vecnum = db->vecnum;
         graph.reserve(db->vecnum);
+    }
+
+    void init_graph(const std::vector<int> &P = {}){
+        std::vector<int> vec;
+        size_t sz;
+        if (P.empty()) {
+            sz = vecnum;
+//            vec.resize(vecnum);
+//            std::iota(vec.begin(), vec.end(), 0);
+        }
+        else {
+            // std::cout << "P is not empty\n";
+            sz = P.size();
+            vec = P;
+        }
+        graph.reserve(sz);
+//        for (auto i: vec) {
+//            graph[i].reserve(deg);
+//            graph[i] = {};
+//        }
     }
 
     void init_graph(const size_t &r, const std::vector<int> &P = {}) {
@@ -93,36 +114,69 @@ struct VamanaIndex {
         }
     }
 
+
+    struct cmp_dist {
+        const std::span<T> &p;
+        const Matrix<T> &db;
+        cmp_dist(const std::span<T> &p, const Matrix<T> &db) : p(p), db(db) {}
+        bool operator()(int v1, int v2) const {
+            return Matrix<T>::sq_euclid(p, db.row(v1), db.dim) < Matrix<T>::sq_euclid(p, db.row(v2), db.dim);
+        }
+    };
+    void greedy_search_s(int start_idx, const std::span<T> &query, int k, size_t list_size, std::vector<int> &L, std::vector<int> &V) {
+        L.reserve(k);
+        V.reserve(2*list_size);
+        auto cmp_L = [&](int v1,int v2){
+            return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
+        };
+        cmp_dist cmp(query, *db);
+        std::set<int, cmp_dist> Ls(cmp);
+        std::set<int, cmp_dist> Vs(cmp);
+        Ls.insert(start_idx);
+        std::vector<int> diff;
+        diff.push_back(start_idx);
+        while (!diff.empty()) {
+            int p_star_idx = 0;
+            p_star_idx = diff[0];
+            //probably unnecessary check
+            Vs.insert(p_star_idx);
+            Ls.insert(graph[p_star_idx].begin(), graph[p_star_idx].end());
+            //keep list_size closest to Xq
+            if (Ls.size() > list_size) {
+                auto it = Ls.begin();
+                std::advance(it, list_size);
+                Ls.erase(it, Ls.end());
+            }
+            diff.clear();
+            std::ranges::set_difference(Ls,Vs,std::back_inserter(diff),cmp_L);
+        }
+        //return k closest points from L
+        auto it = Ls.end();
+        if (Ls.size() > k) {
+            it = Ls.begin();
+            std::advance(it, k);
+        }
+        std::copy(Ls.begin(),it, std::back_inserter(L));
+        std::copy(Vs.begin(), Vs.end(), std::back_inserter(V));
+    }
+
     void greedy_search(int start_idx, const std::span<T> &query, int k, size_t list_size, std::vector<int> &L, std::vector<int> &V) {
         L.reserve(2 * list_size);
         V.reserve(2 * list_size);
         L.push_back(start_idx);
-//        auto vec2 = query; //query point
         std::vector<int> diff;
         diff.reserve(list_size);
         diff.push_back(start_idx);
-//        while( !(difference.empty()) ){
         auto cmp_dist = [&](int v1,int v2){
             return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
         };
         while (!diff.empty()) {
-//            for (auto d:diff) {
-//                std::cout << d << " ";
-//            }
-//            std::cout << std::endl;
             int p_star_idx = 0;
-
             p_star_idx = diff[0];
-//            for (int i = 0; i < L.size(); i++) {
-//                if (std::ranges::find(V, L[i]) == V.end()) {
-//                    p_star_idx = L[i];
-//                    break;
-//                }
-//            }
             //probably unnecessary check
             V.push_back(p_star_idx);
-            std::sort(V.begin(), V.end(), cmp_dist);
             L.insert(L.end(), graph[p_star_idx].begin(), graph[p_star_idx].end());
+            std::sort(V.begin(), V.end(), cmp_dist);
             std::sort(L.begin(), L.end(), cmp_dist);
             auto l = std::unique(L.begin(), L.end());
             L.erase(l, L.end());
@@ -185,19 +239,9 @@ struct VamanaIndex {
     }
 
     void robust_prune(int p, std::vector<int> &V, float a, size_t R) {
-//        V.erase(p); //bgazoume to p
         graph[p].clear();
-
         auto vec1 = db->row(p);
-
         int p_star_idx;
-        // std::sort(V.begin(),V.end(),[&](int v1,int v2){
-        //     return Matrix<T>::sq_euclid(db->row(p),db->row(v1), db->dim) < Matrix<T>::sq_euclid(db->row(p),db->row(v2),db->dim);
-        // });
-//        std::sort(V.begin(),V.end(),[&](int v1,int v2){
-//                return Matrix<T>::sq_euclid(db->row(p),db->row(v1), db->dim) < Matrix<T>::sq_euclid(db->row(p),db->row(v2),db->dim);
-//        });
-
         while (!V.empty()) {
             p_star_idx = V[0];
             graph[p].insert(p_star_idx);
@@ -210,20 +254,6 @@ struct VamanaIndex {
                      auto v = db->row(i);
                      return a * Matrix<T>::sq_euclid(vec2, v, db->dim) <= Matrix<T>::sq_euclid(vec1, v, db->dim);
                  }));
-            //vec1: p , vec2: p*, vec3: p' in V
-//            for (auto it=V.begin();it!=V.end();){
-//                int i=*it;
-//                auto vec3 = db->row(i);
-//                auto d1 =Matrix<T>::sq_euclid(vec2,vec3, vec1.size()); //d(p*,p')
-//
-//                auto d2 = Matrix<T>::sq_euclid(vec1,vec3,vec1.size());   //d(p,p')
-//
-//                if(a*d1<=d2)
-//                    it=V.erase(it);//erase and get new iterator position
-//                else
-//                    it++; //only increment if not erased
-//
-//            }
         }
     }
 
@@ -244,7 +274,7 @@ struct VamanaIndex {
         for (auto i: sigma) {
             std::vector<int> L, V;
             //i must construct query
-            greedy_search(medoid, db->row(i), 1, list_size, L, V);
+            greedy_search_s(medoid, db->row(i), 1, list_size, L, V);
             for (auto nghbr: graph[i]) {
                 V.push_back(nghbr);
             }
@@ -269,6 +299,66 @@ struct VamanaIndex {
                 }
             }
         }
+    }
+
+void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> &query, const size_t &k, const size_t &list_size, const T &Fq, std::vector<int> &L,
+                                std::vector<int> &V) {
+        L.reserve(k);
+        V.reserve(2 * list_size);
+        cmp_dist cmp(query, *db);
+        std::set<int, cmp_dist> Ls(cmp);
+        std::set<int, cmp_dist> Vs(cmp);
+        auto cmp_L = [&](int v1,int v2){
+            return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
+        };
+        if (Fq == -1.0f) {
+            //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
+//            L.reserve(db->filters_set->size() + list_size);
+            for (auto &f: (*db->filters_set)) {
+                auto it = S.find(f); //[] operator adds a default value if the key is not already inside it, we dont want that
+                if (it != S.end()) {
+                    Ls.insert(it->second); //add all starting points
+                }
+            }
+        }
+        else {
+            //its a node with only one filter, I only have one starting node.
+            auto it = S.find(Fq);
+            if (it != S.end()) {
+                Ls.insert(it->second);
+            }
+        }
+        std::vector<int> diff(Ls.begin(),Ls.end());
+        diff.reserve(list_size + Ls.size());
+        while (!diff.empty()) {
+            //p*
+            int p_star_idx =  diff[0];
+            std::vector<int> temp; //keeping N'out(p*)
+            temp.reserve(graph[p_star_idx].size());
+            for (auto &p: graph[p_star_idx]) {
+                if (((*db->vec_filter)[p] == Fq || Fq == -1.0f) && (!std::ranges::binary_search(Vs, p, cmp_L))) {
+                    temp.push_back(p); //insert it
+                }
+            }
+            Vs.insert(p_star_idx);
+            Ls.insert( temp.begin(), temp.end()); //add it in L
+            //keep list_size closest to Xq
+            if (Ls.size() > list_size) {
+                auto it = Ls.begin();
+                std::advance(it, list_size);
+                Ls.erase(it, Ls.end());
+            }
+            diff.clear();
+            std::ranges::set_difference(Ls,Vs,std::back_inserter(diff),cmp_L);
+        }
+        //return k closest points from L
+        auto it = Ls.end();
+        if (Ls.size() > k) {
+            it = Ls.begin();
+            std::advance(it, k);
+        }
+        std::copy(Ls.begin(),it, std::back_inserter(L));
+        std::copy(Vs.begin(), Vs.end(), std::back_inserter(V));
     }
 
     void filtered_greedy_search(std::unordered_map<T, int> &S, const std::span<T> &query, const size_t &k, const size_t &list_size, const T &Fq, std::vector<int> &L,
@@ -356,30 +446,6 @@ struct VamanaIndex {
                                           auto v = db->row(i);
                                           return !(((*db->vec_filter)[i] == (*db->vec_filter)[p]) && ((*db->vec_filter)[p_star_idx] != (*db->vec_filter)[i])) && (a * Matrix<T>::sq_euclid(vec2, v, db->dim) <= Matrix<T>::sq_euclid(vec1, v, db->dim));
                                       }));
-//            for (auto it = V.begin(); it != V.end();) {
-//                int p_tonos = *it;
-//
-//                //first if with filters, condition is Fp' == Fp AND Fp* != Fp'
-//                if (((*db->vec_filter)[p_tonos] == (*db->vec_filter)[p]) && ((*db->vec_filter)[p_star_idx] != (*db->vec_filter)[p_tonos])) {
-//                    ++it; // Increment the iterator before skipping to the next iteration
-//                    continue;
-//                }
-//
-//
-//                //second if, for the distances
-//
-//                auto vec3 = db->row(p_tonos);
-//                //d(p*,p')
-//                auto d1 = Matrix<T>::sq_euclid(vec2, vec3, vec2.size());
-//
-//                vec1 = db->row(p);
-//                //d(p,p')
-//                auto d2 = Matrix<T>::sq_euclid(vec1, vec3, vec1.size());
-//                if (a * d1 <= d2)
-//                    it = V.erase(it); //erase and get new iterator position
-//                else
-//                    it++; //only increment if not erased
-//            }
         }
     }
 
@@ -398,7 +464,7 @@ struct VamanaIndex {
         for (auto i: sigma) {
 //            std::cout << "for node  " << i << std::endl;
             std::vector<int> L, V;
-            filtered_greedy_search(M, db->row(i), 0, list_size, (*db->vec_filter)[i], L, V);
+            filtered_greedy_search_s(M, db->row(i), 0, list_size, (*db->vec_filter)[i], L, V);
             if (V[0] == i) {
                 V.erase(V.begin());
             }
@@ -422,8 +488,9 @@ struct VamanaIndex {
         Gf.reserve(db->filters_set->size());
         for (auto f: *db->filters_set) {
             Gf[f] = std::make_unique<VamanaIndex>(db);
-            Gf[f]->init_graph(R_small, Pf[f]);
-            int med = db->medoid_naive(Pf[f]);
+//            Gf[f]->init_graph(R_small, Pf[f]);
+            Gf[f]->init_graph(Pf[f]);
+            int med = db->medoid_rand(Pf[f]);
             Gf[f]->vamana_indexing(med, a, L_small, R_small, Pf[f]);
             for (auto &kv: Gf[f]->graph) {
                 //pare kathe vertice to Gf, pou ousiastika einai to Pf, kai valta ston megalo grafo G (this->graph)

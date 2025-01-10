@@ -36,16 +36,16 @@ struct Matrix{
     Matrix(size_t dim, size_t vecnum,std::vector<T>* data ,std::vector<T>* vec_filter,  std::unordered_set<T>* filter_set):
             dim(dim), vecnum(vecnum), vecs(data->data(),vecnum*dim), vec_filter(vec_filter), filters_set(filter_set){}
     
-    T get(int row, int col){
+    T get(int row, int col) const {
         return vecs[row*dim+col];
     }
 
-    std::span<T> row(int row){
+     std::span<T> row(int row) const{
         return vecs.subspan(row*dim, dim);
     }
 
     //using SIMD instructions to calculate squared distance faster, AVX/AVX2 required
-    static constexpr  double sq_euclid(const std::span<T>& row1,const std::span<T>& row2,const size_t& dim){
+    static double sq_euclid(const std::span<T>& row1,const std::span<T>& row2,const size_t& dim){
         //for floats
         if constexpr(std::is_floating_point_v<T>){
             __m256 sum = _mm256_setzero_ps(); //Initialize sum to 0
@@ -105,6 +105,21 @@ struct Matrix{
     //     }
     //     return dist;
     // }
+
+    int medoid_rand(const std::vector<int>& Pf = {}) {
+        int medoid_idx = 0;
+        std::vector<int> vec;
+        if (Pf.empty()) {
+            vec.resize(vecnum);
+            std::iota(vec.begin(), vec.end(), 0);
+        } else {
+            vec = Pf;
+        }
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::ranges::sample(vec, &medoid_idx, 1, g);
+        return medoid_idx;
+    }
 
     int medoid_naive(const std::vector<int>& Pf = {}) {
         double dist;

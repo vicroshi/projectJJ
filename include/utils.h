@@ -78,7 +78,8 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
     //calculate medoid once and pass it to functions later
     auto medoid_start = std::chrono::high_resolution_clock::now();
-    int medoid=v_m.db->medoid_naive();
+//    int medoid=v_m.db->medoid_naive();
+    int medoid=v_m.db->medoid_rand();
     auto medoid_end = std::chrono::high_resolution_clock::now();
     auto medoid_duration = std::chrono::duration_cast<std::chrono::microseconds>(medoid_end - medoid_start).count();
     std::cout << ">Time taken to find medoid: " << medoid_duration / 1e6 << " sec(s)." << std::endl;
@@ -95,11 +96,12 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     for(size_t i=0;i<query_vecs_num;i++){
         std::span<T> query_span(query_m.row(i));
         std::vector<int>L,V;
-        v_m.greedy_search(medoid,query_span,k,List_size,L,V);
+//        v_m.greedy_search(medoid,query_span,k,List_size,L,V);
+        v_m.greedy_search_s(medoid,query_span,k,List_size,L,V);
         auto row=ground_m.row(i);
         std::vector<int> G(row.begin(),row.begin()+k);
-        std::vector<int>vecL(L.begin(),L.end());
-        sum+=recall_k(k,vecL,G,0);
+//        std::vector<int>vecL(L.begin(),L.end());
+        sum+=recall_k(k,L,G);
     }
     std::cout<<"Averall recall: "<<sum/(double) query_vecs_num<<"\n";
 
@@ -133,11 +135,8 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         //run greedy search to return the k-closest of requested query node
         std::span<T> query_span(query_m.row(query_point_index));
         std::vector<int>L,V;
-        v_m.greedy_search(medoid,query_span,k,List_size,L,V);
-        // std::cout<<"[ ";
-        // for(auto item:L)
-        //     std::cout<<item<<" ";
-        // std::cout<<" ]\n";
+//        v_m.greedy_search(medoid,query_span,k,List_size,L,V);
+        v_m.greedy_search_s(medoid,query_span,k,List_size,L,V);
         auto row=ground_m.row(query_point_index);
         std::vector<int> G(row.begin(),row.begin()+k);
         std::vector<int>vecL(L.begin(),L.end());
@@ -332,17 +331,11 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     for (uint32_t i = 0; i < query_no_of_points; i++){
             std::vector<int> L, V;
             std::span<T> query_span(query_m.row(i));
-            v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+//            v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+            v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
                 size_t n = std::min(k, ground_data[i].size());
                 std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
                 if(query_type[i]==1.0f){
-//                    std::cout << "For node " << i << ": [";
-//                    for(auto item:L)
-//                        std::cout<<item<<" ";
-//                    std::cout<<"] GT: [";
-//                    for (auto item:G_vec)
-//                        std::cout<<item<<" ";
-//                    std::cout<<"]\n";
                     auto recall= recall_k(n,L,G_vec,0);
                     sum_filtered+=recall;
                 }
@@ -418,7 +411,8 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     for (size_t i = 0; i < query_m.vecnum; i++) {
             std::vector<int> L, V;
             std::span<T> query_span(query_m.row(i));
-            v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+//            v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+            v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
             size_t n = std::min(k, ground_data[i].size());
             std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
             if(query_type[i]==1.0f){

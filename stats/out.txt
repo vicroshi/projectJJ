@@ -1,0 +1,9 @@
+./projectJJ -a 1.2 -R 100 -L 120 -k 100 -b /home/vic/codes/projectJJ/datasets/sift/sift_base.fvecs -q /home/vic/codes/projectJJ/datasets/sift/sift_query.fvecs -g /home/vic/codes/projectJJ/datasets/sift/sift_groundtruth.ivecs
+base vec num:1000000
+query vec num:10000
+ground vec num:10000
+>Time taken to initialize 100-regular Graph: 0.003509 sec(s).
+>Time taken to find medoid: 0.00337 sec(s).
+>Time taken for Indexing: 7647.52 sec(s).
+Averall recall: 0.971976
+
