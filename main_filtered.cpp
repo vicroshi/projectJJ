@@ -13,7 +13,9 @@ int main(int argc,char **argv){
     size_t R=0,L=0,k=0,t=0,R_small=0,L_small=0;
     int load=0,save=0;
     std::string base_file_path,query_file_path,ground_file_path;
-    while((opt = getopt(argc, argv, "a:R:L:k:b:q:g:t:r:l:os"))!=-1){
+    int mode = 0; //0 for both, 1 for filtered, 2 for stitched
+    int num_threads = 1;
+    while((opt = getopt(argc, argv, "a:R:L:k:b:q:g:t:r:l:m:n:os"))!=-1){
         try{
             switch(opt){
                 case 'a':
@@ -52,13 +54,21 @@ int main(int argc,char **argv){
                 case 'l':
                     L_small = std::stoul(optarg);
                     break;
+                case 'm':
+                    mode = std::stoul(optarg);
+                    if (mode > 2) {mode = 0;}
+                    break;
+                case 'n':
+                    num_threads = std::stoul(optarg);
+                    break;
                 default:
                     throw std::invalid_argument("Invalid option");
             }
         //something was given incorrectly
         }catch(const std::invalid_argument& e){
             std::cerr << "Error: Invalid argument for option -" << static_cast<char>(optopt) << ": " << optarg << std::endl;
-            std::cerr << "Usage: ./projectJJ_filtered -a <value> -R <value> -k <value> -L <value> -t <value> -b (base file) <value> -q (query file) <value> -g (ground file) <value> -r (R_small) <value> -l (L_small) <value> -o (load) -s (save)" << std::endl;
+            std::cerr << "Usage: ./projectJJ_filtered -a <value> -R <value> -k <value> -L <value> -t <value> -b (base file) <value> -q (query file) <value> -g (ground file) <value>"
+        "-r (R_small) <value> -l (L_small) <value> -m <value> (0:both, 1:filtered, 2:stitched) -n <value> (thread_num) -o (load) -s (save) " << std::endl;
             return 1;
         }
     }
@@ -71,12 +81,13 @@ int main(int argc,char **argv){
 
     // Check if file paths are not empty
     if(base_file_path.empty() || query_file_path.empty() || ground_file_path.empty()){
-        std::cerr << "Usage: ./projectJJ_filtered -a <value> -R <value> -k <value> -L <value> -t <value> -b (base file) <value> -q (query file) <value> -g (ground file) <value> -r (R_small) <value> -l (L_small) <value> -o (load) -s (save)" << std::endl;
+        std::cerr << "Usage: ./projectJJ_filtered -a <value> -R <value> -k <value> -L <value> -t <value> -b (base file) <value> -q (query file) <value> -g (ground file) <value>"
+        "-r (R_small) <value> -l (L_small) <value> -m <value> (0:both, 1:filtered, 2:stitched) -n <value> (thread_num) -o (load) -s (save) " << std::endl;
         return 1;
     }
 
     //call immediately execute for filtered vamana
-    execute<float>(base_file_path,query_file_path,ground_file_path,a,k,R,L,t,R_small,L_small,load,save);
+    execute<float>(base_file_path,query_file_path,ground_file_path,a,k,R,L,t,R_small,L_small,load,save,mode ,num_threads);
 
 
     return 0;

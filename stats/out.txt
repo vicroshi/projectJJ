@@ -7,3 +7,34 @@ ground vec num:10000
 >Time taken for Indexing: 7647.52 sec(s).
 Averall recall: 0.971976
 
+./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 120 -t 1 -b ../datasets/release1M/contest-data-release-1m.bin -q ../datasets/release1M/contest-queries-release-1m.bin -g ../datasets/release1M/contest-ground-release-1m.bin -r 32 -l 96
+Reading Data: ../datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: ../datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: ../datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to initialize Graph: 0.00157 sec(s).
+>Time taken to find medoid: 0.057408 sec(s).
+
+
+FILTERED
+>Time taken for Indexing: 11378.2 sec(s).
+TOTAL recall for filtered: 1.00
+TOTAL recall for unfiltered: 0.05
+
+
+--END OF FILTERED VAMANA--
+
+STITCHED
+
+>Time taken for Indexing: 3266.92 sec(s).
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.05
+
+
+--END OF STITCHED VAMANA--

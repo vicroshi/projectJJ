@@ -18,7 +18,7 @@
 #include <iterator> // for std::back_inserter
 #include <unordered_map>
 #include <fstream>
-
+#include <omp.h>
 template<typename T>
 struct VamanaIndex {
 //    std::vector<std::unordered_set<int>> graph;

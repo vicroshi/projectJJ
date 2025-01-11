@@ -25,12 +25,12 @@
 #include <unordered_map>
 #include <random>
 
-//#define BASE_FILE_PATH "../datasets/release1M/contest-data-release-1m.bin"
-//#define QUERY_FILE_PATH "../datasets/release1M/contest-queries-release-1m.bin"
-//#define GROUND_FILE_PATH "../datasets/release1M/contest-ground-release-1m.bin"
-#define BASE_FILE_PATH "../datasets/dummy/dummy-data.bin"
-#define QUERY_FILE_PATH "../datasets/dummy/dummy-queries.bin"
-#define GROUND_FILE_PATH "../datasets/dummy/dummy-ground.bin"
+#define BASE_FILE_PATH "../datasets/release1M/contest-data-release-1m.bin"
+#define QUERY_FILE_PATH "../datasets/release1M/contest-queries-release-1m.bin"
+#define GROUND_FILE_PATH "../datasets/release1M/contest-ground-release-1m.bin"
+//#define BASE_FILE_PATH "../datasets/dummy/dummy-data.bin"
+//#define QUERY_FILE_PATH "../datasets/dummy/dummy-queries.bin"
+//#define GROUND_FILE_PATH "../datasets/dummy/dummy-ground.bin"
 #include <queue>
 
 #include "omp.h"
@@ -101,21 +101,21 @@ static double sq_euclid(const std::span<float>& row1, const std::span<float>& ro
 struct k_max_heap {
     size_t k;
     k_max_heap(size_t k) : k(k) {}
-    std::priority_queue<std::pair<int,float>> pq;
-    void push(int idx, float dist) {
+    std::priority_queue<std::pair<float,int>> pq;
+    void push(float dist, int idx) {
         if (pq.size() < k) {
-            pq.emplace(idx, dist);
+            pq.emplace( dist,idx);
         }
-        else if (dist < pq.top().second){
+        else if (dist < pq.top().first){
             pq.pop();
-            pq.emplace(idx, dist);
+            pq.emplace( dist,idx);
         }
     }
     int pop() {
         if (!pq.empty()) {
             auto top = pq.top();
             pq.pop();
-            return top.first;
+            return top.second;
         }
         return -1;
     }
@@ -151,12 +151,12 @@ int main(){
             if (query_data[i][0] == 1.0f) {
                 if (base_data[j][0] == query_data[i][1]) {
                     float dist = sq_euclid(query_span, base_span, dim);
-                    kheap.push(j,dist);
+                    kheap.push(dist,j);
                 }
             }
             else if (query_data[i][0] == 0.0f) {
                 float dist = sq_euclid(query_span, base_span, dim);
-                kheap.push(j,dist);
+                kheap.push(dist,j);
             }
         }
         if (query_data[i][0] <= 1.0f){

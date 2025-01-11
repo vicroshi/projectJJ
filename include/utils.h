@@ -178,7 +178,7 @@ void ReadBin(const std::string &file_path,const int num_dimensions,std::vector<s
     while (ifs.read((char *)buff.data(), num_dimensions * sizeof(T))) {
         std::vector<T> row(num_dimensions);
         for (int d = 0; d < num_dimensions; d++) {
-            row[d] = buff[d];
+            row[d] = static_cast<T>(buff[d]);
         }
         data[counter++] = std::move(row);
     }
@@ -230,7 +230,7 @@ void remove_negative_elements(std::vector<std::vector<T>> &data,std::vector<std:
             newRow.reserve(row.size());
             for (auto &value : row) {
                 if (value >= 0) {
-                    newRow.push_back(static_cast<int>(value));
+                    newRow.push_back(value);
                 }
             }
             result.push_back(std::move(newRow));
@@ -243,7 +243,8 @@ void remove_negative_elements(std::vector<std::vector<T>> &data,std::vector<std:
 
 //overloading execute for second project
 template <typename T>
-void execute(const std::string& base_file_path,const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,const int& load,const int& save){
+void execute(const std::string& base_file_path,const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const
+size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,const int& load,const int& save, int mode, int num_threads) {
     // database read
     std::vector<std::vector<T>> base_data; // only used for reading, will be dropped after data extraction
     std::vector<T> flat_base;
@@ -288,206 +289,218 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
     // groundtruth read
     uint32_t ground_no_of_points;
-    std::vector<std::vector<float>> ground_data_float;
+    std::vector<std::vector<int>> ground_data_dirty;
     std::vector<std::vector<int>> ground_data;
-    ReadBin<int>(ground_file_path, 100, ground_data, ground_no_of_points);
-    remove_negative_elements(ground_data_float,ground_data); // format it as needed because binary is read with readBin and dimensions must be constant for each vector
+    ReadBin<int>(ground_file_path, 100, ground_data_dirty, ground_no_of_points);
+    remove_negative_elements(ground_data_dirty,ground_data); // format it as needed because binary is read with readBin and dimensions must be constant for each vector
+    //    std::vector<std::vector<float>> ground_old_dirty;
+    //    std::vector<std::vector<int>> ground_old;
+    //    ReadBin<float>("/home/vic/codes/projectJJ/datasets/test/ground.bin", 100, ground_old_dirty, ground_no_of_points);
+    //    remove_negative_elements<float>(ground_old_dirty, ground_old);
+    //    for (int i = 0; i < ground_data.size(); i++) {
+    //        std::cout << "for query " << i << "\nG:[";
+    //        for (auto j: ground_data[i]) {
+    //            std::cout << j << " ";
+    //        }
+    //        std::cout << "\b]\n";
+    //        std::cout << "\b]\ng:[";
+    //        for (auto j: ground_old[i]) {
+    //            std::cout << j << " ";
+    //        }
+    //        std::cout << "\b]\n\n";
+    //    }
+    //    exit(0);
     // times for each action
     // R-regular graph initialization
-    auto init_start = std::chrono::high_resolution_clock::now();
-    VamanaIndex<T> v_m(&base_m);
-    v_m.Pf = Pff;
-    auto init_end = std::chrono::high_resolution_clock::now();
-    auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
-    std::cout << ">Time taken to initialize Graph: " << init_duration / 1e6 << " sec(s)." << std::endl;
+    std::unordered_map<T, int> Medoid;          // st(f)
 
 
     // calculate medoid once and pass it to functions later
     auto medoid_start = std::chrono::high_resolution_clock::now();
-    std::unordered_map<T, int> Medoid;          // st(f)
-
-    v_m.db->find_medoid(t, Medoid, Pff);
-
+    base_m.find_medoid(t, Medoid, Pff);
     auto medoid_end = std::chrono::high_resolution_clock::now();
     auto medoid_duration = std::chrono::duration_cast<std::chrono::microseconds>(medoid_end - medoid_start).count();
     std::cout << ">Time taken to find medoid: " << medoid_duration / 1e6 << " sec(s)." << std::endl;
+    if (mode == 0 | mode == 1) {
+        auto init_start = std::chrono::high_resolution_clock::now();
+        VamanaIndex<T> v_m(&base_m);
+        v_m.Pf = Pff;
+        auto init_end = std::chrono::high_resolution_clock::now();
+        auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
+        std::cout << ">Time taken to initialize Graph: " << init_duration / 1e6 << " sec(s)." << std::endl;
 
-    //get input in a loop to show k-nearest neighbors for any query in file
-    int query_point_index;
-
-
-//     std::cout<<"\n\nFILTERED\n";
-//     // load or build graph
-//     if(!load){
-//         // actual indexing
-//         auto indexing_start = std::chrono::high_resolution_clock::now();
-//         v_m.filtered_vamana_indexing(Medoid, a, List_size, R);
-//         auto indexing_end = std::chrono::high_resolution_clock::now();
-//         auto indexing_duration = std::chrono::duration_cast<std::chrono::microseconds>(indexing_end - indexing_start).count();
-//         std::cout << ">Time taken for Indexing: " << indexing_duration / 1e6 << " sec(s)." << std::endl;
-//     }
-//     else{
-//         //load from binary file
-//         std::filesystem::path load_path = get_file_path(k,List_size,R,a,"filtered_graph_");
-//         std::cout<<"Loading graph from file:"<<load_path<<std::endl;
-//         if(v_m.load_graph(load_path)==-1) exit(1);
-//     }
-
-//     if(save){
-//         //write filtered graph in binary file()
-//         std::filesystem::path save_path = get_file_path(k,List_size,R,a,"filtered_graph_");
-//         v_m.save_graph(save_path);
-//         std::cout<<"Saved Graph In File "<<save_path<<".\n\nExit? (1 for yes / 0 for no): ";        
-//         int toExit;
-//         std::cin>>toExit;
-//         if(toExit==1) exit(0);
-//     }
-
-//     double sum_filtered=0.0f,sum_unfiltered=0.0f;
-//     for (uint32_t i = 0; i < query_no_of_points; i++){
-//             std::vector<int> L, V;
-//             std::span<T> query_span(query_m.row(i));
-// //            v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-//             v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-//                 size_t n = std::min(k, ground_data[i].size());
-//                 std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
-//                 if(query_type[i]==1.0f){
-//                     if(i>=5000) std::cout<<"i:"<<i<<"\n";
-//                     auto recall= recall_k(n,L,G_vec,0);
-//                     sum_filtered+=recall;
-//                 }
-//                 else if(query_type[i]==0.0f){
-//                     if(i>=5000) std::cout<<"i:"<<i<<"\n";
-//                     auto recall=recall_k(n,L,G_vec,0);
-//                     sum_unfiltered+=recall;
-//                 }
-//     }
-//     std::cout << std::fixed << std::setprecision(2);
-//     std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
-//     std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
-
-
-//     //get valid integer input for query input, indexing starts at 0
-//     while (true)
-//     {
-//         std::cout << "Enter query index (-1 to exit): ";
-//         std::cin >> query_point_index;
-
-//         // check if -1 was given at start
-//         if (query_point_index == -1)
-//             break;
-
-//         std::vector<int> L, V;
-//         std::span<T> query_span(query_m.row(query_point_index));
-//         v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
-//         size_t n = std::min(k, ground_data[query_point_index].size());
-//         std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
-//         if (query_type[query_point_index] == 1.0f)
-//         {
-//             std::cout << "filtered query!\n";
-//             auto recall = recall_k(n, L, G_vec, 1);
-//             std::cout << "\n recall:" << recall << "\n\n";
-//         }
-//         else if (query_type[query_point_index] == 0.0f)
-//         {
-//             std::cout << "UNFILTERED QUERY!\n";
-//             auto recall = recall_k(n, L, G_vec, 1);
-//             std::cout << "\n recall:" << recall << "\n\n";
-//         }
-//         else
-//         {
-//             std::cout << "point with unsupported filter, continuing...\n";
-//             continue;
-//         }
-//     }
-
-    
-//     std::cout<<"\n\n--END OF FILTERED VAMANA--";
-    VamanaIndex<T> v_stitched(&base_m);
-    v_stitched.Pf = Pff;
-    std::cout << "\n\nSTITCHED" << std::endl;
-    //load of build graph
-    if(!load){
-        auto start = std::chrono::high_resolution_clock::now();
-        v_stitched.stitched_vamana_indexing(a, R_small, R, L_small); 
-        auto end = std::chrono::high_resolution_clock::now();
-        std::cout << ">Time taken for Indexing: " << std::chrono::duration_cast<std::chrono::microseconds>(end-start).count() / 1e6 << " sec(s)." << std::endl;
-    }
-    else{
-        //load from file
-        std::filesystem::path load_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
-        std::cout<<"Loading graph from file:"<<load_path<<std::endl;
-        if(v_stitched.load_graph(load_path) ==-1) exit(1) ;
-        
-    }
-    if(save){
-        //write stitched graph in binary file()
-        std::filesystem::path save_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
-        v_stitched.save_graph(save_path);
-        std::cout<<"Saved Graph In File "<<save_path<<".\n\nExit? (1 for yes / 0 for no): ";
-        int toExit;
-        std::cin>>toExit;
-        if(toExit==1) exit(0);
-    }
-
-    double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
-    for (size_t i = 0; i < query_m.vecnum; i++) {
+        std::cout<<"\n\nFILTERED\n";
+        // load or build graph
+        if(!load){
+            // actual indexing
+            auto indexing_start = std::chrono::high_resolution_clock::now();
+            v_m.filtered_vamana_indexing(Medoid, a, List_size, R);
+            auto indexing_end = std::chrono::high_resolution_clock::now();
+            auto indexing_duration = std::chrono::duration_cast<std::chrono::microseconds>(indexing_end - indexing_start).count();
+            std::cout << ">Time taken for Indexing: " << indexing_duration / 1e6 << " sec(s)." << std::endl;
+        }
+        else{
+            //load from binary file
+            std::filesystem::path load_path = get_file_path(k,List_size,R,a,"filtered_graph_");
+            std::cout<<"Loading graph from file:"<<load_path<<std::endl;
+            if(v_m.load_graph(load_path)==-1) exit(1);
+        }
+        double sum_filtered=0.0f,sum_unfiltered=0.0f;
+        //querying
+        auto query_start = std::chrono::high_resolution_clock::now();
+        for (uint32_t i = 0; i < query_no_of_points; i++){
             std::vector<int> L, V;
             std::span<T> query_span(query_m.row(i));
-//            v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-            v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+            //            v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+            v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
             size_t n = std::min(k, ground_data[i].size());
             std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
             if(query_type[i]==1.0f){
-
-                st_sum_filtered+=recall_k(n,L,G_vec,0);
+                auto recall= recall_k(n,L,G_vec,0);
+                sum_filtered+=recall;
             }
             else if(query_type[i]==0.0f){
-                st_sum_unfiltered+=recall_k(n,L,G_vec,0);
+                auto recall=recall_k(n,L,G_vec,0);
+                sum_unfiltered+=recall;
             }
+        }
+        auto query_end = std::chrono::high_resolution_clock::now();
+        auto query_dur = std::chrono::duration_cast<std::chrono::microseconds>(query_end - query_start).count();
+        std::cout << "Querying took " << query_dur / 1e6 << " sec(s)" << std::endl;
+        std::cout << "Total Queries: " << query_no_of_points << std::endl;
+        std::cout << "QPS (queries per second):" << query_no_of_points / (query_dur / 1e6) << std::endl;
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
+        std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
+        std::cout<<"\n\n--END OF FILTERED VAMANA--";
+        if(save){
+            //write filtered graph in binary file()
+            std::filesystem::path save_path = get_file_path(k,List_size,R,a,"filtered_graph_");
+            v_m.save_graph(save_path);
+        }
+        //get input in a loop to show k-nearest neighbors for any query in file
+        int query_point_index;
+//        get valid integer input for query input, indexing starts at 0
+         while (true)
+         {
+             std::cout << "Enter query index (-1 to exit): ";
+             std::cin >> query_point_index;
+
+             // check if -1 was given at start
+             if (query_point_index == -1)
+                 break;
+
+             std::vector<int> L, V;
+             std::span<T> query_span(query_m.row(query_point_index));
+             v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
+             size_t n = std::min(k, ground_data[query_point_index].size());
+             std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
+             if (query_type[query_point_index] == 1.0f)
+             {
+                 std::cout << "filtered query!\n";
+                 auto recall = recall_k(n, L, G_vec, 1);
+                 std::cout << "\n recall:" << recall << "\n\n";
+             }
+             else if (query_type[query_point_index] == 0.0f)
+             {
+                 std::cout << "UNFILTERED QUERY!\n";
+                 auto recall = recall_k(n, L, G_vec, 1);
+                 std::cout << "\n recall:" << recall << "\n\n";
+             }
+             else
+             {
+                 std::cout << "point with unsupported filter, continuing...\n";
+                 continue;
+             }
+         }
+
+
     }
-    std::cout << std::fixed << std::setprecision(2);
-    std::cout << "TOTAL recall for filtered: " << st_sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
-    std::cout << "TOTAL recall for unfiltered: " << st_sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
-
-    //get input in a loop to show k-nearest neighbors for any query in file
-    //get valid integer input for query input, indexing starts at 0
-
-    while (true)
-    {
-        std::cout << "Enter query index (-1 to exit): ";
-        std::cin >> query_point_index;
-
-        // check if -1 was given at start
-        if (query_point_index == -1)
-            break;
-
-        std::vector<int> L, V;
-        std::span<T> query_span(query_m.row(query_point_index));
-        v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
-        size_t n = std::min(k, ground_data[query_point_index].size());
-        std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
-        if (query_type[query_point_index] == 1.0f)
-        {
-            std::cout << "filtered query!\n";
-            auto recall = recall_k(n, L, G_vec, 1);
-            std::cout << "\n recall:" << recall << "\n\n";
+    if (mode == 0 || mode == 2) {
+        VamanaIndex<T> v_stitched(&base_m);
+        v_stitched.Pf = Pff;
+        std::cout << "\n\nSTITCHED" << std::endl;
+        //load of build graph
+        if(!load){
+            auto start = std::chrono::high_resolution_clock::now();
+            v_stitched.stitched_vamana_indexing(a, R_small, R, L_small);
+            auto end = std::chrono::high_resolution_clock::now();
+            std::cout << ">Time taken for Indexing: " << std::chrono::duration_cast<std::chrono::microseconds>(end-start).count() / 1e6 << " sec(s)." << std::endl;
         }
-        else if (query_type[query_point_index] == 0.0f)
-        {
-            std::cout << "UNFILTERED QUERY!\n";
-            auto recall = recall_k(n, L, G_vec, 1);
-            std::cout << "\n recall:" << recall << "\n\n";
+        else{
+            //load from file
+            std::filesystem::path load_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
+            std::cout<<"Loading graph from file:"<<load_path<<std::endl;
+            if(v_stitched.load_graph(load_path) ==-1) exit(1) ;
+
         }
-        else
-        {
-            std::cout << "point with unsupported filter, continuing...\n";
-            continue;
+        double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
+        auto query_start = std::chrono::high_resolution_clock::now();
+        for (size_t i = 0; i < query_m.vecnum; i++) {
+                std::vector<int> L, V;
+                std::span<T> query_span(query_m.row(i));
+    //            v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+                v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
+                size_t n = std::min(k, ground_data[i].size());
+                std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
+                if(query_type[i]==1.0f){
+                    st_sum_filtered+=recall_k(n,L,G_vec,0);
+                }
+                else if(query_type[i]==0.0f){
+                    st_sum_unfiltered+=recall_k(n,L,G_vec,0);
+                }
+        }
+        auto query_end = std::chrono::high_resolution_clock::now();
+        auto query_dur = std::chrono::duration_cast<std::chrono::microseconds>(query_end - query_start).count();
+        std::cout << "Querying took " << query_dur / 1e6 << " sec(s)" << std::endl;
+        std::cout << "Total Queries: " << query_no_of_points << std::endl;
+        std::cout << "QPS (queries per second):" << query_no_of_points / (query_dur / 1e6) << std::endl;
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << "TOTAL recall for filtered: " << st_sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
+        std::cout << "TOTAL recall for unfiltered: " << st_sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
+        std::cout<<"\n\n--END OF STITCHED VAMANA--\n\n";
+
+        //get input in a loop to show k-nearest neighbors for any query in file
+        //get valid integer input for query input, indexing starts at 0
+        int query_point_index;
+        if(save){
+            //write stitched graph in binary file()
+            std::filesystem::path save_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
+            v_stitched.save_graph(save_path);
+        }
+        while (true) {
+            std::cout << "Enter query index (-1 to exit): ";
+            std::cin >> query_point_index;
+
+            // check if -1 was given at start
+            if (query_point_index == -1)
+                break;
+
+            std::vector<int> L, V;
+            std::span<T> query_span(query_m.row(query_point_index));
+            v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
+            size_t n = std::min(k, ground_data[query_point_index].size());
+            std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
+            if (query_type[query_point_index] == 1.0f)
+            {
+                std::cout << "filtered query!\n";
+                auto recall = recall_k(n, L, G_vec, 1);
+                std::cout << "\n recall:" << recall << "\n\n";
+            }
+            else if (query_type[query_point_index] == 0.0f)
+            {
+                std::cout << "UNFILTERED QUERY!\n";
+                auto recall = recall_k(n, L, G_vec, 1);
+                std::cout << "\n recall:" << recall << "\n\n";
+            }
+            else
+            {
+                std::cout << "point with unsupported filter, continuing...\n";
+                continue;
+            }
         }
     }
 
-    
-    std::cout<<"\n\n--END OF STITCHED VAMANA--\n\n";
 }
 
 
