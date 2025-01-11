@@ -327,6 +327,17 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         std::cout<<"Loading graph from file:"<<load_path<<std::endl;
         if(v_m.load_graph(load_path)==-1) exit(1);
     }
+
+    if(save){
+        //write filtered graph in binary file()
+        std::filesystem::path save_path = get_file_path(k,List_size,R,a,"filtered_graph_");
+        v_m.save_graph(save_path);
+        std::cout<<"Saved Graph In File "<<save_path<<".\n\nExit? (1 for yes / 0 for no): ";        
+        int toExit;
+        std::cin>>toExit;
+        if(toExit==1) exit(0);
+    }
+
     double sum_filtered=0.0f,sum_unfiltered=0.0f;
     for (uint32_t i = 0; i < query_no_of_points; i++){
             std::vector<int> L, V;
@@ -384,11 +395,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     //     }
     // }
 
-    if(save){
-        //write filtered graph in binary file()
-        std::filesystem::path save_path = get_file_path(k,List_size,R,a,"filtered_graph_");
-        v_m.save_graph(save_path);
-    }
+    
     std::cout<<"\n\n--END OF FILTERED VAMANA--";
     VamanaIndex<T> v_stitched(&base_m);
     v_stitched.Pf = Pff;
@@ -407,6 +414,16 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
         if(v_stitched.load_graph(load_path) ==-1) exit(1) ;
         
     }
+    if(save){
+        //write stitched graph in binary file()
+        std::filesystem::path save_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
+        v_stitched.save_graph(save_path);
+        std::cout<<"Saved Graph In File "<<save_path<<".\n\nExit? (1 for yes / 0 for no): ";
+        int toExit;
+        std::cin>>toExit;
+        if(toExit==1) exit(0);
+    }
+
     double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
     for (size_t i = 0; i < query_m.vecnum; i++) {
             std::vector<int> L, V;
@@ -462,11 +479,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     //     }
     // }
 
-    if(save){
-        //write stitched graph in binary file()
-        std::filesystem::path save_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
-        v_stitched.save_graph(save_path);
-    }
+    
     std::cout<<"\n\n--END OF STITCHED VAMANA--\n\n";
 }
 

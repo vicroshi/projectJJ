@@ -86,6 +86,7 @@ struct VamanaIndex {
         size_t R = r > vec.size() ? vec.size() - 1 : r;
         std::vector shuff_vec = vec;
         for (auto p: vec) {
+            // if(p % 10000 ==0 ) std::cout<<"adding neighbors for p:"<<p<<std::endl;
             std::unordered_set<int> neighbors;
             while (neighbors.size() < R) {
                 //get a random permutation of all nodes and add 1 each time making sure we dont add itself
