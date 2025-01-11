@@ -371,12 +371,31 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         if (Fq == -1.0f) {
             //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
             L.reserve(db->filters_set->size() + list_size);
+
+
+            
             for (auto &f: (*db->filters_set)) {
+                int startPoint;
+                std::vector<int> tempL,tempV;
                 auto it = S.find(f); //[] operator adds a default value if the key is not already inside it, we dont want that
                 if (it != S.end()) {
-                    L.push_back(it->second); //add all starting points
+                    startPoint = (it->second); //get the starting point for this filter
+                    
+                    //run greedy to get the k=1 closest
+                    filtered_greedy_search(S,query,1,1,f,tempL,tempV);
+                    L.push_back(tempL[0]);
+                    
                 }
+                
+
+
+
+
             }
+
+            
+
+
         }
         else {
             //its a node with only one filter, I only have one starting node.

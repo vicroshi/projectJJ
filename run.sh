@@ -41,7 +41,7 @@ ground_file_path="./datasets/siftsmall/siftsmall_groundtruth.ivecs"
 # query_file_path="../datasets/sift/sift_query.fvecs"
 # ground_file_path="../datasets/sift/sift_groundtruth.ivecs"
 
-a2=1.0
+a2=1.2
 k2=100
 
 R2=100
