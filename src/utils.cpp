@@ -63,7 +63,7 @@ double recall_k(const int& k, std::vector<int>& X, std::vector<int>& G,int prnt=
     }
     
     
-    // std::cout<<"recall: "<< (double) intersection.size()/(double) k <<std::endl;
+    if(prnt) std::cout<<"recall: "<< (double) intersection.size()/(double) k <<std::endl;
     return (double) intersection.size()/(double) k;
 }
 
