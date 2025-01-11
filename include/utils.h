@@ -173,12 +173,12 @@ void ReadBin(const std::string &file_path,const int num_dimensions,std::vector<s
     ifs.read((char *)&N, sizeof(uint32_t));
     data.resize(N);
     std::cout << "# of points: " << N << std::endl;
-    std::vector<float> buff(num_dimensions);
+    std::vector<T> buff(num_dimensions);
     int counter = 0;
-    while (ifs.read((char *)buff.data(), num_dimensions * sizeof(float))) {
-        std::vector<float> row(num_dimensions);
+    while (ifs.read((char *)buff.data(), num_dimensions * sizeof(T))) {
+        std::vector<T> row(num_dimensions);
         for (int d = 0; d < num_dimensions; d++) {
-        row[d] = static_cast<float>(buff[d]);
+            row[d] = buff[d];
         }
         data[counter++] = std::move(row);
     }
@@ -248,7 +248,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     std::vector<std::vector<T>> base_data; // only used for reading, will be dropped after data extraction
     std::vector<T> flat_base;
     uint32_t base_no_of_points;
-    ReadBin(base_file_path, 102, base_data, base_no_of_points);
+    ReadBin<float>(base_file_path, 102, base_data, base_no_of_points);
 
     // data extraction
     std::vector<T> base_filter;        // to filter kathe point
@@ -267,7 +267,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     std::vector<std::vector<T>> query_data; // only used for reading, will be dropped after data extraction
     std::vector<T> flat_query;
     uint32_t query_no_of_points;
-    ReadBin(query_file_path, 104, query_data, query_no_of_points);
+    ReadBin<float>(query_file_path, 104, query_data, query_no_of_points);
 
     // data extraction
     std::vector<T> query_filter;
@@ -290,7 +290,7 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
     uint32_t ground_no_of_points;
     std::vector<std::vector<float>> ground_data_float;
     std::vector<std::vector<int>> ground_data;
-    ReadBin(ground_file_path, 100, ground_data_float, ground_no_of_points);
+    ReadBin<int>(ground_file_path, 100, ground_data, ground_no_of_points);
     remove_negative_elements(ground_data_float,ground_data); // format it as needed because binary is read with readBin and dimensions must be constant for each vector
     // times for each action
     // R-regular graph initialization

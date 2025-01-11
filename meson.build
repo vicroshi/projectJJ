@@ -21,6 +21,7 @@ add_project_arguments('-O3', language: 'cpp')
 # not the executables that use the library.
 includes = include_directories('include')
 vamana_lib = static_library('vamana', ['src/utils.cpp'], include_directories : includes)
+omp = dependency('openmp')
 
 executable('projectJJ', ['main.cpp'], include_directories : includes, link_with : vamana_lib)
 
@@ -42,5 +43,4 @@ e = executable('unit_tests',
 #dummy_exe = executable('test', 'datasets/test/dummy_create.cpp')
 
 test('unit_tests',e)
-
-executable('brute', 'datasets/test/brute.cpp')
+executable('brute', 'datasets/test/brute.cpp',dependencies : omp)
