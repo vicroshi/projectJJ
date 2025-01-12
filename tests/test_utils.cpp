@@ -81,7 +81,7 @@ void test_extract_data(){
         0.0f, 1.0f, 2.1f, 3.0f
     };
     std::vector<float>point_filter;
-    std::unordered_set<float>filters_set;
+    std::vector<float>filters_set;
     std::vector<float>flattened_data;
     std::unordered_map<float, std::vector<int>> Pf;
 
@@ -96,7 +96,7 @@ void test_extract_data(){
     TEST_ASSERT(point_filter==expected_point_filter);
 
     //test to see if all filters were extracted
-    std::unordered_set<float> expected_filters_set = {1.0f, 2.0f, 3.0f};
+    std::vector<float> expected_filters_set = {1.0f, 2.0f, 3.0f};
     TEST_ASSERT(filters_set == expected_filters_set);
 
     //test that Pf has the right amount of points

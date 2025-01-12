@@ -30,6 +30,7 @@ struct Matrix{
     const std::vector<T>& vec_filter; //filter for each vec
     const std::vector<T>& filters_set; //set of all filters
 
+    Matrix(): dim(0), vecnum(0), vecs({}), vec_filter({}), filters_set({}){}
     //project 1 constructor
     Matrix(size_t dim, size_t vecnum, T* data): dim(dim), vecnum(vecnum), vecs(data, vecnum * dim), vec_filter({}), filters_set({}){}
     //project 2 constructor

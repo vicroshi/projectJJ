@@ -29,7 +29,7 @@ void test_init() {
     //in order:{0,4,1,3,5,2}
 
     Matrix<int> i_m(4,6,&points[0][0]);
-    VamanaIndex<int> V(&i_m);
+    VamanaIndex<int> V(i_m);
     V.init_graph(3);
     // std::cout << 
     TEST_ASSERT(V.graph.size()==6);
@@ -57,7 +57,7 @@ void test_greedy(){
     //in order:{0,4,1,3,5,2}
 
     Matrix<int> i_m(4,6,&points[0][0]);
-    VamanaIndex<int> V(&i_m);
+    VamanaIndex<int> V(i_m);
     V.graph[0].insert(1);
     V.graph[0].insert(2);
     V.graph[0].insert(3);
@@ -154,7 +154,7 @@ void test_greedy(){
     //in order:{0,4,1,3,5,2}
 
     Matrix<float> f_m(4,6,&points_f[0][0]);
-    VamanaIndex<float> Vf(&f_m);
+    VamanaIndex<float> Vf(f_m);
     Vf.graph[0].insert(4);
     Vf.graph[0].insert(5);
     Vf.graph[0].insert(3);
@@ -244,8 +244,8 @@ void test_k_closest(){
         {8, 3, 15} //150
     };
     Matrix<int> i_m(3,6,&points_i[0][0]);
-    VamanaIndex<int> VI(&i_m);
-    VI.vecnum=6;
+    VamanaIndex<int> VI(i_m);
+//    VI.vecnum=6;
     std::vector<int> int_q ={1,2,5};
     const std::span<int> q_i(int_q.data(), int_q.size());
 
@@ -269,8 +269,8 @@ void test_k_closest(){
         {8.0, 3.0, 15.0, 1.0}
     };
     Matrix<float> f_m(4,6,&points_f[0][0]);
-    VamanaIndex<float> VF(&f_m);
-    VF.vecnum=6;
+    VamanaIndex<float> VF(f_m);
+//    VF.vecnum=6;
 
     std::vector<float> float_q ={1.0f,2.0f,5.0f,10.0f};
     const std::span<float> q_f(float_q.data(), float_q.size());
@@ -308,7 +308,7 @@ void test_prune(){
     };
 
     Matrix<int> i_m(4,15,&points[0][0]);
-    VamanaIndex<int> V(7,&i_m);
+    VamanaIndex<int> V(7,i_m);
     
     float a=2.4f;
     std::unordered_set<int>L={};
@@ -338,7 +338,7 @@ void test_prune(){
     };
 
     Matrix<float> f_m(4,14,&points_f[0][0]);
-    VamanaIndex<float> V_F(7,&f_m);
+    VamanaIndex<float> V_F(7,f_m);
     
     a=1.0f;
     std::unordered_set<int>Lf={};
@@ -376,7 +376,7 @@ void test_vamana_index(){
     int q[4]={7,3,10,2};
     std::span<int> q_span(q,4);
     Matrix<int> i_m(4,14,&points[0][0]);
-    VamanaIndex<int> V(R,&i_m);
+    VamanaIndex<int> V(R,i_m);
     auto start_ind=i_m.medoid_naive();
     V.vamana_indexing(start_ind,a,list_size,R);
     
@@ -406,7 +406,7 @@ void test_vamana_index(){
     a=1.1;
     list_size=10;
     Matrix<float> f_m(4,14,&points_f[0][0]);
-    VamanaIndex<float> V_F(R,&f_m);
+    VamanaIndex<float> V_F(R,f_m);
     start_ind=f_m.medoid_naive();
     
     V_F.vamana_indexing(start_ind,a,list_size,R);
@@ -434,7 +434,7 @@ void test_save_graph(){
         {12, 5, 8, 6}
     };
     Matrix<int> i_m(4,6,&points[0][0]);   
-    VamanaIndex<int> V(&i_m);
+    VamanaIndex<int> V(i_m);
     V.graph=graph;
     int ret = V.save_graph("test_graph.bin");
     TEST_ASSERT(ret!=-1);

@@ -24,12 +24,12 @@ void test_filtered_greedy(){
     };
     std::vector vecs(&points[0][0], &points[0][0] + 6*4);
     std::vector vecs_filters = {1,1,1,2,2,3};
-    std::unordered_set filters = {1,2,3};
+    std::vector filters = {1,2,3};
     int q[] = {0,0,0,0};
     std::span query(q,4);
     int fq = 2;
-    Matrix<int> i_m(4,6,&vecs, &vecs_filters, &filters);
-    VamanaIndex<int> V(&i_m);
+    Matrix<int> i_m(4,6,&vecs, vecs_filters, filters);
+    VamanaIndex<int> V(i_m);
     V.graph[0].insert(1);
     V.graph[0].insert(2);
     V.graph[1].insert(0);
@@ -60,12 +60,12 @@ void test_stitched() {
     };
     std::vector vecs(&points[0][0], &points[0][0] + 6*4);
     std::vector vecs_filters = {1,1,1,2,2,3};
-    std::unordered_set filters = {1,2,3};
+    std::vector filters = {1,2,3};
     int q[] = {0,0,0,0};
     std::span query(q,4);
     int fq = 2;
-    Matrix<int> i_m(4,6,&vecs, &vecs_filters, &filters);
-    VamanaIndex<int> V(&i_m);
+    Matrix<int> i_m(4,6,&vecs, vecs_filters, filters);
+    VamanaIndex<int> V(i_m);
     std::unordered_map<int,int> S ={
         {1,2},
         {2,3},
@@ -79,7 +79,7 @@ void test_stitched() {
     };
     V.Pf = Pf;
     TEST_ASSERT(V.vecnum==6);
-    TEST_ASSERT(V.db->filters_set->size()==3);
+    TEST_ASSERT(V.db.filters_set.size()==3);
     V.stitched_vamana_indexing(1.1f, 32, 32, 100);
     V.filtered_greedy_search(S,query,1,5,fq,L,V_f);
     // std::cout << "\nL.size():" << L.size() << std::endl;
@@ -122,9 +122,9 @@ void test_filtered_prune() {
     size_t R=3;
     float a=1.1f;
     std::vector<float> vecs_filters = {1.0f,5.0f,2.0f,2.0f,1.0f,3.0f,1.0f,2.0f,3.0f,5.0f,1.0f,2.0f,3.0f,5.0f};
-    std::unordered_set<float> filters = {1.0f, 2.0f, 3.0f, 5.0f};
-    Matrix<float> f_m(4,14,&vecs, &vecs_filters, &filters);
-    VamanaIndex V_F(6,&f_m); //make a random graph with 6 neighbors for each node
+    std::vector<float> filters = {1.0f, 2.0f, 3.0f, 5.0f};
+    Matrix<float> f_m(4,14,&vecs, vecs_filters, filters);
+    VamanaIndex V_F(6,f_m); //make a random graph with 6 neighbors for each node
 
     std::vector<int>Lf,vf;
     //prune some edges for some vectors
@@ -164,9 +164,9 @@ void test_filtered_vamana_indexing(){
     float a=1.1f;
     size_t list_size=10;
     std::vector<float> vecs_filters = {1.0f,5.0f,2.0f,2.0f,1.0f,3.0f,1.0f,2.0f,3.0f,5.0f,1.0f,2.0f,3.0f,5.0f};
-    std::unordered_set<float> filters = {1.0f, 2.0f, 3.0f, 5.0f};
-    Matrix<float> f_m(4,14,&vecs, &vecs_filters, &filters);
-    VamanaIndex V_F(&f_m); 
+    std::vector<float> filters = {1.0f, 2.0f, 3.0f, 5.0f};
+    Matrix<float> f_m(4,14,&vecs, vecs_filters, filters);
+    VamanaIndex V_F(f_m);
 
     std::unordered_map<float, int> Medoid={
         {1.0f, 0},

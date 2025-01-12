@@ -29,7 +29,7 @@ struct VamanaIndex {
     const size_t deg;
     std::unordered_map<T, std::vector<int> > Pf;
 
-    VamanaIndex() : db(nullptr), vecnum(0), deg(0) {
+    VamanaIndex() : db(Matrix<T>()), vecnum(0), deg(0) {
     }
 
     //constructor used for main
