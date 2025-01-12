@@ -71,15 +71,15 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
     //R-regular graph initialization
     auto init_start = std::chrono::high_resolution_clock::now();
-    VamanaIndex<T> v_m(R,&base_m);
+    VamanaIndex<T> v_m(R,base_m);
     auto init_end = std::chrono::high_resolution_clock::now();
     auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
     std::cout << ">Time taken to initialize "<<R<<"-regular Graph: " << init_duration / 1e6 << " sec(s)." << std::endl;
 
     //calculate medoid once and pass it to functions later
     auto medoid_start = std::chrono::high_resolution_clock::now();
-//    int medoid=v_m.db->medoid_naive();
-    int medoid=v_m.db->medoid_rand();
+//    int medoid=v_m.db.medoid_naive();
+    int medoid=v_m.db.medoid_rand();
     auto medoid_end = std::chrono::high_resolution_clock::now();
     auto medoid_duration = std::chrono::duration_cast<std::chrono::microseconds>(medoid_end - medoid_start).count();
     std::cout << ">Time taken to find medoid: " << medoid_duration / 1e6 << " sec(s)." << std::endl;
@@ -188,17 +188,28 @@ void ReadBin(const std::string &file_path,const int num_dimensions,std::vector<s
 
 // moves the first element other vectors and flattens the 2-D data vector.
 template <typename T>
-void extract_base_vector_info(std::vector<std::vector<T>>& data,std::vector<T>& point_filter,std::unordered_set<T>& filters_set,std::vector<T>& flattened_data,
+void extract_base_vector_info(std::vector<std::vector<T>>& data,std::vector<T>& point_filter,std::vector<T>& filters_set,std::vector<T>& flattened_data,
 std::unordered_map<T, std::vector<int>>& Pf){
     flattened_data.reserve(data.size()*100); //100 dimensions for each vector * num of vectors
     int idx = 0;
     for(auto& point:data){
         point_filter.push_back(point[0]);    //move the first element to filter
-        filters_set.insert(point[0]); //insert filter to the set. if it already is in the set, its not re-entered
+        filters_set.push_back(point[0]); //insert filter to the set. if it already is in the set, its not re-entered
         Pf[point[0]].push_back(idx); //insert point to the filter map
         flattened_data.insert(flattened_data.end(), point.begin() + 2, point.end());  //skip the first two elements and insert the rest
         idx++;
     }
+
+    std::ranges::sort(filters_set);
+    auto l = std::unique(filters_set.begin(), filters_set.end());
+    filters_set.erase(l, filters_set.end());
+    std::ranges::sort(filters_set, [&](int a, int b) { return Pf[a].size() > Pf[b].size(); });
+//    for (auto i: filters_set) {
+//        std::cout << i << " ";
+//    }
+//    std::cout << std::endl;
+//    std::cout << "filters_set size: " << filters_set.size() << std::endl;
+//    exit(0);
     data.clear(); //delete the vector since its not needed
 }
 
@@ -244,7 +255,8 @@ void remove_negative_elements(std::vector<std::vector<T>> &data,std::vector<std:
 //overloading execute for second project
 template <typename T>
 void execute(const std::string& base_file_path,const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const
-size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,const int& load,const int& save, int mode, int num_threads) {
+size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,const int& load,const int& save, int mode, int num_threads, int L_unfiltered) {
+    omp_set_num_threads(num_threads);
     // database read
     std::vector<std::vector<T>> base_data; // only used for reading, will be dropped after data extraction
     std::vector<T> flat_base;
@@ -253,7 +265,7 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
 
     // data extraction
     std::vector<T> base_filter;        // to filter kathe point
-    std::unordered_set<T> filters_set; // ola ta filters pou uparxoun
+    std::vector<T> filters_set; // ola ta filters pou uparxoun
     base_filter.reserve(base_no_of_points);
     filters_set.reserve(base_no_of_points / 5); // rough estimate
     std::unordered_map<T, std::vector<int>> Pff; // so it won't break find medoid
@@ -261,7 +273,7 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
     extract_base_vector_info(base_data, base_filter, filters_set, flat_base, Pff);
 
     // database init
-    Matrix<T> base_m(static_cast<size_t>(100), base_no_of_points, &flat_base, &base_filter, &filters_set);
+    Matrix<T> base_m(static_cast<size_t>(100), base_no_of_points, &flat_base, base_filter, filters_set);
     // base_m.print_check();
 
     // query read
@@ -284,7 +296,7 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
 
 
     // database init                                                        //no need to keep all filters used in queries, we have them from DB.
-    Matrix<T> query_m(static_cast<size_t>(100), query_no_of_points, &flat_query, &query_filter, NULL);
+    Matrix<T> query_m(static_cast<size_t>(100), query_no_of_points, &flat_query, query_filter, {});
 
 
     // groundtruth read
@@ -323,7 +335,7 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
     std::cout << ">Time taken to find medoid: " << medoid_duration / 1e6 << " sec(s)." << std::endl;
     if (mode == 0 | mode == 1) {
         auto init_start = std::chrono::high_resolution_clock::now();
-        VamanaIndex<T> v_m(&base_m);
+        VamanaIndex<T> v_m(base_m);
         v_m.Pf = Pff;
         auto init_end = std::chrono::high_resolution_clock::now();
         auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
@@ -345,79 +357,86 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
             std::cout<<"Loading graph from file:"<<load_path<<std::endl;
             if(v_m.load_graph(load_path)==-1) exit(1);
         }
-        double sum_filtered=0.0f,sum_unfiltered=0.0f;
-        //querying
-        auto query_start = std::chrono::high_resolution_clock::now();
-        for (uint32_t i = 0; i < query_no_of_points; i++){
-            std::vector<int> L, V;
-            std::span<T> query_span(query_m.row(i));
-            //            v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-            v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-            size_t n = std::min(k, ground_data[i].size());
-            std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
-            if(query_type[i]==1.0f){
-                auto recall= recall_k(n,L,G_vec,0);
-                sum_filtered+=recall;
-            }
-            else if(query_type[i]==0.0f){
-                auto recall=recall_k(n,L,G_vec,0);
-                sum_unfiltered+=recall;
-            }
-        }
-        auto query_end = std::chrono::high_resolution_clock::now();
-        auto query_dur = std::chrono::duration_cast<std::chrono::microseconds>(query_end - query_start).count();
-        std::cout << "Querying took " << query_dur / 1e6 << " sec(s)" << std::endl;
-        std::cout << "Total Queries: " << query_no_of_points << std::endl;
-        std::cout << "QPS (queries per second):" << query_no_of_points / (query_dur / 1e6) << std::endl;
-        std::cout << std::fixed << std::setprecision(2);
-        std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
-        std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
-        std::cout<<"\n\n--END OF FILTERED VAMANA--";
         if(save){
             //write filtered graph in binary file()
             std::filesystem::path save_path = get_file_path(k,List_size,R,a,"filtered_graph_");
             v_m.save_graph(save_path);
         }
-        //get input in a loop to show k-nearest neighbors for any query in file
-        int query_point_index;
-//        get valid integer input for query input, indexing starts at 0
-         while (true)
-         {
-             std::cout << "Enter query index (-1 to exit): ";
-             std::cin >> query_point_index;
+        std::cout << "Continue to querying? [Y/n]\n";
+        char c;
+        std::cin >> c;
+        if (c == 'y' || c == 'Y') {
+            double sum_filtered=0.0f,sum_unfiltered=0.0f;
+            //querying
+            auto query_start = std::chrono::high_resolution_clock::now();
+            #pragma omp parallel for reduction(+:sum_filtered,sum_unfiltered)
+            for (uint32_t i = 0; i < query_no_of_points; i++){
+                std::vector<int> L, V;
+                std::span<T> query_span(query_m.row(i));
+                //            v_m.filtered_greedy_search(Medoid, query_span, k, List_size, (query_m.vec_filter)[i], L, V);
+                v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (query_m.vec_filter)[i], L, V, L_unfiltered);
+                size_t n = std::min(k, ground_data[i].size());
+                std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
+                if(query_type[i]==1.0f){
+                    auto recall= recall_k(n,L,G_vec,0);
+                    sum_filtered+=recall;
+                }
+                else if(query_type[i]==0.0f){
+                    auto recall=recall_k(n,L,G_vec,0);
+                    sum_unfiltered+=recall;
+                }
+            }
+            auto query_end = std::chrono::high_resolution_clock::now();
+            auto query_dur = std::chrono::duration_cast<std::chrono::microseconds>(query_end - query_start).count();
+            std::cout << ">Time taken for Querying: " << query_dur / 1e6 << " sec(s)" << std::endl;
+            std::cout << "Total Queries: " << query_no_of_points << std::endl;
+            std::cout << "QPS (queries per second):" << query_no_of_points / (query_dur / 1e6) << std::endl;
+            std::cout << std::fixed << std::setprecision(2);
+            std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
+            std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
+            std::cout<<"\n\n--END OF FILTERED VAMANA--";
+            //get input in a loop to show k-nearest neighbors for any query in file
+            int query_point_index;
+    //        get valid integer input for query input, indexing starts at 0
+             while (true){
+                 std::cout << "Enter query index (-1 to exit): ";
+                 std::cin >> query_point_index;
 
-             // check if -1 was given at start
-             if (query_point_index == -1)
-                 break;
+                 // check if -1 was given at start
+                 if (query_point_index == -1)
+                     break;
 
-             std::vector<int> L, V;
-             std::span<T> query_span(query_m.row(query_point_index));
-             v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
-             size_t n = std::min(k, ground_data[query_point_index].size());
-             std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
-             if (query_type[query_point_index] == 1.0f)
-             {
-                 std::cout << "filtered query!\n";
-                 auto recall = recall_k(n, L, G_vec, 1);
-                 std::cout << "\n recall:" << recall << "\n\n";
+                 std::vector<int> L, V;
+                 std::span<T> query_span(query_m.row(query_point_index));
+                 v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (query_m.vec_filter)[query_point_index], L, V, L_unfiltered);
+                 size_t n = std::min(k, ground_data[query_point_index].size());
+                 std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
+                 if (query_type[query_point_index] == 1.0f)
+                 {
+                     std::cout << "filtered query!\n";
+                     auto recall = recall_k(n, L, G_vec, 1);
+                     std::cout << "\n recall:" << recall << "\n\n";
+                 }
+                 else if (query_type[query_point_index] == 0.0f)
+                 {
+                     std::cout << "UNFILTERED QUERY!\n";
+                     auto recall = recall_k(n, L, G_vec, 1);
+                     std::cout << "\n recall:" << recall << "\n\n";
+                 }
+                 else
+                 {
+                     std::cout << "point with unsupported filter, continuing...\n";
+                     continue;
+                 }
              }
-             else if (query_type[query_point_index] == 0.0f)
-             {
-                 std::cout << "UNFILTERED QUERY!\n";
-                 auto recall = recall_k(n, L, G_vec, 1);
-                 std::cout << "\n recall:" << recall << "\n\n";
-             }
-             else
-             {
-                 std::cout << "point with unsupported filter, continuing...\n";
-                 continue;
-             }
-         }
-
+        }
+        else {
+            std::cout<<"\n\n--END OF FILTERED VAMANA--";
+        }
 
     }
     if (mode == 0 || mode == 2) {
-        VamanaIndex<T> v_stitched(&base_m);
+        VamanaIndex<T> v_stitched(base_m);
         v_stitched.Pf = Pff;
         std::cout << "\n\nSTITCHED" << std::endl;
         //load of build graph
@@ -434,71 +453,82 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
             if(v_stitched.load_graph(load_path) ==-1) exit(1) ;
 
         }
-        double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
-        auto query_start = std::chrono::high_resolution_clock::now();
-        for (size_t i = 0; i < query_m.vecnum; i++) {
-                std::vector<int> L, V;
-                std::span<T> query_span(query_m.row(i));
-    //            v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-                v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[i], L, V);
-                size_t n = std::min(k, ground_data[i].size());
-                std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
-                if(query_type[i]==1.0f){
-                    st_sum_filtered+=recall_k(n,L,G_vec,0);
-                }
-                else if(query_type[i]==0.0f){
-                    st_sum_unfiltered+=recall_k(n,L,G_vec,0);
-                }
-        }
-        auto query_end = std::chrono::high_resolution_clock::now();
-        auto query_dur = std::chrono::duration_cast<std::chrono::microseconds>(query_end - query_start).count();
-        std::cout << "Querying took " << query_dur / 1e6 << " sec(s)" << std::endl;
-        std::cout << "Total Queries: " << query_no_of_points << std::endl;
-        std::cout << "QPS (queries per second):" << query_no_of_points / (query_dur / 1e6) << std::endl;
-        std::cout << std::fixed << std::setprecision(2);
-        std::cout << "TOTAL recall for filtered: " << st_sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
-        std::cout << "TOTAL recall for unfiltered: " << st_sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
-        std::cout<<"\n\n--END OF STITCHED VAMANA--\n\n";
-
-        //get input in a loop to show k-nearest neighbors for any query in file
-        //get valid integer input for query input, indexing starts at 0
-        int query_point_index;
         if(save){
             //write stitched graph in binary file()
             std::filesystem::path save_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
             v_stitched.save_graph(save_path);
         }
-        while (true) {
-            std::cout << "Enter query index (-1 to exit): ";
-            std::cin >> query_point_index;
-
-            // check if -1 was given at start
-            if (query_point_index == -1)
-                break;
-
-            std::vector<int> L, V;
-            std::span<T> query_span(query_m.row(query_point_index));
-            v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
-            size_t n = std::min(k, ground_data[query_point_index].size());
-            std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
-            if (query_type[query_point_index] == 1.0f)
-            {
-                std::cout << "filtered query!\n";
-                auto recall = recall_k(n, L, G_vec, 1);
-                std::cout << "\n recall:" << recall << "\n\n";
+        char c;
+        std::cout << "Continue to querying? [Y/n]\n";
+        std::cin >> c;
+        if (c == 'y' || c == 'Y') {
+            double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
+            auto query_start = std::chrono::high_resolution_clock::now();
+            #pragma omp parallel for reduction(+:st_sum_filtered,st_sum_unfiltered)
+            for (size_t i = 0; i < query_m.vecnum; i++) {
+                    std::vector<int> L, V;
+                    std::span<T> query_span(query_m.row(i));
+    //                v_stitched.filtered_greedy_search(Medoid, query_span, k, List_size, (query_m.vec_filter)[i], L, V);
+                    v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (query_m.vec_filter)[i], L, V, L_unfiltered);
+                    size_t n = std::min(k, ground_data[i].size());
+                    std::vector<int> G_vec(ground_data[i].begin(),ground_data[i].begin()+n);
+                    if(query_type[i]==1.0f){
+                        st_sum_filtered+=recall_k(n,L,G_vec,0);
+                    }
+                    else if(query_type[i]==0.0f){
+                        st_sum_unfiltered+=recall_k(n,L,G_vec,0);
+                    }
             }
-            else if (query_type[query_point_index] == 0.0f)
-            {
-                std::cout << "UNFILTERED QUERY!\n";
-                auto recall = recall_k(n, L, G_vec, 1);
-                std::cout << "\n recall:" << recall << "\n\n";
-            }
-            else
-            {
-                std::cout << "point with unsupported filter, continuing...\n";
-                continue;
+            auto query_end = std::chrono::high_resolution_clock::now();
+            auto query_dur = std::chrono::duration_cast<std::chrono::microseconds>(query_end - query_start).count();
+            std::cout << "Querying took " << query_dur / 1e6 << " sec(s)" << std::endl;
+            std::cout << "Total Queries: " << query_no_of_points << std::endl;
+            std::cout << "QPS (queries per second):" << query_no_of_points / (query_dur / 1e6) << std::endl;
+            std::cout << std::fixed << std::setprecision(2);
+            std::cout << "TOTAL recall for filtered: " << st_sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
+            std::cout << "TOTAL recall for unfiltered: " << st_sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
+            std::cout<<"\n\n--END OF STITCHED VAMANA--\n\n";
+
+            //get input in a loop to show k-nearest neighbors for any query in file
+            //get valid integer input for query input, indexing starts at 0
+            int query_point_index;
+
+            while (true) {
+                std::cout << "Enter query index (-1 to exit): ";
+                std::cin >> query_point_index;
+
+                // check if -1 was given at start
+                if (query_point_index == -1)
+                    break;
+
+                std::vector<int> L, V;
+                std::span<T> query_span(query_m.row(query_point_index));
+                v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (query_m.vec_filter)[query_point_index], L, V, L_unfiltered);
+                size_t n = std::min(k, ground_data[query_point_index].size());
+                std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
+                if (query_type[query_point_index] == 1.0f)
+                {
+                    std::cout << "filtered query!\n";
+                    auto recall = recall_k(n, L, G_vec, 1);
+                    std::cout << "\n recall:" << recall << "\n\n";
+                }
+                else if (query_type[query_point_index] == 0.0f)
+                {
+                    std::cout << "UNFILTERED QUERY!\n";
+                    auto recall = recall_k(n, L, G_vec, 1);
+                    std::cout << "\n recall:" << recall << "\n\n";
+                }
+                else
+                {
+                    std::cout << "point with unsupported filter, continuing...\n";
+                    continue;
+                }
             }
         }
+        else {
+            std::cout<<"\n\n--END OF STITCHED VAMANA--\n\n";
+        }
+
     }
 
 }

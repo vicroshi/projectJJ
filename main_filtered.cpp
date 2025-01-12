@@ -13,9 +13,10 @@ int main(int argc,char **argv){
     size_t R=0,L=0,k=0,t=0,R_small=0,L_small=0;
     int load=0,save=0;
     std::string base_file_path,query_file_path,ground_file_path;
+    int L_unfiltered = 1;
     int mode = 0; //0 for both, 1 for filtered, 2 for stitched
     int num_threads = 1;
-    while((opt = getopt(argc, argv, "a:R:L:k:b:q:g:t:r:l:m:n:os"))!=-1){
+    while((opt = getopt(argc, argv, "a:R:L:k:b:q:g:t:r:l:m:n:u:os"))!=-1){
         try{
             switch(opt){
                 case 'a':
@@ -61,6 +62,9 @@ int main(int argc,char **argv){
                 case 'n':
                     num_threads = std::stoul(optarg);
                     break;
+                case 'u':
+                    L_unfiltered = std::stoul(optarg);
+                    break;
                 default:
                     throw std::invalid_argument("Invalid option");
             }
@@ -87,7 +91,7 @@ int main(int argc,char **argv){
     }
 
     //call immediately execute for filtered vamana
-    execute<float>(base_file_path,query_file_path,ground_file_path,a,k,R,L,t,R_small,L_small,load,save,mode ,num_threads);
+    execute<float>(base_file_path,query_file_path,ground_file_path,a,k,R,L,t,R_small,L_small,load,save,mode ,num_threads, L_unfiltered);
 
 
     return 0;

@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <chrono>
 #include <set>
 #include <unordered_set>
 #include <random>
@@ -23,30 +24,27 @@ template<typename T>
 struct VamanaIndex {
 //    std::vector<std::unordered_set<int>> graph;
     std::unordered_map<int, std::unordered_set<int> > graph;
-    Matrix<T> *db;
-    size_t vecnum;
-    size_t deg;
+    const Matrix<T> &db;
+    const size_t vecnum;
+    const size_t deg;
     std::unordered_map<T, std::vector<int> > Pf;
 
     VamanaIndex() : db(nullptr), vecnum(0), deg(0) {
     }
 
     //constructor used for main
-    VamanaIndex(size_t deg, Matrix<T> *db): db(db) {
-        this->vecnum = db->vecnum;
-//        init_graph(deg);
+    VamanaIndex(size_t deg, const Matrix<T>& db): db(db), vecnum(db.vecnum), deg(deg) {
         init_graph();
     }
 
     //gia stitched
-    VamanaIndex(Matrix<T> *db, size_t deg, size_t vecnum): db(db), vecnum(vecnum), deg(deg) {
+    VamanaIndex(const Matrix<T>& db,const size_t deg, const size_t vecnum): db(db), vecnum(vecnum), deg(deg) {
     }
 
     //constructor for testing where we need to have a fixed graph each time. we add neighbors manually
-    VamanaIndex(Matrix<T> *db): db(db) {
-//        graph.resize(db->vecnum);
-        this->vecnum = db->vecnum;
-        graph.reserve(db->vecnum);
+    VamanaIndex(const Matrix<T>& db) : db(db), vecnum(0), deg(0) {
+//        graph.resize(db.vecnum);
+        graph.reserve(db.vecnum);
     }
 
     void init_graph(const std::vector<int> &P = {}){
@@ -128,9 +126,9 @@ struct VamanaIndex {
         L.reserve(k);
         V.reserve(2*list_size);
         auto cmp_L = [&](int v1,int v2){
-            return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
+            return Matrix<T>::sq_euclid(query, db.row(v1), db.dim) < Matrix<T>::sq_euclid(query, db.row(v2), db.dim);
         };
-        cmp_dist cmp(query, *db);
+        cmp_dist cmp(query, db);
         std::set<int, cmp_dist> Ls(cmp);
         std::set<int, cmp_dist> Vs(cmp);
         Ls.insert(start_idx);
@@ -169,7 +167,7 @@ struct VamanaIndex {
         diff.reserve(list_size);
         diff.push_back(start_idx);
         auto cmp_dist = [&](int v1,int v2){
-            return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
+            return Matrix<T>::sq_euclid(query, db.row(v1), db.dim) < Matrix<T>::sq_euclid(query, db.row(v2), db.dim);
         };
         while (!diff.empty()) {
             int p_star_idx = 0;
@@ -241,19 +239,19 @@ struct VamanaIndex {
 
     void robust_prune(int p, std::vector<int> &V, float a, size_t R) {
         graph[p].clear();
-        auto vec1 = db->row(p);
+        auto vec1 = db.row(p);
         int p_star_idx;
         while (!V.empty()) {
             p_star_idx = V[0];
             graph[p].insert(p_star_idx);
             if (graph[p].size() == R)
                 break;
-            auto vec2 = db->row(p_star_idx);
+            auto vec2 = db.row(p_star_idx);
             V.erase(
                 std::remove_if(V.begin(), V.end(),
                  [&](int i) {
-                     auto v = db->row(i);
-                     return a * Matrix<T>::sq_euclid(vec2, v, db->dim) <= Matrix<T>::sq_euclid(vec1, v, db->dim);
+                     auto v = db.row(i);
+                     return a * Matrix<T>::sq_euclid(vec2, v, db.dim) <= Matrix<T>::sq_euclid(vec1, v, db.dim);
                  }));
         }
     }
@@ -262,7 +260,7 @@ struct VamanaIndex {
         //create the permuation
         std::vector<int> sigma;
         if (P.empty()) {
-            for (size_t i = 0; i < db->vecnum; i++)
+            for (size_t i = 0; i < db.vecnum; i++)
                 sigma.push_back(i);
         }
         else {
@@ -275,18 +273,18 @@ struct VamanaIndex {
         for (auto i: sigma) {
             std::vector<int> L, V;
             //i must construct query
-            greedy_search_s(medoid, db->row(i), 1, list_size, L, V);
-            for (auto nghbr: graph[i]) {
-                V.push_back(nghbr);
-            }
-//            std::sort(V.begin(), V.end(), [&](int v1, int v2) {
-//                return Matrix<T>::sq_euclid(db->row(i), db->row(v1), db->dim) < Matrix<T>::sq_euclid(db->row(i), db->row(v2), db->dim);
-//            });
-//            auto l = std::unique(V.begin(), V.end());
-//            V.erase(l, V.end());
+            auto q = db.row(i);
+            greedy_search_s(medoid, q, 1, list_size, L, V);
             if (V[0] == i) {
                 V.erase(V.begin());
             }
+            for (auto nghbr: graph[i]) {
+                V.push_back(nghbr);
+            }
+            std::ranges::sort(V, [&](int v1, int v2) {
+                return Matrix<T>::sq_euclid(q, db.row(v1), db.dim) < Matrix<T>::sq_euclid(q, db.row(v2), db.dim);
+            });
+
             robust_prune(i, V, a, R);
             //for all points j in Nout(i)
             for (const auto &j: graph[i]) {
@@ -294,7 +292,7 @@ struct VamanaIndex {
                 if (graph[j].size() > R) {
                     std::vector<int> temp_neighbors(graph[j].begin(), graph[j].end());
                     std::sort(temp_neighbors.begin(), temp_neighbors.end(), [&](int v1, int v2) {
-                        return Matrix<T>::sq_euclid(db->row(j), db->row(v1), db->dim) < Matrix<T>::sq_euclid(db->row(j), db->row(v2), db->dim);
+                        return Matrix<T>::sq_euclid(db.row(j), db.row(v1), db.dim) < Matrix<T>::sq_euclid(db.row(j), db.row(v2), db.dim);
                     });
                     robust_prune(j, temp_neighbors, a, R);
                 }
@@ -303,20 +301,21 @@ struct VamanaIndex {
     }
 
 void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> &query, const size_t &k, const size_t &list_size, const T &Fq, std::vector<int> &L,
-                                std::vector<int> &V) {
+                                std::vector<int> &V, int L_unfiltered=1) {
         L.reserve(k);
         V.reserve(2 * list_size);
-        cmp_dist cmp(query, *db);
+        cmp_dist cmp(query, db);
         std::set<int, cmp_dist> Ls(cmp);
         std::set<int, cmp_dist> Vs(cmp);
         auto cmp_L = [&](int v1,int v2){
-            return Matrix<T>::sq_euclid(query, db->row(v1), db->dim) < Matrix<T>::sq_euclid(query, db->row(v2), db->dim);
+            return Matrix<T>::sq_euclid(query, db.row(v1), db.dim) < Matrix<T>::sq_euclid(query, db.row(v2), db.dim);
         };
         if (Fq == -1.0f) {
             //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
-            // L.reserve(db->filters_set->size() + list_size);
-
-            for (auto &f: (*db->filters_set)) {
+            // L.reserve(db.filters_set.size() + list_size);
+            #pragma omp parallel for
+            for (int i =  0; i  < db.filters_set.size(); i++) {
+                auto f = db.filters_set[i];
                 int startPoint;
                 std::vector<int> tempL,tempV;
                 auto it = S.find(f); //[] operator adds a default value if the key is not already inside it, we dont want that
@@ -324,8 +323,11 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
                     startPoint = (it->second); //get the starting point for this filter
                     
                     //run greedy to get the k=1 closest
-                    filtered_greedy_search_s(S,query,1,1,f,tempL,tempV);
-                    Ls.insert(tempL[0]);
+                    filtered_greedy_search_s(S,query,1,L_unfiltered,f,tempL,tempV);
+                    #pragma omp critical
+                    {
+                        Ls.insert(tempL[0]);
+                    }
                     
                 }
                 
@@ -346,7 +348,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
             std::vector<int> temp; //keeping N'out(p*)
             temp.reserve(graph[p_star_idx].size());
             for (auto &p: graph[p_star_idx]) {
-                if (((*db->vec_filter)[p] == Fq || Fq == -1.0f) && (!std::ranges::binary_search(Vs, p, cmp_L))) {
+                if (((db.vec_filter)[p] == Fq || Fq == -1.0f) && (!std::ranges::binary_search(Vs, p, cmp_L))) {
                     temp.push_back(p); //insert it
                 }
             }
@@ -379,11 +381,11 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         V.clear();
         if (Fq == -1.0f) {
             //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
-            L.reserve(db->filters_set->size() + list_size);
+            L.reserve(db.filters_set.size() + list_size);
 
 
             
-            for (auto &f: (*db->filters_set)) {
+            for (auto &f: (db.filters_set)) {
                 int startPoint;
                 std::vector<int> tempL,tempV;
                 auto it = S.find(f); //[] operator adds a default value if the key is not already inside it, we dont want that
@@ -414,7 +416,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
             }
         }
         auto cmp_dist = [&](int v1,int v2){
-            return Matrix<T>::sq_euclid(query,db->row(v1), db->dim) < Matrix<T>::sq_euclid(query,db->row(v2),db->dim);
+            return Matrix<T>::sq_euclid(query,db.row(v1), db.dim) < Matrix<T>::sq_euclid(query,db.row(v2),db.dim);
         };
         if (L.size()>1) {
             std::sort(L.begin(),L.end(),cmp_dist);
@@ -427,7 +429,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
             std::vector<int> temp; //keeping N'out(p*)
             temp.reserve(graph[p_star_idx].size());
             for (auto &p: graph[p_star_idx]) {
-                if (((*db->vec_filter)[p] == Fq || Fq == -1.0f) && (!std::ranges::binary_search(V, p, cmp_dist))) {
+                if (((db.vec_filter)[p] == Fq || Fq == -1.0f) && (!std::ranges::binary_search(V, p, cmp_dist))) {
                     temp.push_back(p); //insert it
                 }
             }
@@ -457,7 +459,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         graph[p].clear();
         int p_star_idx;
 
-        auto vec1 = db->row(p);
+        auto vec1 = db.row(p);
 
         while (!V.empty()) {
             p_star_idx = V[0];
@@ -469,11 +471,11 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
 
             //for each p' in V
             //vec1: p, vec2:p*, vec3: p' in V
-            auto vec2 = db->row(p_star_idx);
+            auto vec2 = db.row(p_star_idx);
             V.erase(std::remove_if(V.begin(), V.end(),
                                       [&](int i) {
-                                          auto v = db->row(i);
-                                          return !(((*db->vec_filter)[i] == (*db->vec_filter)[p]) && ((*db->vec_filter)[p_star_idx] != (*db->vec_filter)[i])) && (a * Matrix<T>::sq_euclid(vec2, v, db->dim) <= Matrix<T>::sq_euclid(vec1, v, db->dim));
+                                          auto v = db.row(i);
+                                          return !(((db.vec_filter)[i] == (db.vec_filter)[p]) && ((db.vec_filter)[p_star_idx] != (db.vec_filter)[i])) && (a * Matrix<T>::sq_euclid(vec2, v, db.dim) <= Matrix<T>::sq_euclid(vec1, v, db.dim));
                                       }));
         }
     }
@@ -485,25 +487,32 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
 
         //random permutation
         std::vector<int> sigma;
-        for (size_t i = 0; i < db->vecnum; i++)
+        for (size_t i = 0; i < db.vecnum; i++)
             sigma.push_back(i);
-        // std::cout<<"vecnum:"<<db->vecnum<<"\n";
+        // std::cout<<"vecnum:"<<db.vecnum<<"\n";
         std::shuffle(sigma.begin(), sigma.end(), g);
 
         for (auto i: sigma) {
 //            std::cout << "for node  " << i << std::endl;
             std::vector<int> L, V;
-            filtered_greedy_search_s(M, db->row(i), 0, list_size, (*db->vec_filter)[i], L, V);
+            auto q = db.row(i);
+            filtered_greedy_search_s(M, q, 0, list_size, (db.vec_filter)[i], L, V);
             if (V[0] == i) {
                 V.erase(V.begin());
             }
+            for (auto nghbr: graph[i]) {
+                V.push_back(nghbr);
+            }
+            std::ranges::sort(V, [&](int v1, int v2) {
+                return Matrix<T>::sq_euclid(q, db.row(v1), db.dim) < Matrix<T>::sq_euclid(q, db.row(v2), db.dim);
+            });
             filtered_robust_prune(i, V, a, R);
             for (const auto &j: graph[i]) {
                 graph[j].insert(i);
                 if (graph[j].size() > R) {
                     std::vector<int> temp_neighbors(graph[j].begin(), graph[j].end());
                     std::sort(temp_neighbors.begin(), temp_neighbors.end(), [&](int v1, int v2) {
-                        return Matrix<T>::sq_euclid(db->row(j), db->row(v1), db->dim) < Matrix<T>::sq_euclid(db->row(j), db->row(v2), db->dim);
+                        return Matrix<T>::sq_euclid(db.row(j), db.row(v1), db.dim) < Matrix<T>::sq_euclid(db.row(j), db.row(v2), db.dim);
                     });
                     filtered_robust_prune(j, temp_neighbors, a, R);
                 }
@@ -514,17 +523,24 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
     void stitched_vamana_indexing(float a, size_t R_small, size_t R_stitched, size_t L_small) {
         std::unordered_map<T, std::unique_ptr<VamanaIndex> > Gf;
         putchar('\n');
-        Gf.reserve(db->filters_set->size());
-        for (auto f: *db->filters_set) {
+        Gf.reserve(db.filters_set.size());
+//        std::cout << "filters_set size:" << db.filters_set.size() << std::endl;
+        #pragma omp parallel for schedule(static,1) proc_bind(spread)
+        for (int i = 0 ; i < db.filters_set.size(); i++) {
+            auto f = db.filters_set[i];
+//            std::cout << "filter:" << f << " ";
+//            auto start = std::chrono::high_resolution_clock::now();
             Gf[f] = std::make_unique<VamanaIndex>(db);
 //            Gf[f]->init_graph(R_small, Pf[f]);
             Gf[f]->init_graph(Pf[f]);
-            int med = db->medoid_rand(Pf[f]);
+            int med = db.medoid_rand(Pf[f]);
             Gf[f]->vamana_indexing(med, a, L_small, R_small, Pf[f]);
             for (auto &kv: Gf[f]->graph) {
                 //pare kathe vertice to Gf, pou ousiastika einai to Pf, kai valta ston megalo grafo G (this->graph)
                 graph[kv.first] = std::move(kv.second);
             }
+//            auto end = std::chrono::high_resolution_clock::now();
+//            std::cout << "took " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() /1e6 << " s\n";
         }
     }
 };

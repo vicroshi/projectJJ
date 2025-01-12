@@ -27,14 +27,14 @@ struct Matrix{
     size_t dim;
     size_t vecnum;
     std::span<T> vecs;
-    std::vector<T>* vec_filter; //filter for each vec
-    std::unordered_set<T>* filters_set; //set of all filters
+    const std::vector<T>& vec_filter; //filter for each vec
+    const std::vector<T>& filters_set; //set of all filters
 
     //project 1 constructor
-    Matrix(size_t dim, size_t vecnum, T* data): dim(dim), vecnum(vecnum), vecs(data, vecnum * dim), vec_filter(nullptr), filters_set(nullptr){}
+    Matrix(size_t dim, size_t vecnum, T* data): dim(dim), vecnum(vecnum), vecs(data, vecnum * dim), vec_filter({}), filters_set({}){}
     //project 2 constructor
-    Matrix(size_t dim, size_t vecnum,std::vector<T>* data ,std::vector<T>* vec_filter,  std::unordered_set<T>* filter_set):
-            dim(dim), vecnum(vecnum), vecs(data->data(),vecnum*dim), vec_filter(vec_filter), filters_set(filter_set){}
+    Matrix(size_t dim, size_t vecnum,std::vector<T>* data , const std::vector<T>& vec_filter,  const std::vector<T>& filters_set):
+            dim(dim), vecnum(vecnum), vecs(data->data(),vecnum*dim), vec_filter(vec_filter), filters_set(filters_set){}
     
     T get(int row, int col) const {
         return vecs[row*dim+col];
@@ -106,7 +106,7 @@ struct Matrix{
     //     return dist;
     // }
 
-    int medoid_rand(const std::vector<int>& Pf = {}) {
+    int medoid_rand(const std::vector<int>& Pf = {}) const {
         int medoid_idx = 0;
         std::vector<int> vec;
         if (Pf.empty()) {
@@ -121,7 +121,7 @@ struct Matrix{
         return medoid_idx;
     }
 
-    int medoid_naive(const std::vector<int>& Pf = {}) {
+    int medoid_naive(const std::vector<int>& Pf = {}) const {
         double dist;
         double min_dist = std::numeric_limits<double>::max();
         int medoid_idx = 0;
@@ -155,12 +155,12 @@ struct Matrix{
         std::unordered_map<int, int>T_counter; //T is a counter for each point
         for(size_t i=0;i<vecnum;i++){
             //fill hashmap
-            // Pf[(*vec_filter)[i]].push_back(i);
+            // Pf[(vec_filter)[i]].push_back(i);
             T_counter[i]=0; //initialize counter to 0 for all points
         }
         
         // for each filter, i shuffle the hash map vectors and i take the first tau
-        for(auto& f:(*filters_set)){
+        for(auto& f:(filters_set)){
             size_t no_of_points=Pf[f].size();
             tau= t>no_of_points ? no_of_points : t;
             std::shuffle(Pf[f].begin(),Pf[f].end(),g); //shuffle the whole vector
