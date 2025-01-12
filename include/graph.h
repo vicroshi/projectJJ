@@ -44,7 +44,7 @@ struct VamanaIndex {
     //constructor for testing where we need to have a fixed graph each time. we add neighbors manually
     VamanaIndex(const Matrix<T>& db) : db(db), vecnum(0), deg(0) {
 //        graph.resize(db.vecnum);
-        graph.reserve(db.vecnum);
+//        graph.reserve(db.vecnum);
     }
 
     void init_graph(const std::vector<int> &P = {}){
@@ -313,7 +313,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         if (Fq == -1.0f) {
             //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
             // L.reserve(db.filters_set.size() + list_size);
-            #pragma omp parallel for
+//            #pragma omp parallel for
             for (int i =  0; i  < db.filters_set.size(); i++) {
                 auto f = db.filters_set[i];
                 int startPoint;
@@ -324,10 +324,10 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
                     
                     //run greedy to get the k=1 closest
                     filtered_greedy_search_s(S,query,1,L_unfiltered,f,tempL,tempV);
-                    #pragma omp critical
-                    {
+//                    #pragma omp critical
+//                    {
                         Ls.insert(tempL[0]);
-                    }
+//                    }
                     
                 }
                 
@@ -524,6 +524,9 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         std::unordered_map<T, std::unique_ptr<VamanaIndex> > Gf;
         putchar('\n');
         Gf.reserve(db.filters_set.size());
+        for (auto f : db.filters_set) {
+            Gf.emplace(f, nullptr);
+        }
 //        std::cout << "filters_set size:" << db.filters_set.size() << std::endl;
         #pragma omp parallel for schedule(static,1) proc_bind(spread)
         for (int i = 0 ; i < db.filters_set.size(); i++) {
@@ -531,7 +534,6 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
 //            std::cout << "filter:" << f << " ";
 //            auto start = std::chrono::high_resolution_clock::now();
             Gf[f] = std::make_unique<VamanaIndex>(db);
-//            Gf[f]->init_graph(R_small, Pf[f]);
             Gf[f]->init_graph(Pf[f]);
             int med = db.medoid_rand(Pf[f]);
             Gf[f]->vamana_indexing(med, a, L_small, R_small, Pf[f]);

@@ -481,7 +481,7 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
             }
             auto query_end = std::chrono::high_resolution_clock::now();
             auto query_dur = std::chrono::duration_cast<std::chrono::microseconds>(query_end - query_start).count();
-            std::cout << "Querying took " << query_dur / 1e6 << " sec(s)" << std::endl;
+            std::cout << ">Time taken for Querying: " << query_dur / 1e6 << " sec(s)" << std::endl;
             std::cout << "Total Queries: " << query_no_of_points << std::endl;
             std::cout << "QPS (queries per second):" << query_no_of_points / (query_dur / 1e6) << std::endl;
             std::cout << std::fixed << std::setprecision(2);
