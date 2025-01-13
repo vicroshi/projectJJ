@@ -19,7 +19,7 @@ std::string getFileExtension(const std::string& filePath){
 
 void ann(const std::string& base_file_path, const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const size_t& List_size,int thread_num){
     //makes sense to first check if the ground_truth is the right type of file
-    omp_set_num_threads(5);
+    omp_set_num_threads(thread_num);
 
     if(getFileExtension(ground_file_path)=="ivecs"){
         //check for file type to call the execute with proper <type>
