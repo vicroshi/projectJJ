@@ -106,7 +106,7 @@ std::filesystem::path get_file_path(const size_t& k, const size_t& L, const size
         // std::cout << a_str << std::endl;
         //construct file name
         std::ostringstream file_name_stream;
-        file_name_stream << type << "_k_" << k_str << "_" << (type=="stitched_graph_" ? "L_small_" : "L_") <<L_str << "_" <<(type=="stitched_graph_" ? "R_small_" : "R_") <<R_str<<"_a_"<<a_str<<"_" << "variation.bin";
+        file_name_stream << type << "k_" << k_str << "_" << (type=="stitched_graph_" ? "L_small_" : "L_") <<L_str << "_" <<(type=="stitched_graph_" ? "R_small_" : "R_") <<R_str<<"_a_"<<a_str<<"_" << "variation.bin";
         std::string file_name = file_name_stream.str();
 
         // Construct the desired file path

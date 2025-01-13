@@ -32,8 +32,8 @@ a1=1.2
 R1=100
 L1=120
 k1=100
-# uncomment the following line to run the project with your own thread number
-simple_Vamana_thread_num=12
+# comment/uncomment the following line to run the project with your own thread number
+# simple_Vamana_thread_num=3
 
 #paths for project 1
 base_file_path="./datasets/siftsmall/siftsmall_base.fvecs"
@@ -58,9 +58,9 @@ R_stitched=50
 
 
 #paths for project 2
-filtered_base_file_path="./datasets/2/dummy-data.bin"
-filtered_query_file_path="./datasets/2/dummy-queries.bin"
-filtered_ground_file_path="./datasets/test/ground.bin"
+filtered_base_file_path="./datasets/dummy/dummy-data.bin"
+filtered_query_file_path="./datasets/dummy/dummy-queries.bin"
+filtered_ground_file_path="./datasets/dummy/dummy-ground.bin"
 
 # checking which version was provided to run the corresponding executable
 if [ $version -eq 1 ]; then

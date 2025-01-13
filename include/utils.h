@@ -335,7 +335,7 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
     auto medoid_end = std::chrono::high_resolution_clock::now();
     auto medoid_duration = std::chrono::duration_cast<std::chrono::microseconds>(medoid_end - medoid_start).count();
     std::cout << ">Time taken to find medoid: " << medoid_duration / 1e6 << " sec(s)." << std::endl;
-    if (mode == 0 | mode == 1) {
+    if (mode == 0 || mode == 1) {
         auto init_start = std::chrono::high_resolution_clock::now();
         VamanaIndex<T> v_m(base_m);
         v_m.Pf = Pff;
@@ -396,7 +396,6 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
             std::cout << std::fixed << std::setprecision(2);
             std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
             std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
-            std::cout<<"\n\n--END OF FILTERED VAMANA--";
             //get input in a loop to show k-nearest neighbors for any query in file
             int query_point_index;
     //        get valid integer input for query input, indexing starts at 0
@@ -432,9 +431,9 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
                  }
              }
         }
-        else {
-            std::cout<<"\n\n--END OF FILTERED VAMANA--";
-        }
+        
+         std::cout<<"\n\n--END OF FILTERED VAMANA--";
+        
 
     }
     if (mode == 0 || mode == 2) {
@@ -495,38 +494,38 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
             //get valid integer input for query input, indexing starts at 0
             int query_point_index;
 
-    // while (true)
-    // {
-    //     std::cout << "Enter query index (-1 to exit): ";
-    //     std::cin >> query_point_index;
+    while (true)
+    {
+        std::cout << "Enter query index (-1 to exit): ";
+        std::cin >> query_point_index;
 
-    //     // check if -1 was given at start
-    //     if (query_point_index == -1)
-    //         break;
+        // check if -1 was given at start
+        if (query_point_index == -1)
+            break;
 
-    //     std::vector<int> L, V;
-    //     std::span<T> query_span(query_m.row(query_point_index));
-    //     v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
-    //     size_t n = std::min(k, ground_data[query_point_index].size());
-    //     std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
-    //     if (query_type[query_point_index] == 1.0f)
-    //     {
-    //         std::cout << "filtered query!\n";
-    //         auto recall = recall_k(n, L, G_vec, 1);
-    //         std::cout << "\n recall:" << recall << "\n\n";
-    //     }
-    //     else if (query_type[query_point_index] == 0.0f)
-    //     {
-    //         std::cout << "UNFILTERED QUERY!\n";
-    //         auto recall = recall_k(n, L, G_vec, 1);
-    //         std::cout << "\n recall:" << recall << "\n\n";
-    //     }
-    //     else
-    //     {
-    //         std::cout << "point with unsupported filter, continuing...\n";
-    //         continue;
-    //     }
-    // }
+        std::vector<int> L, V;
+        std::span<T> query_span(query_m.row(query_point_index));
+        v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
+        size_t n = std::min(k, ground_data[query_point_index].size());
+        std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
+        if (query_type[query_point_index] == 1.0f)
+        {
+            std::cout << "filtered query!\n";
+            auto recall = recall_k(n, L, G_vec, 1);
+            std::cout << "\n recall:" << recall << "\n\n";
+        }
+        else if (query_type[query_point_index] == 0.0f)
+        {
+            std::cout << "UNFILTERED QUERY!\n";
+            auto recall = recall_k(n, L, G_vec, 1);
+            std::cout << "\n recall:" << recall << "\n\n";
+        }
+        else
+        {
+            std::cout << "point with unsupported filter, continuing...\n";
+            continue;
+        }
+    }
 
     
     }
