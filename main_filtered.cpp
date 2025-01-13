@@ -10,7 +10,7 @@
 int main(int argc,char **argv){
     int opt;
     float a=0.0;
-    size_t R=0,L=0,k=0,t=0,R_small=0,L_small=0;
+    size_t R=0,L=0,k=0,t=1,R_small=0,L_small=0;
     int load=0,save=0;
     std::string base_file_path,query_file_path,ground_file_path;
     int L_unfiltered = 1;

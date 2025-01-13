@@ -91,12 +91,20 @@ std::filesystem::path get_file_path(const size_t& k, const size_t& L, const size
         std::string k_str = std::to_string(k);
         std::string L_str = std::to_string(L);
         std::string R_str = std::to_string(R);
-        if (a_str.length() > 3) { //keep only 1 decimal,assuming whole part is 1 digit
-            a_str = a_str.substr(0, 3);
+        std::replace(a_str.begin(), a_str.end(), '.', '_');
+        while (a_str.back() == '0') {
+            a_str.pop_back();
         }
+        if (a_str.length() > 4){
+                a_str = a_str.substr(0, 4);
+        }
+        if(a_str.find('_') == a_str.length() -1 ){
+            a_str.pop_back();    
+        }
+        // std::cout << a_str << std::endl;
         //construct file name
         std::ostringstream file_name_stream;
-        file_name_stream << type << "k_" << k_str << "_" << (type=="stitched_graph_" ? "L_small_" : "L_") <<L_str << "_" <<(type=="stitched_graph_" ? "R_small_" : "R_") <<R_str<<"_a_"<<a_str<<"_" << "variation.bin";
+        file_name_stream << type << "_k_" << k_str << "_" << (type=="stitched_graph_" ? "L_small_" : "L_") <<L_str << "_" <<(type=="stitched_graph_" ? "R_small_" : "R_") <<R_str<<"_a_"<<a_str<<"_" << "variation.bin";
         std::string file_name = file_name_stream.str();
 
         // Construct the desired file path

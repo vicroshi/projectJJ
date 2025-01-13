@@ -25,9 +25,15 @@
 #include <unordered_map>
 #include <random>
 
-#define BASE_FILE_PATH "../datasets/release1M/contest-data-release-1m.bin"
-#define QUERY_FILE_PATH "../datasets/release1M/contest-queries-release-1m.bin"
-#define GROUND_FILE_PATH "../datasets/release1M/contest-ground-release-1m.bin"
+
+#define BASE_FILE_PATH "../datasets/release10M/contest-data-release-10m.bin"
+#define QUERY_FILE_PATH "../datasets/release10M/contest-queries-release-10m.bin"
+#define GROUND_FILE_PATH "../datasets/release10M/contest-ground-release-10m.bin"
+
+// #define BASE_FILE_PATH "../datasets/release1M/contest-data-release-1m.bin"
+// #define QUERY_FILE_PATH "../datasets/release1M/contest-queries-release-1m.bin"
+// #define GROUND_FILE_PATH "../datasets/release1M/contest-ground-release-1m.bin"
+
 //#define BASE_FILE_PATH "../datasets/dummy/dummy-data.bin"
 //#define QUERY_FILE_PATH "../datasets/dummy/dummy-queries.bin"
 //#define GROUND_FILE_PATH "../datasets/dummy/dummy-ground.bin"
@@ -122,7 +128,11 @@ struct k_max_heap {
 
 };
 #define K 100
-int main(){
+int main(int argc, char *argv[]) {
+    int n = 1;
+    if (argc > 1) {
+        n = std::stoi(argv[1]);
+    }
     uint32_t query_no_of_points;
     std::vector<std::vector<float>> query_data;  //only used for reading, will be dropped after data extraction
     ReadBin(QUERY_FILE_PATH,104,query_data,query_no_of_points);
@@ -141,7 +151,7 @@ int main(){
     std::vector<std::vector<int>> neighbors(base_no_of_points); // Initialize with empty vectors
 
     size_t dim = base_data[0].size() - 2;
-    #pragma omp parallel for num_threads(16)
+    #pragma omp parallel for num_threads(n)
     for (size_t i = 0; i < query_no_of_points; i++) { // For each query point
 //        std::cout << "query " << i << std::endl;
         k_max_heap kheap(K);
@@ -169,3 +179,4 @@ int main(){
     WriteBin(GROUND_FILE_PATH, K, neighbors, counter);
     return 0;
 }
+

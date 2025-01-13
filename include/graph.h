@@ -42,7 +42,7 @@ struct VamanaIndex {
     }
 
     //constructor for testing where we need to have a fixed graph each time. we add neighbors manually
-    VamanaIndex(const Matrix<T>& db) : db(db), vecnum(0), deg(0) {
+    VamanaIndex(const Matrix<T>& db) : db(db), vecnum(db.vecnum), deg(0) {
 //        graph.resize(db.vecnum);
 //        graph.reserve(db.vecnum);
     }
@@ -86,7 +86,7 @@ struct VamanaIndex {
         for (auto p: vec) {
             // if(p % 10000 ==0 ) std::cout<<"adding neighbors for p:"<<p<<std::endl;
             std::unordered_set<int> neighbors;
-            while (neighbors.size() < R) {
+            // while (neighbors.size() < R) {
                 //get a random permutation of all nodes and add 1 each time making sure we dont add itself
                 std::shuffle(shuff_vec.begin(), shuff_vec.end(), rndm);
                 for (auto i: shuff_vec) {
@@ -97,7 +97,7 @@ struct VamanaIndex {
                         break;
                     }
                 }
-            }
+            // }
             graph[p] = std::move(neighbors);
         }
     }
@@ -119,6 +119,7 @@ struct VamanaIndex {
         const Matrix<T> &db;
         cmp_dist(const std::span<T> &p, const Matrix<T> &db) : p(p), db(db) {}
         bool operator()(int v1, int v2) const {
+            // std::cout << "v1:" << v1 << " v2:" << v2 << std::endl;
             return Matrix<T>::sq_euclid(p, db.row(v1), db.dim) < Matrix<T>::sq_euclid(p, db.row(v2), db.dim);
         }
     };
@@ -308,12 +309,13 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         std::set<int, cmp_dist> Ls(cmp);
         std::set<int, cmp_dist> Vs(cmp);
         auto cmp_L = [&](int v1,int v2){
+            // std::cout << "v1:" << v1 << " v2:" << v2 << std::endl;
             return Matrix<T>::sq_euclid(query, db.row(v1), db.dim) < Matrix<T>::sq_euclid(query, db.row(v2), db.dim);
         };
         if (Fq == -1.0f) {
             //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
             // L.reserve(db.filters_set.size() + list_size);
-//            #pragma omp parallel for
+        //    #pragma omp parallel for
             for (int i =  0; i  < db.filters_set.size(); i++) {
                 auto f = db.filters_set[i];
                 int startPoint;
@@ -323,11 +325,13 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
                     startPoint = (it->second); //get the starting point for this filter
                     
                     //run greedy to get the k=1 closest
+                    // printf("filter:%f\n",f);
                     filtered_greedy_search_s(S,query,1,L_unfiltered,f,tempL,tempV);
-//                    #pragma omp critical
-//                    {
+                    // printf("%d\n",tempL[0]);
+                //    #pragma omp critical
+                //    {
                         Ls.insert(tempL[0]);
-//                    }
+                //    }
                     
                 }
                 
@@ -340,9 +344,38 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
                 Ls.insert(it->second);
             }
         }
+        // #pragma omp single
+        // {
+        //     // if (Fq == 1.0f){
+        //         printf("f:%f\n",Fq);
+        //         printf("L:");
+        //         for(auto l:Ls){
+        //             printf("%d ",l);
+        //         }
+        //         printf("\nV:");
+        //         for(auto v:Vs){
+        //             printf("%d ",v);
+        //         }
+        //         printf("\n");
+        //     // }
+        // }
         std::vector<int> diff(Ls.begin(),Ls.end());
         diff.reserve(list_size + Ls.size());
         while (!diff.empty()) {
+            // #pragma omp single
+            // {
+            //     if (Fq == 1.0f){
+            //         printf("L:");
+            //         for(auto l:Ls){
+            //             printf("%d ",l);
+            //         }
+            //         printf("\nV:");
+            //         for(auto v:Vs){
+            //             printf("%d ",v);
+            //         }
+            //         printf("\n");
+            //     }
+            // }
             //p*
             int p_star_idx =  diff[0];
             std::vector<int> temp; //keeping N'out(p*)
@@ -353,7 +386,35 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
                 }
             }
             Vs.insert(p_star_idx);
+            // #pragma omp single
+            // {
+            //     if (Fq == 1.0f){
+            //         printf("L:");
+            //         for(auto l:Ls){
+            //             printf("%d ",l);
+            //         }
+            //         printf("\nV:");
+            //         for(auto v:Vs){
+            //             printf("%d ",v);
+            //         }
+            //         printf("\n");
+            //     }
+            // }
             Ls.insert( temp.begin(), temp.end()); //add it in L
+            // #pragma omp single
+            // {
+            //     if (Fq == 1.0f){
+            //         printf("L:");
+            //         for(auto l:Ls){
+            //             printf("%d ",l);
+            //         }
+            //         printf("\nV:");
+            //         for(auto v:Vs){
+            //             printf("%d ",v);
+            //         }
+            //         printf("\n");
+            //     }
+            // }
             //keep list_size closest to Xq
             if (Ls.size() > list_size) {
                 auto it = Ls.begin();
@@ -361,6 +422,24 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
                 Ls.erase(it, Ls.end());
             }
             diff.clear();
+            // if (Ls.contains(-1) || Vs.contains(-1))
+            // {
+                // std::cout <<"empty" << std::endl;
+            // }
+            // #pragma omp single
+            // {
+            //     if (Fq == 1.0f){
+            //         printf("L:");
+            //         for(auto l:Ls){
+            //             printf("%d ",l);
+            //         }
+            //         printf("\nV:");
+            //         for(auto v:Vs){
+            //             printf("%d ",v);
+            //         }
+            //         printf("\n");
+            //     }
+            // }
             std::ranges::set_difference(Ls,Vs,std::back_inserter(diff),cmp_L);
         }
         //return k closest points from L

@@ -506,3 +506,121 @@ TOTAL recall for unfiltered: 0.83
 --END OF STITCHED VAMANA--
 
 Enter query index (-1 to exit): -1
+
+vic@DESKTOP-V3I0C5:/mnt/c/Users/user/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -k 100 -L 120 -R 10 -u 10 -r 32 -l 32 -t 1 -b ../datasets/release1M/contest-data-release-1m.bin -q ../datasets/release1M/contest-queries-release-1m.bin -g ../datasets/release1M/contest-ground-release-1m.bin -m 2 -n 8 -s
+Reading Data: ../datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: ../datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: ../datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.042443 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 446.456 sec(s).
+Continue to querying? [Y/n]
+y
+>Total time taken for Querying: 22.9718 sec(s)
+Total Queries: 5012
+QPS (queries per second):218.181
+TOTAL recall for filtered: 0.98
+TOTAL recall for unfiltered: 0.93
+
+
+--END OF STITCHED VAMANA--
+
+vic@DESKTOP-V3I0C5:/mnt/c/Users/user/codes/projectJJ/build$
+vic@DESKTOP-V3I0C5:/mnt/c/Users/user/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -k 100 -L 120 -R 20 -u 10 -r 64 -l 50 -t 1 -b ../datasets/release1M/contest-data-release-1m.bin -q ../datasets/release1M/contest-queries-release-1m.bin -g ../datasets/release1M/contest-ground-release-1m.bin -m 2 -n 8 -s
+Reading Data: ../datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: ../datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: ../datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.040699 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 875.542 sec(s).
+Continue to querying? [Y/n]
+y
+>Total time taken for Querying: 30.6749 sec(s)
+Total Queries: 5012
+QPS (queries per second):163.391
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.96
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+vic@DESKTOP-V3I0C5:/mnt/c/Users/user/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -k 100 -L 120 -R 20 -u 10 -r 96 -l 100 -t 1 -b ../datasets/release1M/contest-data-release-1m.bin -q ../datasets/release1M/contest-queries-release-1m.bin -g ../datasets/release1M/contest-ground-release-1m.bin -m 2 -n 8 -s
+Reading Data: ../datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: ../datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: ../datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.049947 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 2437.24 sec(s).
+Continue to querying? [Y/n]
+y
+>Total time taken for Querying: 36.944 sec(s)
+Total Queries: 5012
+QPS (queries per second):135.665
+TOTAL recall for filtered: 1.00
+TOTAL recall for unfiltered: 0.97
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+
+vic@DESKTOP-V3I0C5:/mnt/c/Users/user/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -k 100 -L 120 -R 20 -u 10 -r 10 -l 25 -t 1 -b ../datasets/release1M/contest-data-release-1m.bin -q ../datasets/release1M/contest-queries-release-1m.bin -g ../datasets/release1M/contest-ground-release-1m.bin -m 2 -n 8 -s
+Reading Data: ../datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: ../datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: ../datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.054066 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 158.924 sec(s).
+Continue to querying? [Y/n]
+y
+>Total time taken for Querying: 12.8262 sec(s)
+Total Queries: 5012
+QPS (queries per second):390.763
+TOTAL recall for filtered: 0.85
+TOTAL recall for unfiltered: 0.66
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit):
