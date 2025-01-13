@@ -119,8 +119,8 @@ void test_find_medoid(){
 
     std::vector<float> vecs(&p_f[0][0], &p_f[0][0] + 8*4);
     std::vector<float> vecs_filters ={1.0f,2.0f,3.0f,1.0f,2.0f,3.0f,1.0f,2.0f};
-    std::unordered_set<float> filters = {1.0f,2.0f,3.0f};
-    Matrix<float> f_m(4,8,&vecs, &vecs_filters, &filters);
+    std::vector<float> filters = {1.0f,2.0f,3.0f};
+    Matrix<float> f_m(4,8,&vecs, vecs_filters, filters);
     size_t t=5;
 
     std::unordered_map<float, int> Medoid;          

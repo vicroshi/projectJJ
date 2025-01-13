@@ -37,10 +37,16 @@ base_file_path="./datasets/siftsmall/siftsmall_base.fvecs"
 query_file_path="./datasets/siftsmall/siftsmall_query.fvecs"
 ground_file_path="./datasets/siftsmall/siftsmall_groundtruth.ivecs"
 
+# base_file_path="../datasets/sift/sift_base.fvecs"
+# query_file_path="../datasets/sift/sift_query.fvecs"
+# ground_file_path="../datasets/sift/sift_groundtruth.ivecs"
+
 a2=1.0
+k2=100
+
 R2=100
 L2=120
-k2=100
+
 t=1
 R_small=32
 L_small=100

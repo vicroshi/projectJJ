@@ -7,3 +7,620 @@ ground vec num:10000
 >Time taken for Indexing: 7647.52 sec(s).
 Averall recall: 0.971976
 
+./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 120 -t 1 -b ../datasets/release1M/contest-data-release-1m.bin -q ../datasets/release1M/contest-queries-release-1m.bin -g ../datasets/release1M/contest-ground-release-1m.bin -r 32 -l 96
+Reading Data: ../datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: ../datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: ../datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to initialize Graph: 0.00157 sec(s).
+>Time taken to find medoid: 0.057408 sec(s).
+
+
+FILTERED
+>Time taken for Indexing: 11378.2 sec(s).
+TOTAL recall for filtered: 1.00
+TOTAL recall for unfiltered: 0.05
+
+
+--END OF FILTERED VAMANA--
+
+STITCHED
+
+>Time taken for Indexing: 3266.92 sec(s).
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.05
+
+
+--END OF STITCHED VAMANA--
+
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 32 -l 64 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.061257 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 906.146 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 7.64745 sec(s)
+Total Queries: 5012
+QPS (queries per second):655.382
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.75
+
+
+--END OF STITCHED VAMANA--
+
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 32 -l 96 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.058086 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 1474.98 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 7.97975 sec(s)
+Total Queries: 5012
+QPS (queries per second):628.09
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.73
+
+
+--END OF STITCHED VAMANA--
+
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 32 -l 96 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.058086 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 1474.98 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 7.97975 sec(s)
+Total Queries: 5012
+QPS (queries per second):628.09
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.73
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ nano ../stats/out.txt 
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.1 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 32 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.053294 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 314.64 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 6.67306 sec(s)
+Total Queries: 5012
+QPS (queries per second):751.08
+TOTAL recall for filtered: 0.98
+TOTAL recall for unfiltered: 0.70
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 32 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.058898 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 273.239 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 6.52212 sec(s)
+Total Queries: 5012
+QPS (queries per second):768.462
+TOTAL recall for filtered: 0.97
+TOTAL recall for unfiltered: 0.66
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.3 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 32 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.059975 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 491.095 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 8.09916 sec(s)
+Total Queries: 5012
+QPS (queries per second):618.83
+TOTAL recall for filtered: 0.98
+TOTAL recall for unfiltered: 0.68
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 20 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.057308 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 254.808 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 5.59021 sec(s)
+Total Queries: 5012
+QPS (queries per second):896.567
+TOTAL recall for filtered: 0.95
+TOTAL recall for unfiltered: 0.57
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 64 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.056228 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 480.338 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 8.93299 sec(s)
+Total Queries: 5012
+QPS (queries per second):561.066
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.76
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 96 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.05258 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 452.781 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 9.50655 sec(s)
+Total Queries: 5012
+QPS (queries per second):527.215
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.74
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1  
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 96 -l 64 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.056449 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 1351.47 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 11.7304 sec(s)
+Total Queries: 5012
+QPS (queries per second):427.267
+TOTAL recall for filtered: 1.00
+TOTAL recall for unfiltered: 0.80
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 150 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 96 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.061919 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 471.417 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 13.0868 sec(s)
+Total Queries: 5012
+QPS (queries per second):382.982
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.78
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 200 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 96 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.068057 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 480.999 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 17.9364 sec(s)
+Total Queries: 5012
+QPS (queries per second):279.432
+TOTAL recall for filtered: 1.00
+TOTAL recall for unfiltered: 0.80
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1      
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 250 -t 5 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 96 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.062662 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 543.875 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 21.4491 sec(s)
+Total Queries: 5012
+QPS (queries per second):233.669
+TOTAL recall for filtered: 1.00
+TOTAL recall for unfiltered: 0.85
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 120 -t 1 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 32 -l 64 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.061257 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 906.146 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 7.64745 sec(s)
+Total Queries: 5012
+QPS (queries per second):655.382
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.75
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): 0
+
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 350 -t 10 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 96 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.05642 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 460.478 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 36.2077 sec(s)
+Total Queries: 5012
+QPS (queries per second):138.423
+TOTAL recall for filtered: 1.00
+TOTAL recall for unfiltered: 0.85
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): 
+
+
+vic@v1i7c5-LMC21:~/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -R 100 -k 100 -L 250 -t 10 -b /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin -q /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin -g /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin -r 96 -l 32 -m 2 -n 16 -s
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: /home/vic/codes/projectJJ/datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.062645 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 434.726 sec(s).
+Continue to querying? [Y/n]
+y
+Querying took 21.9955 sec(s)
+Total Queries: 5012
+QPS (queries per second):227.865
+TOTAL recall for filtered: 1.00
+TOTAL recall for unfiltered: 0.83
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+
+vic@DESKTOP-V3I0C5:/mnt/c/Users/user/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -k 100 -L 120 -R 10 -u 10 -r 32 -l 32 -t 1 -b ../datasets/release1M/contest-data-release-1m.bin -q ../datasets/release1M/contest-queries-release-1m.bin -g ../datasets/release1M/contest-ground-release-1m.bin -m 2 -n 8 -s
+Reading Data: ../datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: ../datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: ../datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.042443 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 446.456 sec(s).
+Continue to querying? [Y/n]
+y
+>Total time taken for Querying: 22.9718 sec(s)
+Total Queries: 5012
+QPS (queries per second):218.181
+TOTAL recall for filtered: 0.98
+TOTAL recall for unfiltered: 0.93
+
+
+--END OF STITCHED VAMANA--
+
+vic@DESKTOP-V3I0C5:/mnt/c/Users/user/codes/projectJJ/build$
+vic@DESKTOP-V3I0C5:/mnt/c/Users/user/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -k 100 -L 120 -R 20 -u 10 -r 64 -l 50 -t 1 -b ../datasets/release1M/contest-data-release-1m.bin -q ../datasets/release1M/contest-queries-release-1m.bin -g ../datasets/release1M/contest-ground-release-1m.bin -m 2 -n 8 -s
+Reading Data: ../datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: ../datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: ../datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.040699 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 875.542 sec(s).
+Continue to querying? [Y/n]
+y
+>Total time taken for Querying: 30.6749 sec(s)
+Total Queries: 5012
+QPS (queries per second):163.391
+TOTAL recall for filtered: 0.99
+TOTAL recall for unfiltered: 0.96
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+vic@DESKTOP-V3I0C5:/mnt/c/Users/user/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -k 100 -L 120 -R 20 -u 10 -r 96 -l 100 -t 1 -b ../datasets/release1M/contest-data-release-1m.bin -q ../datasets/release1M/contest-queries-release-1m.bin -g ../datasets/release1M/contest-ground-release-1m.bin -m 2 -n 8 -s
+Reading Data: ../datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: ../datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: ../datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.049947 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 2437.24 sec(s).
+Continue to querying? [Y/n]
+y
+>Total time taken for Querying: 36.944 sec(s)
+Total Queries: 5012
+QPS (queries per second):135.665
+TOTAL recall for filtered: 1.00
+TOTAL recall for unfiltered: 0.97
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit): -1
+
+vic@DESKTOP-V3I0C5:/mnt/c/Users/user/codes/projectJJ/build$ ./projectJJ_filtered -a 1.2 -k 100 -L 120 -R 20 -u 10 -r 10 -l 25 -t 1 -b ../datasets/release1M/contest-data-release-1m.bin -q ../datasets/release1M/contest-queries-release-1m.bin -g ../datasets/release1M/contest-ground-release-1m.bin -m 2 -n 8 -s
+Reading Data: ../datasets/release1M/contest-data-release-1m.bin
+# of points: 1000000
+Finish Reading Data
+Reading Data: ../datasets/release1M/contest-queries-release-1m.bin
+# of points: 10000
+Finish Reading Data
+points after extraction:5012
+Reading Data: ../datasets/release1M/contest-ground-release-1m.bin
+# of points: 5012
+Finish Reading Data
+>Time taken to find medoid: 0.054066 sec(s).
+
+
+STITCHED
+
+>Time taken for Indexing: 158.924 sec(s).
+Continue to querying? [Y/n]
+y
+>Total time taken for Querying: 12.8262 sec(s)
+Total Queries: 5012
+QPS (queries per second):390.763
+TOTAL recall for filtered: 0.85
+TOTAL recall for unfiltered: 0.66
+
+
+--END OF STITCHED VAMANA--
+
+Enter query index (-1 to exit):

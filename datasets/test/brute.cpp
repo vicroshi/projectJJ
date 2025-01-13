@@ -25,10 +25,21 @@
 #include <unordered_map>
 #include <random>
 
-#define BASE_FILE_PATH "../2/dummy-data.bin"
-#define QUERY_FILE_PATH "../2/dummy-queries.bin"
-#define GROUND_FILE_PATH "ground.bin"
 
+#define BASE_FILE_PATH "../datasets/release10M/contest-data-release-10m.bin"
+#define QUERY_FILE_PATH "../datasets/release10M/contest-queries-release-10m.bin"
+#define GROUND_FILE_PATH "../datasets/release10M/contest-ground-release-10m.bin"
+
+// #define BASE_FILE_PATH "../datasets/release1M/contest-data-release-1m.bin"
+// #define QUERY_FILE_PATH "../datasets/release1M/contest-queries-release-1m.bin"
+// #define GROUND_FILE_PATH "../datasets/release1M/contest-ground-release-1m.bin"
+
+//#define BASE_FILE_PATH "../datasets/dummy/dummy-data.bin"
+//#define QUERY_FILE_PATH "../datasets/dummy/dummy-queries.bin"
+//#define GROUND_FILE_PATH "../datasets/dummy/dummy-ground.bin"
+#include <queue>
+
+#include "omp.h"
 
 //from sigmod repo
 void ReadBin(const std::string &file_path,const int num_dimensions,std::vector<std::vector<float>> &data, uint32_t& N) {
@@ -53,13 +64,15 @@ void ReadBin(const std::string &file_path,const int num_dimensions,std::vector<s
     // std::cout << "Finish Reading Data" << std::endl;
 }
 
-void WriteBin(const std::string &file_path, const int num_dimensions, const std::vector<std::vector<float>> &data, const uint32_t N) {
+void WriteBin(const std::string &file_path, const int num_dimensions, const std::vector<std::vector<int>> &data, const uint32_t N) {
     std::ofstream ofs;
     ofs.open(file_path, std::ios::binary);
     assert(ofs.is_open());
     ofs.write((char *)&N, sizeof(uint32_t));
     for (const auto &row : data) {
-        ofs.write((char *)row.data(), num_dimensions * sizeof(float));
+        if (row.size()) {
+            ofs.write((char *)row.data(), num_dimensions * sizeof(int));
+        }
     }
     ofs.close();
 }
@@ -91,12 +104,40 @@ static double sq_euclid(const std::span<float>& row1, const std::span<float>& ro
     return result;
 }
 
+struct k_max_heap {
+    size_t k;
+    k_max_heap(size_t k) : k(k) {}
+    std::priority_queue<std::pair<float,int>> pq;
+    void push(float dist, int idx) {
+        if (pq.size() < k) {
+            pq.emplace( dist,idx);
+        }
+        else if (dist < pq.top().first){
+            pq.pop();
+            pq.emplace( dist,idx);
+        }
+    }
+    int pop() {
+        if (!pq.empty()) {
+            auto top = pq.top();
+            pq.pop();
+            return top.second;
+        }
+        return -1;
+    }
 
-int main(){
+};
+#define K 100
+int main(int argc, char *argv[]) {
+    int n = 1;
+    if (argc > 1) {
+        n = std::stoi(argv[1]);
+    }
     uint32_t query_no_of_points;
     std::vector<std::vector<float>> query_data;  //only used for reading, will be dropped after data extraction
-    ReadBin(BASE_FILE_PATH,104,query_data,query_no_of_points);
+    ReadBin(QUERY_FILE_PATH,104,query_data,query_no_of_points);
     int counter = 0;
+    std::cout << "query_no_of_points:" << query_no_of_points << std::endl;
     for(auto i:query_data){
         if(i[0]<=1.0f){
             counter++;
@@ -105,79 +146,37 @@ int main(){
     std::cout << "counter:" << counter << std::endl;
     std::vector<std::vector<float>> base_data; //only used for reading, will be dropped after data extraction
     uint32_t base_no_of_points;
-    ReadBin(QUERY_FILE_PATH,102,base_data,base_no_of_points);
+    ReadBin(BASE_FILE_PATH,102,base_data,base_no_of_points);
         
-    std::vector<std::vector<int>> neighbors(counter); // Initialize with empty vectors
+    std::vector<std::vector<int>> neighbors(base_no_of_points); // Initialize with empty vectors
 
-    int idx=0;
-
+    size_t dim = base_data[0].size() - 2;
+    #pragma omp parallel for num_threads(n)
     for (size_t i = 0; i < query_no_of_points; i++) { // For each query point
-        if(query_data[i][0] > 1.0f) continue; // only first two types
-            std::vector<int> added(base_data.size(), 0); // Track visited points
-            std::span<float> vec1(query_data[i].data() + 4, 100); // Extract query vector
-
-            for (int k = 0; k < 100; k++) { // Find 100 neighbors
-                float min = std::numeric_limits<float>::max(); // Reset min for each neighbor
-                int min_idx = -1;
-
-                for (size_t j = 0; j < base_no_of_points; j++) { // Search all base points
-                    if (added[j] == 1) continue; // Skip already visited points
-
-                    std::span<float> vec2(base_data[j].data() + 2, 100); // Extract base vector
-                    float dist = sq_euclid(vec1, vec2, 100);
-                    if(query_data[i][0] == 1.0f){
-                        // Check both distance and matching condition
-                        if (dist < min && base_data[j][0] == query_data[i][1]) {
-                            min = dist;
-                            min_idx = j;
-                        }
-                    }
-                    else if(query_data[i][0] == 0.0f){
-                        // Check both distance 
-                        if (dist < min) {
-                            min = dist;
-                            min_idx = j;
-                        }
-                    }
-                }
-
-                if (min_idx != -1) { // Ensure a valid neighbor was found
-                    neighbors[idx].push_back(min_idx);
-                    added[min_idx] = 1; // Mark as added
-                } else {
-                    break; // Exit if no more valid neighbors can be found
+//        std::cout << "query " << i << std::endl;
+        k_max_heap kheap(K);
+        std::span query_span(query_data[i].data()+4, query_data[i].size());
+        for (size_t j = 0; j < base_no_of_points; j++) {
+            std::span base_span(base_data[j].data()+2, base_data[j].size());
+            if (query_data[i][0] == 1.0f) {
+                if (base_data[j][0] == query_data[i][1]) {
+                    float dist = sq_euclid(query_span, base_span, dim);
+                    kheap.push(dist,j);
                 }
             }
-            idx++;
-            
-    }
-
-    for(int i = 0; i < counter; i++){
-        if(query_data[i][0] > 1.0f) continue; // filtered
-            std::cout << "for filtered query:" << i << " with query type:"<<query_data[i][0] <<",filter:" << query_data[i][1] << " ," << neighbors[i].size() << " nearest neighbors:\n[ ";
-            for (auto it = neighbors[i].begin(); it != neighbors[i].end(); ++it) {
-                     std::cout << *it << " ";
+            else if (query_data[i][0] == 0.0f) {
+                float dist = sq_euclid(query_span, base_span, dim);
+                kheap.push(dist,j);
             }
-            // std::cout<<"\n";
-            std::cout << "]\n\n";
-            // while(neighbors[i].size() < 100){
-            //     neighbors[i].insert(-static_cast<int>(neighbors[i].size()) - 1);
-            // }
-            
-            
-        
-    }
-
-    std::vector<std::vector<float>> neighbors_float(counter, std::vector<float>(100, -1.0f));
-
-    for (int i = 0; i < counter; i++) {
-            int index = 0;
-            for (const auto& neighbor : neighbors[i]) {
-                neighbors_float[i][index++] = static_cast<float>(neighbor);
+        }
+        if (query_data[i][0] <= 1.0f){
+            neighbors[i].resize(K,-1);
+            for (int j = kheap.pq.size()-1; j >= 0; j--) {
+                neighbors[i][j] = kheap.pop();
             }
+        }
     }
-
-    WriteBin(GROUND_FILE_PATH, 100, neighbors_float, counter);
-
+    WriteBin(GROUND_FILE_PATH, K, neighbors, counter);
     return 0;
 }
+
