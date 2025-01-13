@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include <random>
 #include <algorithm>
+#include <omp.h>
+
 template <typename T>
 struct Matrix{
     size_t dim;
@@ -134,8 +136,10 @@ struct Matrix{
             vec = Pf;
         }
 
-        #pragma omp parallel num_threads(8)
+        #pragma omp parallel 
         {
+            // std::cout << "OpenMP is running medoid_naive with " << omp_get_num_threads() << " thread(s)." << std::endl;
+
             double local_min_dist = std::numeric_limits<double>::max();
             int local_medoid_idx = 0;
 

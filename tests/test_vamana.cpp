@@ -10,7 +10,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <omp.h>
 void test_init() {
+    omp_set_num_threads(1);
     int points[6][4] = {
         {3, 7, 12, 8},
         {10, 2, 6, 14},
@@ -31,9 +33,10 @@ void test_init() {
     Matrix<int> i_m(4,6,&points[0][0]);
     VamanaIndex<int> V(i_m);
     V.init_graph(3);
-    // std::cout << 
+    // std::cout << V.graph.size()<<std::endl;
     TEST_ASSERT(V.graph.size()==6);
     for (auto& kv : V.graph) {
+        // std::cout << kv.second.size()<<std::endl;
         TEST_ASSERT(kv.second.size()==3);
     }
 }

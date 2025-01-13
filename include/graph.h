@@ -20,7 +20,6 @@
 #include <unordered_map>
 #include <fstream>
 #include <omp.h>
-#include <mutex>
 
 template<typename T>
 struct VamanaIndex {
@@ -73,7 +72,6 @@ struct VamanaIndex {
 //        graph.reserve(vecnum);
         //generator for shuffle
 
-
         std::random_device rd;
         // std::mt19937 rndm(rd());
         std::vector<int> vec;
@@ -89,19 +87,17 @@ struct VamanaIndex {
         std::vector shuff_vec = vec;
 
 
-            // omp_set_num_threads(12);
+        
 
 
-
-        #pragma omp parallel num_threads(16)
+        #pragma omp parallel 
         {
-                // int num_threads = omp_get_num_threads();
-                // std::cout << "OpenMP is running with " << omp_get_num_threads() << " threads." << std::endl;
+            std::cout << "OpenMP is running init_graph with " << omp_get_num_threads() << " thread(s)." << std::endl;
             // Thread-local random number generator
             thread_local std::mt19937 rndm(rd() + omp_get_thread_num());
             #pragma omp for 
             for (size_t idx = 0; idx < vec.size(); idx++) {
-             
+            
                 int p = vec[idx];
 
                 // if(idx % 10000 ==0 ) std::cout<<"adding neighbors for p:"<<idx<<std::endl;
