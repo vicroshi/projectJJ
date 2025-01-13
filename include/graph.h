@@ -62,6 +62,10 @@ struct VamanaIndex {
             vec = P;
         }
         graph.reserve(sz);
+        for(auto i: vec){
+            // graph[i].reserve(deg);
+            graph[i] = {};
+        }
 //        for (auto i: vec) {
 //            graph[i].reserve(deg);
 //            graph[i] = {};
@@ -349,7 +353,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
                     // printf("filter:%f\n",f);
                     filtered_greedy_search_s(S,query,1,L_unfiltered,f,tempL,tempV);
                     // printf("%d\n",tempL[0]);
-                //    #pragma omp critical
+                //    #pragma omp criticalf
                 //    {
                         Ls.insert(tempL[0]);
                 //    }
@@ -365,39 +369,9 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
                 Ls.insert(it->second);
             }
         }
-        // #pragma omp single
-        // {
-        //     // if (Fq == 1.0f){
-        //         printf("f:%f\n",Fq);
-        //         printf("L:");
-        //         for(auto l:Ls){
-        //             printf("%d ",l);
-        //         }
-        //         printf("\nV:");
-        //         for(auto v:Vs){
-        //             printf("%d ",v);
-        //         }
-        //         printf("\n");
-        //     // }
-        // }
         std::vector<int> diff(Ls.begin(),Ls.end());
         diff.reserve(list_size + Ls.size());
         while (!diff.empty()) {
-            // #pragma omp single
-            // {
-            //     if (Fq == 1.0f){
-            //         printf("L:");
-            //         for(auto l:Ls){
-            //             printf("%d ",l);
-            //         }
-            //         printf("\nV:");
-            //         for(auto v:Vs){
-            //             printf("%d ",v);
-            //         }
-            //         printf("\n");
-            //     }
-            // }
-            //p*
             int p_star_idx =  diff[0];
             std::vector<int> temp; //keeping N'out(p*)
             temp.reserve(graph[p_star_idx].size());
@@ -407,35 +381,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
                 }
             }
             Vs.insert(p_star_idx);
-            // #pragma omp single
-            // {
-            //     if (Fq == 1.0f){
-            //         printf("L:");
-            //         for(auto l:Ls){
-            //             printf("%d ",l);
-            //         }
-            //         printf("\nV:");
-            //         for(auto v:Vs){
-            //             printf("%d ",v);
-            //         }
-            //         printf("\n");
-            //     }
-            // }
             Ls.insert( temp.begin(), temp.end()); //add it in L
-            // #pragma omp single
-            // {
-            //     if (Fq == 1.0f){
-            //         printf("L:");
-            //         for(auto l:Ls){
-            //             printf("%d ",l);
-            //         }
-            //         printf("\nV:");
-            //         for(auto v:Vs){
-            //             printf("%d ",v);
-            //         }
-            //         printf("\n");
-            //     }
-            // }
             //keep list_size closest to Xq
             if (Ls.size() > list_size) {
                 auto it = Ls.begin();
@@ -443,24 +389,6 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
                 Ls.erase(it, Ls.end());
             }
             diff.clear();
-            // if (Ls.contains(-1) || Vs.contains(-1))
-            // {
-                // std::cout <<"empty" << std::endl;
-            // }
-            // #pragma omp single
-            // {
-            //     if (Fq == 1.0f){
-            //         printf("L:");
-            //         for(auto l:Ls){
-            //             printf("%d ",l);
-            //         }
-            //         printf("\nV:");
-            //         for(auto v:Vs){
-            //             printf("%d ",v);
-            //         }
-            //         printf("\n");
-            //     }
-            // }
             std::ranges::set_difference(Ls,Vs,std::back_inserter(diff),cmp_L);
         }
         //return k closest points from L
@@ -481,10 +409,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         V.clear();
         if (Fq == -1.0f) {
             //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
-            L.reserve(db.filters_set.size() + list_size);
-
-
-            
+            L.reserve(db.filters_set.size() + list_size);            
             for (auto &f: (db.filters_set)) {
                 // int startPoint;
                 std::vector<int> tempL,tempV;
@@ -591,7 +516,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
             sigma.push_back(i);
         // std::cout<<"vecnum:"<<db.vecnum<<"\n";
         std::shuffle(sigma.begin(), sigma.end(), g);
-
+        #pragma omp parallel for schedule(runtime) proc_bind(spread)
         for (auto i: sigma) {
 //            std::cout << "for node  " << i << std::endl;
             std::vector<int> L, V;
@@ -608,13 +533,16 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
             });
             filtered_robust_prune(i, V, a, R);
             for (const auto &j: graph[i]) {
-                graph[j].insert(i);
-                if (graph[j].size() > R) {
-                    std::vector<int> temp_neighbors(graph[j].begin(), graph[j].end());
-                    std::sort(temp_neighbors.begin(), temp_neighbors.end(), [&](int v1, int v2) {
-                        return Matrix<T>::sq_euclid(db.row(j), db.row(v1), db.dim) < Matrix<T>::sq_euclid(db.row(j), db.row(v2), db.dim);
+                #pragma omp critical 
+                {
+                    graph[j].insert(i);
+                    if (graph[j].size() > R) {
+                        std::vector<int> temp_neighbors(graph[j].begin(), graph[j].end());
+                        std::sort(temp_neighbors.begin(), temp_neighbors.end(), [&](int v1, int v2) {
+                            return Matrix<T>::sq_euclid(db.row(j), db.row(v1), db.dim) < Matrix<T>::sq_euclid(db.row(j), db.row(v2), db.dim);
                     });
                     filtered_robust_prune(j, temp_neighbors, a, R);
+                
                 }
             }
         }

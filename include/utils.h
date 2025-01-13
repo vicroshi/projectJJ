@@ -433,15 +433,15 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
                  }
              }
         }
-        
-         std::cout<<"\n\n--END OF FILTERED VAMANA--";
-        
+        else {
+            std::cout<<"\n\n--END OF FILTERED VAMANA--\n";
+        }
 
     }
     if (mode == 0 || mode == 2) {
         VamanaIndex<T> v_stitched(base_m);
         v_stitched.Pf = Pff;
-        std::cout << "\n\nSTITCHED" << std::endl;
+        std::cout << "\nSTITCHED" << std::endl;
         //load of build graph
         if(!load){
             auto start = std::chrono::high_resolution_clock::now();
