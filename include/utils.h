@@ -30,6 +30,7 @@ double recall_k(const int&,std::vector<int>&,std::vector<int>&,int );
 template <typename T>
 void execute(const std::string& base_file_path,const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const size_t& List_size){
     //file reading and storing in matrixes
+
     size_t base_dim,base_vecs_num;
     T* base=read_from_file<T>(base_file_path,&base_dim,&base_vecs_num);
     Matrix<T> base_m(base_dim,base_vecs_num,base);
@@ -68,17 +69,17 @@ void execute(const std::string& base_file_path,const std::string& query_file_pat
 
 
     //times for each action
-
+    std::cout<<"timing graph init for 8 threads: ...\n";
     //R-regular graph initialization
     auto init_start = std::chrono::high_resolution_clock::now();
     VamanaIndex<T> v_m(R,base_m);
     auto init_end = std::chrono::high_resolution_clock::now();
     auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
     std::cout << ">Time taken to initialize "<<R<<"-regular Graph: " << init_duration / 1e6 << " sec(s)." << std::endl;
-
+    exit(1);
     //calculate medoid once and pass it to functions later
     auto medoid_start = std::chrono::high_resolution_clock::now();
-//    int medoid=v_m.db.medoid_naive();
+    // int medoid=v_m.db.medoid_naive();
     int medoid=v_m.db.medoid_rand();
     auto medoid_end = std::chrono::high_resolution_clock::now();
     auto medoid_duration = std::chrono::duration_cast<std::chrono::microseconds>(medoid_end - medoid_start).count();

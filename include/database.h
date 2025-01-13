@@ -123,9 +123,9 @@ struct Matrix{
     }
 
     int medoid_naive(const std::vector<int>& Pf = {}) const {
-        double dist;
-        double min_dist = std::numeric_limits<double>::max();
-        int medoid_idx = 0;
+        double global_min_dist = std::numeric_limits<double>::max();
+        int global_medoid_idx = 0;
+
         std::vector<int> vec;
         if (Pf.empty()) {
             vec.resize(vecnum);
@@ -133,20 +133,40 @@ struct Matrix{
         } else {
             vec = Pf;
         }
-        for (auto i : vec) {
-            dist = 0;
-            for (auto j : vec) {
-                if (i != j) {
-                    dist += sq_euclid(row(i),row(j),dim);
+
+        #pragma omp parallel num_threads(8)
+        {
+            double local_min_dist = std::numeric_limits<double>::max();
+            int local_medoid_idx = 0;
+
+            #pragma omp for  nowait
+            for (size_t idx = 0; idx < vec.size(); idx++) {
+                auto i = vec[idx];
+                double dist = 0;
+
+                for (auto j : vec) {
+                    if (i != j) {
+                        dist += sq_euclid(row(i), row(j), dim);
+                    }
+                }
+
+                if (dist < local_min_dist) {
+                    local_min_dist = dist;
+                    local_medoid_idx = i;
                 }
             }
-            if (dist < min_dist) {
-                min_dist = dist;
-                medoid_idx = i;
+
+            #pragma omp critical
+            {
+                if (local_min_dist < global_min_dist) {
+                    global_min_dist = local_min_dist;
+                    global_medoid_idx = local_medoid_idx;
+                }
             }
         }
-        return medoid_idx;
-    }
+
+    return global_medoid_idx;
+}
 
                                                         //M keeps the index of the starting point for each filter
     void find_medoid(const size_t& t,std::unordered_map<T,int>& M,std::unordered_map<T, std::vector<int>>& Pf){

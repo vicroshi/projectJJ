@@ -16,6 +16,7 @@ endif
 
 # Adding optimization flag -O3
 add_project_arguments('-O3', language: 'cpp')
+add_project_arguments('-fopenmp', language: 'cpp')
 
 # These arguments are only used to build the shared library
 # not the executables that use the library.
@@ -37,7 +38,8 @@ test_src = ['tests/tests_all.cpp',
 e = executable('unit_tests',
                 sources: test_src,
                 include_directories: includes,
-                link_with : vamana_lib
+                link_with : vamana_lib,
+                dependencies: omp
                 )
 
 #dummy_exe = executable('test', 'datasets/test/dummy_create.cpp')

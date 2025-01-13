@@ -20,6 +20,8 @@
 #include <unordered_map>
 #include <fstream>
 #include <omp.h>
+#include <mutex>
+
 template<typename T>
 struct VamanaIndex {
 //    std::vector<std::unordered_set<int>> graph;
@@ -34,7 +36,7 @@ struct VamanaIndex {
 
     //constructor used for main
     VamanaIndex(size_t deg, const Matrix<T>& db): db(db), vecnum(db.vecnum), deg(deg) {
-        init_graph();
+        init_graph(deg);
     }
 
     //gia stitched
@@ -70,8 +72,10 @@ struct VamanaIndex {
     void init_graph(const size_t &r, const std::vector<int> &P = {}) {
 //        graph.reserve(vecnum);
         //generator for shuffle
+
+
         std::random_device rd;
-        std::mt19937 rndm(rd());
+        // std::mt19937 rndm(rd());
         std::vector<int> vec;
         if (P.empty()) {
             vec.resize(vecnum);
@@ -83,22 +87,39 @@ struct VamanaIndex {
         }
         size_t R = r > vec.size() ? vec.size() - 1 : r;
         std::vector shuff_vec = vec;
-        for (auto p: vec) {
-            // if(p % 10000 ==0 ) std::cout<<"adding neighbors for p:"<<p<<std::endl;
-            std::unordered_set<int> neighbors;
-            // while (neighbors.size() < R) {
-                //get a random permutation of all nodes and add 1 each time making sure we dont add itself
-                std::shuffle(shuff_vec.begin(), shuff_vec.end(), rndm);
-                for (auto i: shuff_vec) {
-                    if (i != p) {
-                        neighbors.insert(i);
+
+
+            // omp_set_num_threads(12);
+
+
+
+        #pragma omp parallel num_threads(16)
+        {
+                // int num_threads = omp_get_num_threads();
+                // std::cout << "OpenMP is running with " << omp_get_num_threads() << " threads." << std::endl;
+            // Thread-local random number generator
+            thread_local std::mt19937 rndm(rd() + omp_get_thread_num());
+            #pragma omp for 
+            for (size_t idx = 0; idx < vec.size(); idx++) {
+             
+                int p = vec[idx];
+
+                // if(idx % 10000 ==0 ) std::cout<<"adding neighbors for p:"<<idx<<std::endl;
+                std::unordered_set<int> neighbors;
+                // while (neighbors.size() < R) {
+                    //get a random permutation of all nodes and add 1 each time making sure we dont add itself
+                    std::shuffle(shuff_vec.begin(), shuff_vec.end(), rndm);
+                    for (auto i: shuff_vec) {
+                        if (i != p) {
+                            neighbors.insert(i);
+                        }
+                        if (neighbors.size() == R) {
+                            break;
+                        }
                     }
-                    if (neighbors.size() == R) {
-                        break;
-                    }
-                }
-            // }
-            graph[p] = std::move(neighbors);
+                // }
+                graph[p] = std::move(neighbors);
+            }
         }
     }
 
@@ -300,6 +321,10 @@ struct VamanaIndex {
             }
         }
     }
+
+
+
+
 
 void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> &query, const size_t &k, const size_t &list_size, const T &Fq, std::vector<int> &L,
                                 std::vector<int> &V, int L_unfiltered=1) {

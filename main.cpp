@@ -56,6 +56,7 @@ int main(int argc,char **argv){
         std::cerr << "Usage: ./projectjj -a <value> -R <value> -k <value> -L <value> -base <value> -query <value> -ground <value>" << std::endl;
         return 1;
     }
+    omp_set_num_threads(12);
 
     //call ann() here to check file type for first project and then call execute
     ann(base_file_path,query_file_path,ground_file_path,a,k,R,L);
