@@ -493,44 +493,41 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
             //get valid integer input for query input, indexing starts at 0
             int query_point_index;
 
-            while (true) {
-                std::cout << "Enter query index (-1 to exit): ";
-                std::cin >> query_point_index;
+    // while (true)
+    // {
+    //     std::cout << "Enter query index (-1 to exit): ";
+    //     std::cin >> query_point_index;
 
-                // check if -1 was given at start
-                if (query_point_index < 0 || query_point_index >= query_no_of_points)
-                    break;
+    //     // check if -1 was given at start
+    //     if (query_point_index == -1)
+    //         break;
 
-                std::vector<int> L, V;
-                std::span<T> query_span(query_m.row(query_point_index));
-                v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (query_m.vec_filter)[query_point_index], L, V, L_unfiltered);
-                size_t n = std::min(k, ground_data[query_point_index].size());
-                std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
-                if (query_type[query_point_index] == 1.0f)
-                {
-                    std::cout << "filtered query!\n";
-                    auto recall = recall_k(n, L, G_vec, 1);
-                    std::cout << "\n recall:" << recall << "\n\n";
-                }
-                else if (query_type[query_point_index] == 0.0f)
-                {
-                    std::cout << "UNFILTERED QUERY!\n";
-                    auto recall = recall_k(n, L, G_vec, 1);
-                    std::cout << "\n recall:" << recall << "\n\n";
-                }
-                else
-                {
-                    std::cout << "point with unsupported filter, continuing...\n";
-                    continue;
-                }
-            }
-        }
-        else {
-            std::cout<<"\n\n--END OF STITCHED VAMANA--\n\n";
-        }
+    //     std::vector<int> L, V;
+    //     std::span<T> query_span(query_m.row(query_point_index));
+    //     v_stitched.filtered_greedy_search_s(Medoid, query_span, k, List_size, (*query_m.vec_filter)[query_point_index], L, V);
+    //     size_t n = std::min(k, ground_data[query_point_index].size());
+    //     std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
+    //     if (query_type[query_point_index] == 1.0f)
+    //     {
+    //         std::cout << "filtered query!\n";
+    //         auto recall = recall_k(n, L, G_vec, 1);
+    //         std::cout << "\n recall:" << recall << "\n\n";
+    //     }
+    //     else if (query_type[query_point_index] == 0.0f)
+    //     {
+    //         std::cout << "UNFILTERED QUERY!\n";
+    //         auto recall = recall_k(n, L, G_vec, 1);
+    //         std::cout << "\n recall:" << recall << "\n\n";
+    //     }
+    //     else
+    //     {
+    //         std::cout << "point with unsupported filter, continuing...\n";
+    //         continue;
+    //     }
+    // }
 
-    }
-
+    
+    std::cout<<"\n\n--END OF STITCHED VAMANA--\n\n";
 }
 
 
