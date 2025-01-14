@@ -130,11 +130,12 @@ void test_filtered_prune() {
 
     std::vector<int>Lf,vf;
     //prune some edges for some vectors
-    V_F.filtered_robust_prune(0,vf,a,R);
+    std::vector<int> temp;
+    V_F.filtered_robust_prune(0,vf,a,R, temp);
     TEST_ASSERT(V_F.graph[0].size()<=3);
 
     //prune some edges for some vectors
-    V_F.filtered_robust_prune(5,vf,a,R);
+    V_F.filtered_robust_prune(5,vf,a,R, temp);
     TEST_ASSERT(V_F.graph[5].size()<=3);
 
 
