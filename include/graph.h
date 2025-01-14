@@ -376,15 +376,14 @@ struct VamanaIndex
         {
             // its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
             //  L.reserve(db.filters_set.size() + list_size);
-            for (int i = 0; i < db.filters_set.size(); i++)
+            for (size_t i = 0; i < db.filters_set.size(); i++)
             {
                 auto f = db.filters_set[i];
-                int startPoint;
                 std::vector<int> tempL, tempV;
                 auto it = S.find(f); //[] operator adds a default value if the key is not already inside it, we dont want that
                 if (it != S.end())
                 {
-                    startPoint = (it->second); // get the starting point for this filter
+                    // int startPoint = (it->second); // get the starting point for this filter
 
                     // run greedy to get the k=1 closest
                     //  printf("filter:%f\n",f);
@@ -593,7 +592,7 @@ struct VamanaIndex
 // #pragma omp single
 // {
 #pragma omp parallel for schedule(runtime)
-        for (int s = 0; s < db.vecnum; s++)
+        for (size_t s = 0; s < db.vecnum; s++)
         {
             // #pragma omp task
             // {
@@ -669,7 +668,7 @@ struct VamanaIndex
         }
         //        std::cout << "filters_set size:" << db.filters_set.size() << std::endl;
 #pragma omp parallel for schedule(static,1) proc_bind(close)
-        for (int i = 0; i < db.filters_set.size(); i++)
+        for (size_t i = 0; i < db.filters_set.size(); i++)
         {
             auto f = db.filters_set[i];
             //            std::cout << "filter:" << f << " ";

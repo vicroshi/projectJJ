@@ -57,7 +57,7 @@ int main(int argc,char **argv){
     }
     // Check if file paths are not empty
     if(base_file_path.empty() || query_file_path.empty() || ground_file_path.empty()){
-        std::cerr << "Usage: ./projectjj -a <value> -R <value> -k <value> -L <value> -base <value> -query <value> -ground <value> {optional threading -n <value>}" << std::endl;
+        std::cerr << "Usage: ./projectjj -a <value> -R <value> -k <value> -L <value> -b <value> -q <value> -g <value> {optional threading -n <value>}" << std::endl;
         return 1;
     }
 
