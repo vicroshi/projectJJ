@@ -328,6 +328,8 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
     // R-regular graph initialization
     std::unordered_map<T, int> Medoid;          // st(f)
 
+    //get input in a loop to show k-nearest neighbors for any query in file, is used later
+    
 
     // calculate medoid once and pass it to functions later
     auto medoid_start = std::chrono::high_resolution_clock::now();
@@ -396,10 +398,10 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
             std::cout << std::fixed << std::setprecision(2);
             std::cout << "TOTAL recall for filtered: " << sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
             std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
-            //get input in a loop to show k-nearest neighbors for any query in file
-            int query_point_index;
+            
     //        get valid integer input for query input, indexing starts at 0
              while (true){
+                int query_point_index;
                  std::cout << "Enter query index (-1 to exit): ";
                  std::cin >> query_point_index;
 
@@ -443,7 +445,9 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
         //load of build graph
         if(!load){
             auto start = std::chrono::high_resolution_clock::now();
-            v_stitched.stitched_vamana_indexing(a, R_small, R, L_small);
+            // v_stitched.stitched_vamana_indexing(a, R_small, R, L_small);
+            v_stitched.stitched_vamana_indexing(a, R_small, L_small);
+
             auto end = std::chrono::high_resolution_clock::now();
             std::cout << ">Time taken for Indexing: " << std::chrono::duration_cast<std::chrono::microseconds>(end-start).count() / 1e6 << " sec(s)." << std::endl;
         }
@@ -489,12 +493,13 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
             std::cout << "TOTAL recall for filtered: " << st_sum_filtered / static_cast<double>(num_filtered_points) << std::endl;
             std::cout << "TOTAL recall for unfiltered: " << st_sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
 
-            //get input in a loop to show k-nearest neighbors for any query in file
-            //get valid integer input for query input, indexing starts at 0
-            int query_point_index;
+            
 
     // while (true)
     // {
+            //get input in a loop to show k-nearest neighbors for any query in file
+            //get valid integer input for query input, indexing starts at 0
+            // int query_point_index;
     //     std::cout << "Enter query index (-1 to exit): ";
     //     std::cin >> query_point_index;
 

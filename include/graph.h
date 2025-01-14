@@ -30,7 +30,7 @@ struct VamanaIndex {
     const size_t deg;
     std::unordered_map<T, std::vector<int> > Pf;
 
-    VamanaIndex() : db(Matrix<T>()), vecnum(0), deg(0) {
+    VamanaIndex() : db(Matrix<T>::default_instance()), vecnum(0), deg(0) {
     }
 
     //constructor used for main
@@ -169,7 +169,7 @@ struct VamanaIndex {
         }
         //return k closest points from L
         auto it = Ls.end();
-        if (Ls.size() > k) {
+        if (Ls.size() > (size_t) k) {
             it = Ls.begin();
             std::advance(it, k);
         }
@@ -337,13 +337,13 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
             //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
             // L.reserve(db.filters_set.size() + list_size);
         //    #pragma omp parallel for
-            for (int i =  0; i  < db.filters_set.size(); i++) {
+            for (size_t i =  0; i  < db.filters_set.size(); i++) {
                 auto f = db.filters_set[i];
-                int startPoint;
+                // int startPoint;
                 std::vector<int> tempL,tempV;
                 auto it = S.find(f); //[] operator adds a default value if the key is not already inside it, we dont want that
                 if (it != S.end()) {
-                    startPoint = (it->second); //get the starting point for this filter
+                    // int startPoint = (it->second); //get the starting point for this filter
                     
                     //run greedy to get the k=1 closest
                     // printf("filter:%f\n",f);
@@ -486,11 +486,11 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
 
             
             for (auto &f: (db.filters_set)) {
-                int startPoint;
+                // int startPoint;
                 std::vector<int> tempL,tempV;
                 auto it = S.find(f); //[] operator adds a default value if the key is not already inside it, we dont want that
                 if (it != S.end()) {
-                    startPoint = (it->second); //get the starting point for this filter
+                    // startPoint = (it->second); //get the starting point for this filter
                     
                     //run greedy to get the k=1 closest
                     filtered_greedy_search(S,query,1,1,f,tempL,tempV);
@@ -620,7 +620,9 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         }
     }
 
-    void stitched_vamana_indexing(float a, size_t R_small, size_t R_stitched, size_t L_small) {
+    // void stitched_vamana_indexing(float a, size_t R_small, size_t R_stitched, size_t L_small) {
+    void stitched_vamana_indexing(float a, size_t R_small, size_t L_small) {
+
         std::unordered_map<T, std::unique_ptr<VamanaIndex> > Gf;
         putchar('\n');
         Gf.reserve(db.filters_set.size());
@@ -629,7 +631,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         }
 //        std::cout << "filters_set size:" << db.filters_set.size() << std::endl;
         #pragma omp parallel for schedule(static,1) proc_bind(spread)
-        for (int i = 0 ; i < db.filters_set.size(); i++) {
+        for (size_t i = 0 ; i < db.filters_set.size(); i++) {
             auto f = db.filters_set[i];
 //            std::cout << "filter:" << f << " ";
 //            auto start = std::chrono::high_resolution_clock::now();

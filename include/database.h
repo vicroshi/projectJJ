@@ -24,17 +24,29 @@
 #include <algorithm>
 #include <omp.h>
 
+
 template <typename T>
 struct Matrix{
+    private:
+        static const std::vector<T> empty_vector; // Default empty vector
+    
+    public:
     size_t dim;
     size_t vecnum;
     std::span<T> vecs;
     const std::vector<T>& vec_filter; //filter for each vec
     const std::vector<T>& filters_set; //set of all filters
+    
+    
 
-    Matrix(): dim(0), vecnum(0), vecs({}), vec_filter({}), filters_set({}){}
+    Matrix(): dim(0), vecnum(0), vecs({}), vec_filter(empty_vector), filters_set(empty_vector){}
+    // Static default instance
+    static const Matrix<T>& default_instance() {
+        static Matrix<T> default_matrix;
+        return default_matrix;
+    }
     //project 1 constructor
-    Matrix(size_t dim, size_t vecnum, T* data): dim(dim), vecnum(vecnum), vecs(data, vecnum * dim), vec_filter({}), filters_set({}){}
+    Matrix(size_t dim, size_t vecnum, T* data): dim(dim), vecnum(vecnum), vecs(data, vecnum * dim), vec_filter(empty_vector), filters_set(empty_vector){}
     //project 2 constructor
     Matrix(size_t dim, size_t vecnum,std::vector<T>* data , const std::vector<T>& vec_filter,  const std::vector<T>& filters_set):
             dim(dim), vecnum(vecnum), vecs(data->data(),vecnum*dim), vec_filter(vec_filter), filters_set(filters_set){}
@@ -208,7 +220,11 @@ struct Matrix{
 
     }
 
+
+
 };
 
+template <typename T>
+const std::vector<T> Matrix<T>::empty_vector = {};
 
 #endif //DATABASE_H
