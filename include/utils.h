@@ -217,6 +217,19 @@ std::unordered_map<T, std::vector<int>>& Pf){
 
 //keeps the first two query types and flattens the 2-D vector.
 template <typename T>
+// void extract_query_vector_info(std::vector<std::vector<T>>& data,std::vector<T>& filter,std::vector<int>&query_type,std::vector<T>& flattened_data,std::vector<int>& filtered_points,std::vector<int>& unfiltered_points){
+//     flattened_data.reserve(data.size()*100); //100 dimensions for each vector * num of vectors
+//     for(int i = 0; i < data.size(); i++){
+//         if(point[0]<2.0f){ //only keep the first two query types
+//             if(static_cast<int>(point[0])==1) filterd_points.push_back(i); //count how many filtered points there are for recall
+//             if(static_cast<int>(point[0])==0) unfiltered_points.push_back(i) //count how many filtered points there are for recall
+//             filter.push_back(point[1]); //move filter value
+//             query_type.push_back(static_cast<int>(point[0])); //move query type
+//             flattened_data.insert(flattened_data.end(), point.begin() + 4, point.end());  //skip the first 4 elements and insert the rest
+//         }
+//     }
+//     data.clear();
+// }
 void extract_query_vector_info(std::vector<std::vector<T>>& data,std::vector<T>& filter,std::vector<int>&query_type,std::vector<T>& flattened_data,size_t& num_filtered_points,size_t& num_unfiltered_points){
     flattened_data.reserve(data.size()*100); //100 dimensions for each vector * num of vectors
     for(auto& point:data){
@@ -337,9 +350,11 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
     auto medoid_end = std::chrono::high_resolution_clock::now();
     auto medoid_duration = std::chrono::duration_cast<std::chrono::microseconds>(medoid_end - medoid_start).count();
     std::cout << ">Time taken to find medoid: " << medoid_duration / 1e6 << " sec(s)." << std::endl;
+    // std::cout << base_m.db
     if (mode == 0 || mode == 1) {
         auto init_start = std::chrono::high_resolution_clock::now();
         VamanaIndex<T> v_m(base_m);
+        v_m.init_graph();
         v_m.Pf = Pff;
         auto init_end = std::chrono::high_resolution_clock::now();
         auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(init_end - init_start).count();
@@ -373,7 +388,7 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
             double sum_filtered=0.0f,sum_unfiltered=0.0f;
             //querying
             auto query_start = std::chrono::high_resolution_clock::now();
-            #pragma omp parallel for reduction(+:sum_filtered,sum_unfiltered)
+            #pragma omp parallel for reduction(+:sum_filtered,sum_unfiltered) schedule(runtime) proc_bind(close)
             for (uint32_t i = 0; i < query_no_of_points; i++){
                 std::vector<int> L, V;
                 std::span<T> query_span(query_m.row(i));

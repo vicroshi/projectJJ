@@ -11,7 +11,7 @@
 #include "graph.h"
 #include <unordered_set>
 #include <utils.h>
-
+#include <omp.h>
 void test_filtered_greedy(){
     std::cout<<std::endl;
     int points[6][4] = {
@@ -50,6 +50,7 @@ void test_filtered_greedy(){
 }
 
 void test_stitched() {
+    omp_set_num_threads(1);
     int points[6][4] = {
         {3, 7, 12, 8},
         {10, 2, 6, 14},
@@ -101,7 +102,7 @@ void test_stitched() {
 }
 
 void test_filtered_prune() {
-
+    omp_set_num_threads(1);
     float points_f[14][4] = {
     {3.0f, 7.0f, 12.0f, 8.0f},
     {5.0f, 15.0f, 1.0f, 9.0f},
