@@ -53,7 +53,7 @@ struct VamanaIndex {
         size_t sz;
         if (P.empty()) {
             sz = vecnum;
-//            vec.resize(vecnum);
+//            vec.resize(vecnum);   
 //            std::iota(vec.begin(), vec.end(), 0);
         }
         else {
