@@ -99,7 +99,7 @@ L2=100
 
 t=1
 R_small=32
-L_small=100
+L_small=50
 
 R_stitched=50
 # variable for unfiltered queries improvement.
