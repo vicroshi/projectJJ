@@ -7,3 +7,4 @@ datasets/test/dummy_create.cpp
 run.sh
 graphs/*
 profiler
+to_run.sh

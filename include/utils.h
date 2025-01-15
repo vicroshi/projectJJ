@@ -21,7 +21,7 @@
 
 void ann(const std::string& , const std::string& ,const std::string& ,const float& , const size_t& ,const size_t& ,const size_t& ,int );
 std::string getFileExtension(const std::string&);
-std::filesystem::path get_file_path(const size_t& , const size_t& , const size_t& , const float& ,std::string );
+std::filesystem::path get_file_path(const size_t& , const size_t& , const size_t& , const float& ,std::string ,const size_t &);
 
 template <typename T>
 T* read_from_file(const std::string&,size_t*,size_t*);
@@ -277,7 +277,7 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
     std::vector<T> flat_base;
     uint32_t base_no_of_points;
     ReadBin<float>(base_file_path, 102, base_data, base_no_of_points);
-
+    size_t file_size = base_data.size();
     // data extraction
     std::vector<T> base_filter;        // to filter kathe point
     std::vector<T> filters_set; // ola ta filters pou uparxoun
@@ -286,7 +286,7 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
     std::unordered_map<T, std::vector<int>> Pff; // so it won't break find medoid
     // std::unordered_map<T, std::vector<int>> Pf; // points for each filter
     extract_base_vector_info(base_data, base_filter, filters_set, flat_base, Pff);
-
+    // std::cout<<file_size<<std::endl;
     // database init
     Matrix<T> base_m(static_cast<size_t>(100), base_no_of_points, &flat_base, base_filter, filters_set);
     // base_m.print_check();
@@ -372,13 +372,13 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
         }
         else{
             //load from binary file
-            std::filesystem::path load_path = get_file_path(k,List_size,R,a,"filtered_graph_");
+            std::filesystem::path load_path = get_file_path(k,List_size,R,a,"filtered_graph_",file_size);
             std::cout<<"Loading graph from file:"<<load_path<<std::endl;
             if(v_m.load_graph(load_path)==-1) exit(1);
         }
         if(save){
             //write filtered graph in binary file()
-            std::filesystem::path save_path = get_file_path(k,List_size,R,a,"filtered_graph_");
+            std::filesystem::path save_path = get_file_path(k,List_size,R,a,"filtered_graph_",file_size);
             v_m.save_graph(save_path);
         }
         std::cout << "Continue to querying? [Y/n]\n";
@@ -415,42 +415,42 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
             std::cout << "TOTAL recall for unfiltered: " << sum_unfiltered / static_cast<double>(num_unfiltered_points) << std::endl;
             
     //        get valid integer input for query input, indexing starts at 0
-             while (true){
-                int query_point_index;
-                 std::cout << "Enter query index (-1 to exit): ";
-                 std::cin >> query_point_index;
+            //  while (true){
+            //     int query_point_index;
+            //      std::cout << "Enter query index (-1 to exit): ";
+            //      std::cin >> query_point_index;
 
-                 // check if -1 was given at start
-                 if (query_point_index == -1)
-                     break;
+            //      // check if -1 was given at start
+            //      if (query_point_index == -1)
+            //          break;
 
-                 std::vector<int> L, V;
-                 std::span<T> query_span(query_m.row(query_point_index));
-                 v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (query_m.vec_filter)[query_point_index], L, V, L_unfiltered);
-                 size_t n = std::min(k, ground_data[query_point_index].size());
-                 std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
-                 if (query_type[query_point_index] == 1.0f)
-                 {
-                     std::cout << "filtered query!\n";
-                     auto recall = recall_k(n, L, G_vec, 1);
-                     std::cout << "\n recall:" << recall << "\n\n";
-                 }
-                 else if (query_type[query_point_index] == 0.0f)
-                 {
-                     std::cout << "UNFILTERED QUERY!\n";
-                     auto recall = recall_k(n, L, G_vec, 1);
-                     std::cout << "\n recall:" << recall << "\n\n";
-                 }
-                 else
-                 {
-                     std::cout << "point with unsupported filter, continuing...\n";
-                     continue;
-                 }
-             }
+            //      std::vector<int> L, V;
+            //      std::span<T> query_span(query_m.row(query_point_index));
+            //      v_m.filtered_greedy_search_s(Medoid, query_span, k, List_size, (query_m.vec_filter)[query_point_index], L, V, L_unfiltered);
+            //      size_t n = std::min(k, ground_data[query_point_index].size());
+            //      std::vector<int> G_vec(ground_data[query_point_index].begin(), ground_data[query_point_index].begin() + n);
+            //      if (query_type[query_point_index] == 1.0f)
+            //      {
+            //          std::cout << "filtered query!\n";
+            //          auto recall = recall_k(n, L, G_vec, 1);
+            //          std::cout << "\n recall:" << recall << "\n\n";
+            //      }
+            //      else if (query_type[query_point_index] == 0.0f)
+            //      {
+            //          std::cout << "UNFILTERED QUERY!\n";
+            //          auto recall = recall_k(n, L, G_vec, 1);
+            //          std::cout << "\n recall:" << recall << "\n\n";
+            //      }
+            //      else
+            //      {
+            //          std::cout << "point with unsupported filter, continuing...\n";
+            //          continue;
+            //      }
+            //  }
         }
-        else {
-            std::cout<<"\n\n--END OF FILTERED VAMANA--\n";
-        }
+        
+        std::cout<<"\n\n--END OF FILTERED VAMANA--\n";
+        
 
     }
     if (mode == 0 || mode == 2) {
@@ -468,14 +468,14 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
         }
         else{
             //load from file
-            std::filesystem::path load_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
+            std::filesystem::path load_path = get_file_path(k,L_small,R_small,a,"stitched_graph_",file_size);
             std::cout<<"Loading graph from file:"<<load_path<<std::endl;
             if(v_stitched.load_graph(load_path) ==-1) exit(1) ;
 
         }
         if(save){
             //write stitched graph in binary file()
-            std::filesystem::path save_path = get_file_path(k,L_small,R_small,a,"stitched_graph_");
+            std::filesystem::path save_path = get_file_path(k,L_small,R_small,a,"stitched_graph_",file_size);
             v_stitched.save_graph(save_path);
         }
         char c;
