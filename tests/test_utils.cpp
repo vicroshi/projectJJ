@@ -167,7 +167,7 @@ void test_file_path(){
 
     size_t k=2,L=3,R=4;
     float a=1.4;
-    std::string type="filtered_graph";
+    std::string type="filtered_graph_";
     std::filesystem::path p1=get_file_path(k,L,R,a,type);
     auto it = p1.end();
     
@@ -184,7 +184,7 @@ void test_file_path(){
     
     k=5,L=2,R=9;
     a=2.0;
-    type="stitched_graph";
+    type="stitched_graph_";
     std::filesystem::path p2=get_file_path(k,L,R,a,type);
      it = p2.end();
     
@@ -195,7 +195,10 @@ void test_file_path(){
      second_last_component = *it;
      last_two_components = second_last_component / last_component;
     //  std::cout << last_two_components << std::endl;
-    std::filesystem::path expected_path2= "graphs/stitched_graph_k_5_L_2_R_9_a_2_variation.bin";
+        
+
+    std::filesystem::path expected_path2= "graphs/stitched_graph_k_5_L_small_2_R_small_9_a_2_variation.bin";
+//  std::cout<<expected_path2<<std::endl;
     TEST_ASSERT(last_two_components == expected_path2) ;
     
 

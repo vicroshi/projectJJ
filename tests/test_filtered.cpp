@@ -80,7 +80,8 @@ void test_stitched() {
     V.Pf = Pf;
     TEST_ASSERT(V.vecnum==6);
     TEST_ASSERT(V.db.filters_set.size()==3);
-    V.stitched_vamana_indexing(1.1f, 32, 32, 100);
+    // V.stitched_vamana_indexing(1.1f, 32, 32, 100);
+    V.stitched_vamana_indexing(1.1f, 32,  100);
     V.filtered_greedy_search(S,query,1,5,fq,L,V_f);
     // std::cout << "\nL.size():" << L.size() << std::endl;
     putchar('\n');

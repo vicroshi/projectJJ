@@ -12,11 +12,12 @@
 #include "utils.h"
 
 int main(int argc,char **argv){
-    int opt;
+    int opt,thread_num=1; //default thread value if not given by user
     float a=0.0;
     size_t R=0,L=0,k=0;
     std::string base_file_path,query_file_path,ground_file_path;
-    while((opt = getopt(argc, argv, "a:R:L:b:q:g:k:"))!=-1){
+
+    while((opt = getopt(argc, argv, "a:R:L:b:q:g:k:n:"))!=-1){
         try{
             switch(opt){
                 case 'a':
@@ -40,6 +41,9 @@ int main(int argc,char **argv){
                 case 'k':
                     k=std::stoul(optarg);
                     break;
+                case 'n':
+                    thread_num = std::stoi(optarg);
+                    break;
                 default:
                     throw std::invalid_argument("Invalid option");
             }
@@ -47,18 +51,18 @@ int main(int argc,char **argv){
         }catch(const std::invalid_argument& e){
             
             std::cerr << "Error: Invalid argument for option -" << static_cast<char>(optopt) << ": " << optarg << std::endl;
-            std::cerr << "Usage: ./projectjj -a <value> -R <value> -L <value> -b <value> -q <value> -g <value>" << std::endl;
+            std::cerr << "Usage: ./projectjj -a <value> -R <value> -L <value> -b <value> -q <value> -g <value> {optional threading -n <value>}" << std::endl;
             return 1;
         }
     }
     // Check if file paths are not empty
     if(base_file_path.empty() || query_file_path.empty() || ground_file_path.empty()){
-        std::cerr << "Usage: ./projectjj -a <value> -R <value> -k <value> -L <value> -base <value> -query <value> -ground <value>" << std::endl;
+        std::cerr << "Usage: ./projectjj -a <value> -R <value> -k <value> -L <value> -base <value> -query <value> -ground <value> {optional threading -n <value>}" << std::endl;
         return 1;
     }
 
     //call ann() here to check file type for first project and then call execute
-    ann(base_file_path,query_file_path,ground_file_path,a,k,R,L);
+    ann(base_file_path,query_file_path,ground_file_path,a,k,R,L,thread_num);
 
 
     return 0;

@@ -17,17 +17,19 @@ std::string getFileExtension(const std::string& filePath){
     return filePath.substr(dotPosition + 1);
 }
 
-void ann(const std::string& base_file_path, const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const size_t& List_size){
+void ann(const std::string& base_file_path, const std::string& query_file_path,const std::string& ground_file_path,const float& a, const size_t& k,const size_t& R,const size_t& List_size,int thread_num){
     //makes sense to first check if the ground_truth is the right type of file
+    omp_set_num_threads(thread_num);
+
     if(getFileExtension(ground_file_path)=="ivecs"){
         //check for file type to call the execute with proper <type>
         //if user gives a .fvecs base file and a .ivecs as query, should exit
         std::string type=getFileExtension(base_file_path);
         if(type==getFileExtension(query_file_path) && type=="fvecs"){
-            execute<float>(base_file_path,query_file_path,ground_file_path,a,k,R,List_size);
+            execute<float>(base_file_path,query_file_path,ground_file_path,a,k,R,List_size,thread_num);
         }
         else if(type==getFileExtension(query_file_path) && type=="ivecs"){
-            execute<int>(base_file_path,query_file_path,ground_file_path,a,k,R,List_size);
+            execute<int>(base_file_path,query_file_path,ground_file_path,a,k,R,List_size,thread_num);
         }
         //any other case: they're incompatible
         else {
@@ -104,7 +106,7 @@ std::filesystem::path get_file_path(const size_t& k, const size_t& L, const size
         // std::cout << a_str << std::endl;
         //construct file name
         std::ostringstream file_name_stream;
-        file_name_stream << type << "_k_" << k_str << "_" << (type=="stitched_graph_" ? "L_small_" : "L_") <<L_str << "_" <<(type=="stitched_graph_" ? "R_small_" : "R_") <<R_str<<"_a_"<<a_str<<"_" << "variation.bin";
+        file_name_stream << type << "k_" << k_str << "_" << (type=="stitched_graph_" ? "L_small_" : "L_") <<L_str << "_" <<(type=="stitched_graph_" ? "R_small_" : "R_") <<R_str<<"_a_"<<a_str<<"_" << "variation.bin";
         std::string file_name = file_name_stream.str();
 
         // Construct the desired file path

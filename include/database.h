@@ -22,17 +22,31 @@
 #include <unordered_map>
 #include <random>
 #include <algorithm>
+#include <omp.h>
+
+
 template <typename T>
 struct Matrix{
+    private:
+        static const std::vector<T> empty_vector; // Default empty vector
+    
+    public:
     size_t dim;
     size_t vecnum;
     std::span<T> vecs;
     const std::vector<T>& vec_filter; //filter for each vec
     const std::vector<T>& filters_set; //set of all filters
+    
+    
 
-    Matrix(): dim(0), vecnum(0), vecs({}), vec_filter({}), filters_set({}){}
+    Matrix(): dim(0), vecnum(0), vecs({}), vec_filter(empty_vector), filters_set(empty_vector){}
+    // Static default instance
+    static const Matrix<T>& default_instance() {
+        static Matrix<T> default_matrix;
+        return default_matrix;
+    }
     //project 1 constructor
-    Matrix(size_t dim, size_t vecnum, T* data): dim(dim), vecnum(vecnum), vecs(data, vecnum * dim), vec_filter({}), filters_set({}){}
+    Matrix(size_t dim, size_t vecnum, T* data): dim(dim), vecnum(vecnum), vecs(data, vecnum * dim), vec_filter(empty_vector), filters_set(empty_vector){}
     //project 2 constructor
     Matrix(size_t dim, size_t vecnum,std::vector<T>* data , const std::vector<T>& vec_filter,  const std::vector<T>& filters_set):
             dim(dim), vecnum(vecnum), vecs(data->data(),vecnum*dim), vec_filter(vec_filter), filters_set(filters_set){}
@@ -123,9 +137,9 @@ struct Matrix{
     }
 
     int medoid_naive(const std::vector<int>& Pf = {}) const {
-        double dist;
-        double min_dist = std::numeric_limits<double>::max();
-        int medoid_idx = 0;
+        double global_min_dist = std::numeric_limits<double>::max();
+        int global_medoid_idx = 0;
+
         std::vector<int> vec;
         if (Pf.empty()) {
             vec.resize(vecnum);
@@ -133,20 +147,42 @@ struct Matrix{
         } else {
             vec = Pf;
         }
-        for (auto i : vec) {
-            dist = 0;
-            for (auto j : vec) {
-                if (i != j) {
-                    dist += sq_euclid(row(i),row(j),dim);
+
+        #pragma omp parallel 
+        {
+            // std::cout << "OpenMP is running medoid_naive with " << omp_get_num_threads() << " thread(s)." << std::endl;
+
+            double local_min_dist = std::numeric_limits<double>::max();
+            int local_medoid_idx = 0;
+
+            #pragma omp for  nowait
+            for (size_t idx = 0; idx < vec.size(); idx++) {
+                auto i = vec[idx];
+                double dist = 0;
+
+                for (auto j : vec) {
+                    if (i != j) {
+                        dist += sq_euclid(row(i), row(j), dim);
+                    }
+                }
+
+                if (dist < local_min_dist) {
+                    local_min_dist = dist;
+                    local_medoid_idx = i;
                 }
             }
-            if (dist < min_dist) {
-                min_dist = dist;
-                medoid_idx = i;
+
+            #pragma omp critical
+            {
+                if (local_min_dist < global_min_dist) {
+                    global_min_dist = local_min_dist;
+                    global_medoid_idx = local_medoid_idx;
+                }
             }
         }
-        return medoid_idx;
-    }
+
+    return global_medoid_idx;
+}
 
                                                         //M keeps the index of the starting point for each filter
     void find_medoid(const size_t& t,std::unordered_map<T,int>& M,std::unordered_map<T, std::vector<int>>& Pf){
@@ -184,7 +220,11 @@ struct Matrix{
 
     }
 
+
+
 };
 
+template <typename T>
+const std::vector<T> Matrix<T>::empty_vector = {};
 
 #endif //DATABASE_H

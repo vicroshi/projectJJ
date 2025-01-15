@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <fstream>
 #include <omp.h>
+
 template<typename T>
 struct VamanaIndex {
 //    std::vector<std::unordered_set<int>> graph;
@@ -29,12 +30,12 @@ struct VamanaIndex {
     const size_t deg;
     std::unordered_map<T, std::vector<int> > Pf;
 
-    VamanaIndex() : db(Matrix<T>()), vecnum(0), deg(0) {
+    VamanaIndex() : db(Matrix<T>::default_instance()), vecnum(0), deg(0) {
     }
 
     //constructor used for main
     VamanaIndex(size_t deg, const Matrix<T>& db): db(db), vecnum(db.vecnum), deg(deg) {
-        init_graph();
+        init_graph(deg);
     }
 
     //gia stitched
@@ -52,7 +53,7 @@ struct VamanaIndex {
         size_t sz;
         if (P.empty()) {
             sz = vecnum;
-//            vec.resize(vecnum);
+//            vec.resize(vecnum);   
 //            std::iota(vec.begin(), vec.end(), 0);
         }
         else {
@@ -70,8 +71,9 @@ struct VamanaIndex {
     void init_graph(const size_t &r, const std::vector<int> &P = {}) {
 //        graph.reserve(vecnum);
         //generator for shuffle
+
         std::random_device rd;
-        std::mt19937 rndm(rd());
+        // std::mt19937 rndm(rd());
         std::vector<int> vec;
         if (P.empty()) {
             vec.resize(vecnum);
@@ -83,22 +85,37 @@ struct VamanaIndex {
         }
         size_t R = r > vec.size() ? vec.size() - 1 : r;
         std::vector shuff_vec = vec;
-        for (auto p: vec) {
-            // if(p % 10000 ==0 ) std::cout<<"adding neighbors for p:"<<p<<std::endl;
-            std::unordered_set<int> neighbors;
-            // while (neighbors.size() < R) {
-                //get a random permutation of all nodes and add 1 each time making sure we dont add itself
-                std::shuffle(shuff_vec.begin(), shuff_vec.end(), rndm);
-                for (auto i: shuff_vec) {
-                    if (i != p) {
-                        neighbors.insert(i);
+
+
+        
+
+
+        #pragma omp parallel 
+        {
+            std::cout << "OpenMP is running init_graph with " << omp_get_num_threads() << " thread(s)." << std::endl;
+            // Thread-local random number generator
+            thread_local std::mt19937 rndm(rd() + omp_get_thread_num());
+            #pragma omp for 
+            for (size_t idx = 0; idx < vec.size(); idx++) {
+            
+                int p = vec[idx];
+
+                // if(idx % 10000 ==0 ) std::cout<<"adding neighbors for p:"<<idx<<std::endl;
+                std::unordered_set<int> neighbors;
+                // while (neighbors.size() < R) {
+                    //get a random permutation of all nodes and add 1 each time making sure we dont add itself
+                    std::shuffle(shuff_vec.begin(), shuff_vec.end(), rndm);
+                    for (auto i: shuff_vec) {
+                        if (i != p) {
+                            neighbors.insert(i);
+                        }
+                        if (neighbors.size() == R) {
+                            break;
+                        }
                     }
-                    if (neighbors.size() == R) {
-                        break;
-                    }
-                }
-            // }
-            graph[p] = std::move(neighbors);
+                // }
+                graph[p] = std::move(neighbors);
+            }
         }
     }
 
@@ -152,7 +169,7 @@ struct VamanaIndex {
         }
         //return k closest points from L
         auto it = Ls.end();
-        if (Ls.size() > k) {
+        if (Ls.size() > (size_t) k) {
             it = Ls.begin();
             std::advance(it, k);
         }
@@ -301,6 +318,10 @@ struct VamanaIndex {
         }
     }
 
+
+
+
+
 void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> &query, const size_t &k, const size_t &list_size, const T &Fq, std::vector<int> &L,
                                 std::vector<int> &V, int L_unfiltered=1) {
         L.reserve(k);
@@ -316,13 +337,13 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
             //its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
             // L.reserve(db.filters_set.size() + list_size);
         //    #pragma omp parallel for
-            for (int i =  0; i  < db.filters_set.size(); i++) {
+            for (size_t i =  0; i  < db.filters_set.size(); i++) {
                 auto f = db.filters_set[i];
-                int startPoint;
+                // int startPoint;
                 std::vector<int> tempL,tempV;
                 auto it = S.find(f); //[] operator adds a default value if the key is not already inside it, we dont want that
                 if (it != S.end()) {
-                    startPoint = (it->second); //get the starting point for this filter
+                    // int startPoint = (it->second); //get the starting point for this filter
                     
                     //run greedy to get the k=1 closest
                     // printf("filter:%f\n",f);
@@ -465,11 +486,11 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
 
             
             for (auto &f: (db.filters_set)) {
-                int startPoint;
+                // int startPoint;
                 std::vector<int> tempL,tempV;
                 auto it = S.find(f); //[] operator adds a default value if the key is not already inside it, we dont want that
                 if (it != S.end()) {
-                    startPoint = (it->second); //get the starting point for this filter
+                    // startPoint = (it->second); //get the starting point for this filter
                     
                     //run greedy to get the k=1 closest
                     filtered_greedy_search(S,query,1,1,f,tempL,tempV);
@@ -599,7 +620,9 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         }
     }
 
-    void stitched_vamana_indexing(float a, size_t R_small, size_t R_stitched, size_t L_small) {
+    // void stitched_vamana_indexing(float a, size_t R_small, size_t R_stitched, size_t L_small) {
+    void stitched_vamana_indexing(float a, size_t R_small, size_t L_small) {
+
         std::unordered_map<T, std::unique_ptr<VamanaIndex> > Gf;
         putchar('\n');
         Gf.reserve(db.filters_set.size());
@@ -608,7 +631,7 @@ void filtered_greedy_search_s(std::unordered_map<T, int> &S, const std::span<T> 
         }
 //        std::cout << "filters_set size:" << db.filters_set.size() << std::endl;
         #pragma omp parallel for schedule(static,1) proc_bind(spread)
-        for (int i = 0 ; i < db.filters_set.size(); i++) {
+        for (size_t i = 0 ; i < db.filters_set.size(); i++) {
             auto f = db.filters_set[i];
 //            std::cout << "filter:" << f << " ";
 //            auto start = std::chrono::high_resolution_clock::now();
