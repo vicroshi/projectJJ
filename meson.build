@@ -17,7 +17,6 @@ endif
 # Adding optimization flag -O3
 add_project_arguments('-O3', language: 'cpp')
 add_project_arguments('-fopenmp', language: 'cpp')
-
 # These arguments are only used to build the shared library
 # not the executables that use the library.
 includes = include_directories('include')

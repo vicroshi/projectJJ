@@ -317,6 +317,7 @@ void test_prune(){
     std::unordered_set<int>L={};
     std::vector<int> v={};
     size_t R=5;
+    std::vector<int> temp;
     V.robust_prune(0,v,a,R);
     TEST_ASSERT(V.graph[0].size()<=R); //node should now have at most R neighbors
     V.robust_prune(5,v,a,R);

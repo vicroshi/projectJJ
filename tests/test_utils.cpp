@@ -164,11 +164,11 @@ void test_remove_negative_elements(){
 
 
 void test_file_path(){
-
+    const size_t file_size1=10,file_size2=20;
     size_t k=2,L=3,R=4;
     float a=1.4;
     std::string type="filtered_graph_";
-    std::filesystem::path p1=get_file_path(k,L,R,a,type);
+    std::filesystem::path p1=get_file_path(k,L,R,a,type,file_size1);
     auto it = p1.end();
     
     --it;
@@ -177,7 +177,7 @@ void test_file_path(){
     --it;
     std::filesystem::path second_last_component = *it;
     std::filesystem::path last_two_components = second_last_component / last_component;
-    std::filesystem::path expected_path1= "graphs/filtered_graph_k_2_L_3_R_4_a_1_4_variation.bin";
+    std::filesystem::path expected_path1= "graphs/filtered_graph_10_k_2_L_3_R_4_a_1_4_variation.bin";
     // std::cout<<last_two_components<<std::endl;
     // std::cout<<expected_path1<<std::endl;
     TEST_ASSERT(last_two_components == expected_path1) ;
@@ -185,7 +185,8 @@ void test_file_path(){
     k=5,L=2,R=9;
     a=2.0;
     type="stitched_graph_";
-    std::filesystem::path p2=get_file_path(k,L,R,a,type);
+    
+    std::filesystem::path p2=get_file_path(k,L,R,a,type,file_size2);
      it = p2.end();
     
     --it;
@@ -194,11 +195,11 @@ void test_file_path(){
     --it;
      second_last_component = *it;
      last_two_components = second_last_component / last_component;
-    //  std::cout << last_two_components << std::endl;
+     std::cout << last_two_components << std::endl;
         
 
-    std::filesystem::path expected_path2= "graphs/stitched_graph_k_5_L_small_2_R_small_9_a_2_variation.bin";
-//  std::cout<<expected_path2<<std::endl;
+    std::filesystem::path expected_path2= "graphs/stitched_graph_20_k_5_L_small_2_R_small_9_a_2_variation.bin";
+ std::cout<<expected_path2<<std::endl;
     TEST_ASSERT(last_two_components == expected_path2) ;
     
 

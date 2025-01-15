@@ -69,28 +69,7 @@ while getopts "v:m:n:os" opt; do
     esac
 done
 
-# Check if version was provided
-if [ "$version" -eq 0 ]; then
-    echo "Error: Version (-v) must be specified."
-    usage
-fi
 
-
-
-
-
-
-if [ $# -ge 2 ]; then 
-    if [ "$2" == "-s" ] || [ "$2" == "-o" ] ; then
-        arg1=$2
-    fi
-fi
-
-if [ $# -ge 3 ]; then 
-    if [ "$3" == "-s" ] || [ "$3" == "-o" ] ; then
-        arg2=$3
-    fi
-fi
 
 
 
@@ -115,12 +94,12 @@ ground_file_path="./datasets/siftsmall/siftsmall_groundtruth.ivecs"
 a2=1.2
 k2=100
 
-R2=100
-L2=120
+R2=32
+L2=100
 
 t=1
 R_small=32
-L_small=100
+L_small=50
 
 R_stitched=50
 # variable for unfiltered queries improvement.
@@ -131,6 +110,9 @@ filtered_base_file_path="./datasets/dummy/dummy-data.bin"
 filtered_query_file_path="./datasets/dummy/dummy-queries.bin"
 filtered_ground_file_path="./datasets/dummy/dummy-ground.bin"
 
+# filtered_base_file_path="./datasets/release1M/contest-data-release-1m.bin"
+# filtered_query_file_path="./datasets/release1M/contest-queries-release-1m.bin"
+# filtered_ground_file_path="./datasets/release1M/contest-ground-release-1m.bin"
 
 
 
@@ -143,7 +125,7 @@ if [ $version -eq 1 ]; then
     fi
     exit 0
 elif [ $version -eq 2 ]; then    
-    ./build/projectJJ_filtered -a $a2 -R $R2 -L $L2 -k $k2 -t $t -b $filtered_base_file_path -q $filtered_query_file_path -g $filtered_ground_file_path -r $R_small -l $L_small $arg1 $arg2 -n $num_threads -m $mode -u $L_unfilitered -R $R_stitched
+    ./build/projectJJ_filtered -a $a2 -R $R2 -L $L2 -k $k2 -t $t -b $filtered_base_file_path -q $filtered_query_file_path -g $filtered_ground_file_path -r $R_small -l $L_small $arg1 $arg2 -n $num_threads -m $mode -u $L_unfilitered 
     exit 0
 else
     echo "Usage: $0 <version>"
