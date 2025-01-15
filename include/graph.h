@@ -30,7 +30,6 @@ struct VamanaIndex
     const size_t vecnum;
     const size_t deg;
     std::unordered_map<T, std::vector<int>> Pf;
-
     VamanaIndex() : db(Matrix<T>::default_instance()), vecnum(0), deg(0) {
     }
 
@@ -147,10 +146,18 @@ struct VamanaIndex
     {
         const std::span<T> &p;
         const Matrix<T> &db;
+        // mutable std::unordered_map<int, float> dist_cache;
         cmp_dist(const std::span<T> &p, const Matrix<T> &db) : p(p), db(db) {}
         bool operator()(int v1, int v2) const
         {
-            // std::cout << "v1:" << v1 << " v2:" << v2 << std::endl;
+            //distance cache didnt do any improvements
+            // if(dist_cache.find(v1) == dist_cache.end()) {
+            //     dist_cache[v1] = Matrix<T>::sq_euclid(p, db.row(v1), db.dim);
+            // }
+            // if(dist_cache.find(v2) == dist_cache.end()) {
+            //     dist_cache[v2] = Matrix<T>::sq_euclid(p, db.row(v2), db.dim);
+            // }
+            // return dist_cache[v1] < dist_cache[v2];
             return Matrix<T>::sq_euclid(p, db.row(v1), db.dim) < Matrix<T>::sq_euclid(p, db.row(v2), db.dim);
         }
     };
@@ -167,6 +174,7 @@ struct VamanaIndex
         std::set<int, cmp_dist> Vs(cmp);
         Ls.insert(start_idx);
         std::vector<int> diff;
+        
         diff.push_back(start_idx);
         while (!diff.empty())
         {
@@ -183,7 +191,8 @@ struct VamanaIndex
                 Ls.erase(it, Ls.end());
             }
             diff.clear();
-            std::ranges::set_difference(Ls, Vs, std::back_inserter(diff), cmp_L);
+            std::ranges::set_difference(Ls, Vs, std::back_inserter(diff), cmp);
+            // std::ranges::set_difference(Ls, Vs, std::back_inserter(diff), cmp_L);
         }
         // return k closest points from L
         auto it = Ls.end();
@@ -445,7 +454,7 @@ struct VamanaIndex
                 Ls.erase(it, Ls.end());
             }
             diff.clear();
-            std::ranges::set_difference(Ls, Vs, std::back_inserter(diff), cmp_L);
+            std::ranges::set_difference(Ls, Vs, std::back_inserter(diff), cmp);
         }
         // return k closest points from L
         auto it = Ls.end();

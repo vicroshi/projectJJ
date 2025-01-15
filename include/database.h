@@ -23,8 +23,8 @@
 #include <random>
 #include <algorithm>
 #include <omp.h>
-
-
+#include <numeric>
+#include <execution>
 template <typename T>
 struct Matrix{
     private:
@@ -59,7 +59,7 @@ struct Matrix{
         return vecs.subspan(row*dim, dim);
     }
 
-    //using SIMD instructions to calculate squared distance faster, AVX/AVX2 required
+    // using SIMD instructions to calculate squared distance faster, AVX/AVX2 required
     static double sq_euclid(const std::span<T>& row1,const std::span<T>& row2,const size_t& dim){
         //for floats
         if constexpr(std::is_floating_point_v<T>){
@@ -109,16 +109,28 @@ struct Matrix{
     }
     
     //naive approach, not used
-    // static double sq_euclid(std::span<T> row1, std::span<T> row2,const size_t size){
-    //     double dist = 0;
-    //     double diff;
-    //     // auto vec1 = vecs[row1*dim];
-    //     // auto vec2 = vecs[row2*dim];
-    //     for (size_t i = 0; i < size; i++) {
-    //         diff = row1[i] - row2[i];
-    //         dist += diff*diff;
-    //     }
-    //     return dist;
+    // static double sq_euclid(const std::span<T>& row1,const std::span<T>& row2,const size_t size){
+        // double dist = 0;
+        // double diff;
+        // // auto vec1 = vecs[row1*dim];
+        // // auto vec2 = vecs[row2*dim];
+        // // #pragma omp simd reduction(+:dist)
+        // for (size_t i = 0; i < size; i++) {
+        //     diff = row1[i] - row2[i];
+        //     dist += diff*diff;
+        // }
+        // return dist;
+        // return std::transform_reduce(
+        //     std::execution::par,                  // Parallel execution policy
+        //     row1.begin(), row1.begin() + size,
+        //     row2.begin(),
+        //     0.0,
+        //     std::plus<>(),
+        //     [](T a, T b) {
+        //         double diff = a - b;
+        //         return diff * diff;
+        //     }
+        // );
     // }
 
     int medoid_rand(const std::vector<int>& Pf = {}) const {
