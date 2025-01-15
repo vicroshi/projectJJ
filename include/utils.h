@@ -484,7 +484,7 @@ size_t& List_size,const size_t& t,const size_t& R_small,const size_t&L_small,con
         if (c == 'y' || c == 'Y') {
             double st_sum_filtered=0.0f,st_sum_unfiltered=0.0f;
             auto query_start = std::chrono::high_resolution_clock::now();
-            #pragma omp parallel for reduction(+:st_sum_filtered,st_sum_unfiltered)
+            #pragma omp parallel for reduction(+:st_sum_filtered,st_sum_unfiltered) schedule(runtime) proc_bind(close)
             for (size_t i = 0; i < query_m.vecnum; i++) {
                     std::vector<int> L, V;
                     std::span<T> query_span(query_m.row(i));
