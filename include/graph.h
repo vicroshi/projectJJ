@@ -165,10 +165,10 @@ struct VamanaIndex
     {
         L.reserve(k);
         V.reserve(2 * list_size);
-        auto cmp_L = [&](int v1, int v2)
-        {
-            return Matrix<T>::sq_euclid(query, db.row(v1), db.dim) < Matrix<T>::sq_euclid(query, db.row(v2), db.dim);
-        };
+        // auto cmp_L = [&](int v1, int v2)
+        // {
+        //     return Matrix<T>::sq_euclid(query, db.row(v1), db.dim) < Matrix<T>::sq_euclid(query, db.row(v2), db.dim);
+        // };
         cmp_dist cmp(query, db);
         std::set<int, cmp_dist> Ls(cmp);
         std::set<int, cmp_dist> Vs(cmp);
@@ -376,11 +376,11 @@ struct VamanaIndex
         cmp_dist cmp(query, db);
         std::set<int, cmp_dist> Ls(cmp);
         std::set<int, cmp_dist> Vs(cmp);
-        auto cmp_L = [&](int v1, int v2)
-        {
-            // std::cout << "v1:" << v1 << " v2:" << v2 << std::endl;
-            return Matrix<T>::sq_euclid(query, db.row(v1), db.dim) < Matrix<T>::sq_euclid(query, db.row(v2), db.dim);
-        };
+        // auto cmp_L = [&](int v1, int v2)
+        // {
+        //     // std::cout << "v1:" << v1 << " v2:" << v2 << std::endl;
+        //     return Matrix<T>::sq_euclid(query, db.row(v1), db.dim) < Matrix<T>::sq_euclid(query, db.row(v2), db.dim);
+        // };
         if (Fq == -1.0f)
         {
             // its a query node with type:0, so we assume it has all filters, must pass all starting points for each filter
@@ -438,7 +438,7 @@ struct VamanaIndex
             temp.reserve(N_out.size());
             for (auto &p : N_out)
             {
-                if (((db.vec_filter)[p] == Fq || Fq == -1.0f) && (!std::ranges::binary_search(Vs, p, cmp_L)))
+                if (((db.vec_filter)[p] == Fq || Fq == -1.0f) && (!std::ranges::binary_search(Vs, p, cmp)))
                 {
                     temp.push_back(p); // insert it
                 }
@@ -676,6 +676,7 @@ struct VamanaIndex
             Gf.emplace(f, nullptr);
         }
         //        std::cout << "filters_set size:" << db.filters_set.size() << std::endl;
+// #pragma omp parallel for schedule(static,1) proc_bind(close)
 #pragma omp parallel for schedule(static,1) proc_bind(close)
         for (size_t i = 0; i < db.filters_set.size(); i++)
         {
